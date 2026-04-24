@@ -1,0 +1,9 @@
+{
+  "name": "ai-funnel-engine",
+  "version": "1.0.0",
+  "description": "AI-driven funnel engine with quiz, OpenAI analysis, and Supabase storage",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
