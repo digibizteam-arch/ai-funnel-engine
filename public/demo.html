@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Funnel Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
+
+    /* Top bar */
+    .demo-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(15,15,15,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+
+    .demo-bar-left { display: flex; align-items: center; gap: 10px; }
+    .demo-badge { background: #B8956A; color: #fff; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
+    .demo-label { font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+
+    .demo-bar-right { display: flex; align-items: center; gap: 10px; }
+    .demo-cta-btn {
+      background: #B8956A; color: #fff; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      padding: 9px 20px; border-radius: 100px; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .demo-cta-btn:hover { background: #8B6A42; transform: translateY(-1px); }
+
+    /* Loading */
+    #loading {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; gap: 20px; padding: 24px; text-align: center;
+    }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #B8956A; border-radius: 50%; animation: spin 0.9s linear infinite; }
+    .loading-title { font-size: 1.1rem; font-weight: 500; }
+    .loading-sub { font-size: 0.85rem; color: rgba(255,255,255,0.4); max-width: 320px; line-height: 1.6; }
+
+    /* Error */
+    #error-state { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; text-align: center; padding: 24px; }
+
+    /* iframe wrapper */
+    #preview-wrap { display: none; padding-top: 58px; }
+    #preview-frame { width: 100%; height: calc(100vh - 58px); border: none; display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Top demo bar -->
+<div class="demo-bar">
+  <div class="demo-bar-left">
+    <span class="demo-badge">Demo Preview</span>
+    <span class="demo-label">This funnel was generated based on your quiz answers</span>
+  </div>
+  <div class="demo-bar-right">
+    <a href="/chat" class="demo-cta-btn" id="chat-link">💬 I want this for my business →</a>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-title">Loading your funnel preview...</div>
+  <div class="loading-sub">We've generated a personalized funnel based on your answers. Just a moment.</div>
+</div>
+
+<!-- Error -->
+<div id="error-state">
+  <div style="font-size:2rem">⚠️</div>
+  <div style="font-size:1.1rem;font-weight:500">Preview not found</div>
+  <div style="font-size:0.85rem;color:rgba(255,255,255,0.4);max-width:300px;line-height:1.6">This demo link may have expired. Go back and generate a new preview.</div>
+  <a href="/" style="margin-top:8px;color:#B8956A;font-size:0.88rem">← Back to quiz</a>
+</div>
+
+<!-- Preview iframe -->
+<div id="preview-wrap">
+  <iframe id="preview-frame" title="Your Funnel Preview"></iframe>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const leadId = params.get('id');
+  const name   = params.get('name') || '';
+  const email  = params.get('email') || '';
+
+  // Update chat link with context
+  if (name || email) {
+    const chatUrl = '/chat?name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + (leadId ? '&id=' + leadId : '');
+    document.getElementById('chat-link').href = chatUrl;
+  }
+
+  async function loadDemo() {
+    if (!leadId || leadId === 'preview') {
+      showError();
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${window._supabaseUrl}/rest/v1/leads?id=eq.${leadId}&select=demo_html,name`,
+        {
+          headers: {
+            'apikey': window._supabaseKey,
+            'Authorization': 'Bearer ' + window._supabaseKey
+          }
+        }
+      );
+      const data = await res.json();
+
+      if (!data || !data[0] || !data[0].demo_html) {
+        showError();
+        return;
+      }
+
+      const html = data[0].demo_html;
+
+      // Render in iframe via blob
+      const blob = new Blob([html], { type: 'text/html' });
+      const url  = URL.createObjectURL(blob);
+      const frame = document.getElementById('preview-frame');
+      frame.src = url;
+
+      frame.onload = () => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('preview-wrap').style.display = 'block';
+      };
+
+    } catch (err) {
+      console.error(err);
+      showError();
+    }
+  }
+
+  function showError() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-state').style.display = 'flex';
+  }
+
+  // Inject Supabase config from env (passed via a tiny API call)
+  async function init() {
+    try {
+      const cfg = await fetch('/api/config').then(r => r.json());
+      window._supabaseUrl  = cfg.supabase_url;
+      window._supabaseKey  = cfg.supabase_key;
+      loadDemo();
+    } catch(e) {
+      showError();
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
