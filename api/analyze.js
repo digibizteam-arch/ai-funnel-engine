@@ -1,6 +1,20 @@
-// api/analyze.js
-// Vercel Serverless Function
-// Receives 10-question quiz answers → calls OpenAI → saves to Supabase → returns result
+const https = require('https');
+
+function postJSON(options, body) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,113 +36,111 @@ module.exports = async function handler(req, res) {
 
   const prompt = `You are a conversion-focused funnel strategist and direct-response copywriter.
 
-A potential client has just completed a deep-dive psychological questionnaire.
-Analyze their full answers and generate a personalized funnel blueprint result page.
+A potential client completed a psychological questionnaire. Analyze their answers and generate a personalized funnel blueprint.
 
-CLIENT ANSWERS
-
-[INTRODUCTION]
+CLIENT ANSWERS:
 Name: ${name}
 Business: ${business_name || 'Not provided'}
-
-[PART 1 — CURRENT REALITY (Pain Points)]
-Primary marketing goal: ${goal}
+Primary goal: ${goal}
 Biggest challenge: ${challenge}
-How it's impacting their business: ${impact}
-
-[PART 2 — DREAM STATE]
-Ideal outcome if challenge was solved: ${dream}
-Specific measurable target: ${metric || 'Not specified'}
-
-[PART 3 — SOLUTION ALIGNMENT]
-What they've already tried: ${tried}
-How important they believe a funnel is: ${belief}
-
-[PART 4 — FRICTION POINTS]
-Biggest hesitation about implementing: ${concern}
+Business impact: ${impact}
+Ideal outcome: ${dream}
+Target metric: ${metric || 'Not specified'}
+What they tried: ${tried}
+Funnel belief: ${belief}
+Biggest hesitation: ${concern}
 Resources available: ${resources}
 
-INSTRUCTIONS: Using their exact words, generate a highly personalized analysis.
 Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON only.
 
 {
-  "headline": "One compelling headline that mirrors their exact situation and goal (max 12 words)",
+  "headline": "One compelling headline mirroring their exact situation (max 12 words)",
   "core_desire": "What they truly want beneath their stated goal — one sentence",
-  "main_pain": "Their deepest real frustration — one sentence",
-  "hidden_trigger": "The emotional driver (fear, urgency, or insecurity) behind their answers — one sentence",
+  "main_pain": "Their deepest frustration — one sentence",
+  "hidden_trigger": "The emotional driver behind their answers — one sentence",
   "buying_intent": "cold or warm or hot",
   "opportunity_score": 7,
-  "funnel_type": "Specific funnel type + one sentence on why it fits their situation",
-  "diagnosis": "2 specific sentences on exactly why they are stuck — use their own words where possible",
-  "agitation": "2 sentences on what happens in 6 months if this is not fixed — make it real and personal",
-  "future_state": "2 sentences describing their specific success based on their dream answer",
-  "objection_addressed": "One sentence speaking directly to their concern without dismissing it",
-  "solution_intro": "1-2 sentences introducing a done-for-you funnel building service as the bridge — warm and confident, not salesy"
+  "funnel_type": "Specific funnel type + one sentence why it fits",
+  "diagnosis": "2 sentences on exactly why they are stuck",
+  "agitation": "2 sentences on what happens in 6 months if not fixed",
+  "future_state": "2 sentences describing their specific success",
+  "objection_addressed": "One sentence speaking to their concern without dismissing it",
+  "solution_intro": "1-2 sentences introducing done-for-you funnel building as the bridge"
 }`;
 
+  // Call OpenAI
   let analysisData;
-
   try {
-    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+    const openAIBody = {
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.72,
+      max_tokens: 700
+    };
+
+    const openAIOptions = {
+      hostname: 'api.openai.com',
+      path: '/v1/chat/completions',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.72,
-        max_tokens: 700
-      })
-    });
+      }
+    };
 
-    const openaiData = await openaiRes.json();
+    const openaiData = await postJSON(openAIOptions, openAIBody);
+
+    if (openaiData.error) {
+      console.error('OpenAI error:', openaiData.error);
+      return res.status(500).json({ error: 'OpenAI error: ' + openaiData.error.message });
+    }
+
     const raw = openaiData.choices?.[0]?.message?.content?.trim();
     const clean = raw.replace(/^```json\n?/, '').replace(/^```\n?/, '').replace(/```$/, '').trim();
     analysisData = JSON.parse(clean);
 
   } catch (err) {
-    console.error('OpenAI error:', err);
-    return res.status(500).json({ error: 'AI analysis failed. Please try again.' });
+    console.error('OpenAI call failed:', err);
+    return res.status(500).json({ error: 'AI analysis failed: ' + err.message });
   }
 
+  // Save to Supabase
   try {
-    await fetch(`${process.env.SUPABASE_URL}/rest/v1/leads`, {
+    const supabaseBody = {
+      name, email,
+      business_name: business_name || null,
+      goal, challenge, impact, dream,
+      metric: metric || null,
+      tried,
+      funnel_belief: belief,
+      concern, resources,
+      core_desire: analysisData.core_desire,
+      main_pain: analysisData.main_pain,
+      hidden_trigger: analysisData.hidden_trigger,
+      buying_intent: analysisData.buying_intent,
+      opportunity_score: analysisData.opportunity_score,
+      funnel_type: analysisData.funnel_type,
+      headline: analysisData.headline,
+      full_analysis: JSON.stringify(analysisData),
+      created_at: new Date().toISOString()
+    };
+
+    const supabaseOptions = {
+      hostname: new URL(process.env.SUPABASE_URL).hostname,
+      path: '/rest/v1/leads',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': process.env.SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        business_name:     business_name || null,
-        goal,
-        challenge,
-        impact,
-        dream,
-        metric:            metric || null,
-        tried,
-        funnel_belief:     belief,
-        concern,
-        resources,
-        core_desire:       analysisData.core_desire,
-        main_pain:         analysisData.main_pain,
-        hidden_trigger:    analysisData.hidden_trigger,
-        buying_intent:     analysisData.buying_intent,
-        opportunity_score: analysisData.opportunity_score,
-        funnel_type:       analysisData.funnel_type,
-        headline:          analysisData.headline,
-        full_analysis:     JSON.stringify(analysisData),
-        created_at:        new Date().toISOString()
-      })
-    });
+      }
+    };
+
+    await postJSON(supabaseOptions, supabaseBody);
   } catch (err) {
     console.error('Supabase save error:', err);
   }
 
   return res.status(200).json(analysisData);
-}
+};
