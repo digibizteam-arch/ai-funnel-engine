@@ -150,7 +150,7 @@ JSON FORMAT:
         'Content-Type': 'application/json',
         'apikey': process.env.SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        'Prefer': 'return=minimal'
+        'Prefer': 'return=representation'
       }
     };
 
@@ -159,5 +159,30 @@ JSON FORMAT:
     console.error('Supabase save error:', err.message);
   }
 
-  return res.status(200).json(analysisData);
+  // Try to extract the saved lead id
+  let leadId = null;
+  try {
+    const supaURL = new URL(process.env.SUPABASE_URL);
+    const checkOpts = {
+      hostname: supaURL.hostname,
+      path: '/rest/v1/leads?email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=1&select=id',
+      method: 'GET',
+      headers: {
+        'apikey': process.env.SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + process.env.SUPABASE_ANON_KEY
+      }
+    };
+    const rows = await new Promise((resolve, reject) => {
+      const req = require('https').request(checkOpts, (res) => {
+        let d = '';
+        res.on('data', c => d += c);
+        res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve([]); } });
+      });
+      req.on('error', reject);
+      req.end();
+    });
+    if (rows && rows[0] && rows[0].id) leadId = rows[0].id;
+  } catch(e) { console.error('lead_id fetch error:', e.message); }
+
+  return res.status(200).json({ ...analysisData, lead_id: leadId });
 };
