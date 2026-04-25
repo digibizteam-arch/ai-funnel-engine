@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/demo", "destination": "/demo.html" },
+
     { "source": "/api/analyze", "destination": "/api/analyze.js" },
     { "source": "/api/demo",    "destination": "/api/demo.js" },
     { "source": "/api/config",  "destination": "/api/config.js" },
