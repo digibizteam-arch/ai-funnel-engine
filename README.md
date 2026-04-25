@@ -1,3 +1,4 @@
+[README (1).md](https://github.com/user-attachments/files/27079933/README.1.md)
 # AI Funnel Engine — Setup Guide
 ## Copy-paste steps, zero fluff
 
@@ -26,7 +27,16 @@ funnel-engine/
 5. Paste this SQL exactly and click **Run**:
 
 ```sql
-create table leads (
+-- Run this in Supabase SQL Editor to add the new columns for Brain 3
+alter table leads add column if not exists offer_name        text;
+alter table leads add column if not exists offer_price       text;
+alter table leads add column if not exists ideal_client      text;
+alter table leads add column if not exists offer_pain        text;
+alter table leads add column if not exists offer_transform   text;
+alter table leads add column if not exists design_vibe       text;
+alter table leads add column if not exists demo_html         text;
+alter table leads add column if not exists demo_generated_at timestamptz;
+```
   id                uuid default gen_random_uuid() primary key,
   created_at        timestamptz default now(),
 
