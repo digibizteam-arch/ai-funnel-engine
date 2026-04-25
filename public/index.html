@@ -96,7 +96,21 @@
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 540px) { .q-card, .diag-card { padding: 22px 16px; } .cta-block { padding: 26px 18px; } }
+
+    /* ─── BRIDGE ─── */
+    .bridge-field { margin-bottom: 22px; }
+    .bridge-label { display: block; font-family: 'Playfair Display', serif; font-size: 0.98rem; font-weight: 600; color: var(--bark); margin-bottom: 4px; }
+    .bridge-hint { font-size: 0.78rem; color: var(--text-mid); margin-bottom: 10px; line-height: 1.5; }
+
+    .vibe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .vibe-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background: var(--cream); border: 1.5px solid var(--cream-mid); border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: left; transition: border-color 0.15s, background 0.15s, transform 0.1s; }
+    .vibe-btn:hover { border-color: var(--clay); background: var(--cream-mid); transform: translateY(-2px); }
+    .vibe-btn.selected { border-color: var(--clay); background: #F7EFE3; }
+    .vibe-swatch { width: 100%; height: 32px; border-radius: 6px; display: block; }
+    .vibe-name { font-size: 0.82rem; font-weight: 600; color: var(--bark); }
+    .vibe-desc { font-size: 0.72rem; color: var(--text-mid); line-height: 1.4; }
+
+    @media (max-width: 540px) { .q-card, .diag-card { padding: 22px 16px; } .cta-block { padding: 26px 18px; } .vibe-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -280,6 +294,67 @@
       <div class="diag-card"><div class="diag-card-title">Your Ideal Solution</div><div class="solution-box"><div class="solution-name" id="result-solution-name"></div><div class="solution-desc" id="result-solution-desc"></div></div></div>
       <div class="cta-block"><h3 id="cta-title">Ready to See Real Results?</h3><p id="cta-body">We'll build your complete funnel and automation system — done for you, in days.</p><a href="#" class="btn-book" id="book-btn">Book a Free Strategy Call →</a><p class="cta-fine">No credit card. No sales pitch. Just clarity.</p></div>
     </div>
+
+    <!-- ═══ BRIDGE SECTION ═══ -->
+    <div id="bridge-section" style="display:none;max-width:660px;margin:0 auto;padding:0 24px 100px">
+
+      <div style="text-align:center;padding:48px 0 32px">
+        <div style="display:inline-block;background:var(--clay);color:var(--white);font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:20px">Free Demo — Just For You</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.2;margin-bottom:12px">Want to see exactly what your funnel would look like?</h2>
+        <p style="color:var(--text-mid);font-size:0.92rem;max-width:480px;margin:0 auto;line-height:1.65">Tell us about your best offer — we'll generate a real, fully designed funnel preview built around it. Free. Takes 60 seconds.</p>
+      </div>
+
+      <div style="background:var(--white);border:1px solid var(--cream-mid);border-radius:20px;padding:32px 28px">
+
+        <div class="bridge-field">
+          <label class="bridge-label">What do you offer?</label>
+          <p class="bridge-hint">Your main product or service — the one you're most confident in</p>
+          <input class="q-input" id="b-offer" type="text" placeholder='e.g. "6-week business coaching program" or "real estate buyer consultation"' style="margin-bottom:0" />
+        </div>
+
+        <div class="bridge-field">
+          <label class="bridge-label">What does it cost?</label>
+          <p class="bridge-hint">Price or price range of this offer</p>
+          <input class="q-input" id="b-price" type="text" placeholder='e.g. "₱15,000 one-time" or "$500/month"' style="margin-bottom:0" />
+        </div>
+
+        <div class="bridge-field">
+          <label class="bridge-label">Who is it for?</label>
+          <p class="bridge-hint">Describe your ideal client in one sentence</p>
+          <input class="q-input" id="b-client" type="text" placeholder='e.g. "Small business owners 30–50 who struggle to get consistent leads"' style="margin-bottom:0" />
+        </div>
+
+        <div class="bridge-field">
+          <label class="bridge-label">What pain does it solve?</label>
+          <p class="bridge-hint">The #1 problem your offer fixes for them</p>
+          <input class="q-input" id="b-pain" type="text" placeholder='e.g. "They waste time on the wrong marketing and keep losing clients"' style="margin-bottom:0" />
+        </div>
+
+        <div class="bridge-field">
+          <label class="bridge-label">What transformation do you promise?</label>
+          <p class="bridge-hint">What does their life look like AFTER working with you?</p>
+          <input class="q-input" id="b-transform" type="text" placeholder='e.g. "They wake up to booked appointments and predictable income every month"' style="margin-bottom:0" />
+        </div>
+
+        <div class="bridge-field">
+          <label class="bridge-label">Pick your funnel's design vibe</label>
+          <p class="bridge-hint">Choose the look and feel that best represents your brand</p>
+          <div class="vibe-grid">
+            <button class="vibe-btn" onclick="selectVibe(this,'bold-premium')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#0D0D0D,#C9A84C)"></span><span class="vibe-name">🌟 Bold & Premium</span><span class="vibe-desc">Dark + gold. Commands attention.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'warm-trustworthy')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1B2B4B,#E8C87A)"></span><span class="vibe-name">🤝 Warm & Trustworthy</span><span class="vibe-desc">Navy + warm gold. Safe and credible.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'modern-edgy')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#0A0A0A,#00E5FF)"></span><span class="vibe-name">⚡ Modern & Edgy</span><span class="vibe-desc">Dark + electric. Sharp and disruptive.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'fresh-approachable')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#2D6A4F,#F9FFFC)"></span><span class="vibe-name">🌿 Fresh & Approachable</span><span class="vibe-desc">Green + white. Friendly and clean.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'bold-energetic')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1A1A2E,#FF6B35)"></span><span class="vibe-name">🔥 Bold & Energetic</span><span class="vibe-desc">Dark + orange. High-conversion energy.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'clean-creative')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1E1E2E,#6C5CE7)"></span><span class="vibe-name">💜 Clean & Creative</span><span class="vibe-desc">Charcoal + purple. Artistic and bold.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'corporate-authority')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1E3A5F,#A8C0D6)"></span><span class="vibe-name">💙 Corporate & Authoritative</span><span class="vibe-desc">Deep blue + silver. Executive feel.</span></button>
+            <button class="vibe-btn" onclick="selectVibe(this,'elegant-feminine')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#C4847A,#FDF6F0)"></span><span class="vibe-name">🌸 Elegant & Feminine</span><span class="vibe-desc">Blush + gold. Refined personal brand.</span></button>
+          </div>
+        </div>
+
+        <button id="demo-btn" onclick="generateDemo()" style="width:100%;background:var(--bark);color:var(--white);border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;padding:16px 32px;border-radius:100px;cursor:pointer;margin-top:8px;transition:background 0.2s,transform 0.15s">Generate My Free Funnel Preview →</button>
+        <p style="text-align:center;font-size:0.75rem;color:var(--text-mid);margin-top:12px;opacity:0.7">Your preview opens in a new tab · No sign-up required</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -387,10 +462,69 @@
       document.getElementById('cta-title').textContent             = data.cta_headline || 'Ready to See Real Results?';
       document.getElementById('cta-body').textContent              = data.cta_body || "We'll build your complete funnel — done for you, in days.";
 
+      // Store lead_id for demo generation
+      if (data.lead_id) window._leadId = data.lead_id;
+
+      // Show bridge section
+      document.getElementById('bridge-section').style.display = 'block';
+
     } catch(err) {
       document.getElementById('result-loading').innerHTML = '<p style="color:var(--text-mid);text-align:center">Something went wrong. Please refresh and try again.</p>';
       console.error(err);
     }
+  }
+
+  // ─── BRIDGE / DEMO GENERATION ───
+  async function generateDemo() {
+    const offer        = document.getElementById('b-offer').value.trim();
+    const price        = document.getElementById('b-price').value.trim();
+    const client       = document.getElementById('b-client').value.trim();
+    const pain         = document.getElementById('b-pain').value.trim();
+    const transform    = document.getElementById('b-transform').value.trim();
+    const vibe         = window._selectedVibe || '';
+
+    if (!offer || !client || !pain || !transform) {
+      alert('Please fill in all fields to generate your funnel preview.');
+      return;
+    }
+
+    const btn = document.getElementById('demo-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating your funnel...';
+
+    try {
+      const res = await fetch('/api/demo', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          lead_id:    window._leadId || null,
+          name:       answers.name,
+          email:      answers.email,
+          role:       answers.role,
+          goal:       answers.goal,
+          problem:    answers.problem,
+          offer, price, client, pain, transform, vibe
+        })
+      });
+      const data = await res.json();
+      if (data.demo_url) {
+        window.open(data.demo_url, '_blank');
+      } else {
+        alert('Something went wrong generating your demo. Please try again.');
+      }
+    } catch(err) {
+      alert('Something went wrong. Please try again.');
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate My Free Funnel Preview →';
+    }
+  }
+
+  function selectVibe(el, vibe) {
+    document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    window._selectedVibe = vibe;
   }
 </script>
 </body>
