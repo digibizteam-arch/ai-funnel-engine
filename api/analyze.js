@@ -7,7 +7,7 @@ function postJSON(options, body) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try { resolve(JSON.parse(data)); }
-        catch (e) { reject(e); }
+        catch (e) { reject(new Error('JSON parse failed: ' + data.slice(0, 200))); }
       });
     });
     req.on('error', reject);
@@ -34,48 +34,68 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const prompt = `You are a conversion-focused funnel strategist and direct-response copywriter.
+  const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis.
 
-A potential client completed a psychological questionnaire. Analyze their answers and generate a personalized funnel blueprint.
+A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis — not generic advice. Use their exact words and situation throughout.
 
 CLIENT ANSWERS:
 Name: ${name}
 Business: ${business_name || 'Not provided'}
 Primary goal: ${goal}
 Biggest challenge: ${challenge}
-Business impact: ${impact}
-Ideal outcome: ${dream}
-Target metric: ${metric || 'Not specified'}
-What they tried: ${tried}
-Funnel belief: ${belief}
+How it impacts them: ${impact}
+Ideal outcome if solved: ${dream}
+Specific target metric: ${metric || 'Not specified'}
+What they have tried: ${tried}
+How important they think a funnel is: ${belief}
 Biggest hesitation: ${concern}
 Resources available: ${resources}
 
-Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON only.
+OUTPUT RULES:
+- Use their name (${name}) naturally in bullet points
+- Reference their exact goal, challenge, and dream using their own words
+- Be specific — no generic statements
+- Tone: warm, direct, expert — like a trusted advisor who truly understands them
+- Respond ONLY with a valid raw JSON object. No markdown. No code fences. No explanation.
 
+JSON FORMAT:
 {
-  "headline": "One compelling headline mirroring their exact situation (max 12 words)",
-  "core_desire": "What they truly want beneath their stated goal — one sentence",
-  "main_pain": "Their deepest frustration — one sentence",
-  "hidden_trigger": "The emotional driver behind their answers — one sentence",
+  "page_title": "Your Personalized Funnel Diagnosis",
+
+  "situation_bullets": [
+    "You're a [their business/role] who's currently [restate their challenge in their own words]",
+    "Your top goal is to [restate their goal exactly]",
+    "Ideally achieving [their specific metric or dream outcome]",
+    "The biggest friction point is that [restate their concern]"
+  ],
+
+  "diagnosis": "2-3 sentence paragraph that goes deep into WHY they are stuck. Be specific to their challenge and what they told you. Use the word 'you' to make it personal. Reference the gap between where they are and where they want to be. This is the core insight — not surface level.",
+
+  "agitation_footnote": "One sentence on what this blind spot is costing them — tied to their specific impact answer.",
+
+  "next_step": "2-3 sentences describing the single most important action they should take RIGHT NOW to move toward their dream. Be very specific to their situation. Address their concern (${concern}) naturally without dismissing it.",
+
+  "next_step_footnote": "One short sentence reinforcing why this step matters most for them specifically.",
+
+  "solution_name": "A short name for their ideal solution — e.g. 'A Value-First Lead Qualification Funnel' or 'An Automated Client Attraction System'",
+
+  "solution_desc": "2 sentences explaining how this solution directly addresses their challenge and gets them to their dream. Mention their resources (${resources}) to show it fits their situation.",
+
+  "cta_headline": "A personalized CTA headline tied to their dream metric or outcome — e.g. 'Ready to Get [their metric] Without [their pain]?'",
+
+  "cta_body": "2 sentences. First: what we will do for them (done-for-you, specific). Second: one line that speaks directly to their concern (${concern}) to remove the hesitation.",
+
   "buying_intent": "cold or warm or hot",
-  "opportunity_score": 7,
-  "funnel_type": "Specific funnel type + one sentence why it fits",
-  "diagnosis": "2 sentences on exactly why they are stuck",
-  "agitation": "2 sentences on what happens in 6 months if not fixed",
-  "future_state": "2 sentences describing their specific success",
-  "objection_addressed": "One sentence speaking to their concern without dismissing it",
-  "solution_intro": "1-2 sentences introducing done-for-you funnel building as the bridge"
+  "opportunity_score": 7
 }`;
 
-  // Call OpenAI
   let analysisData;
   try {
     const openAIBody = {
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.72,
-      max_tokens: 700
+      temperature: 0.75,
+      max_tokens: 900
     };
 
     const openAIOptions = {
@@ -91,7 +111,7 @@ Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON onl
     const openaiData = await postJSON(openAIOptions, openAIBody);
 
     if (openaiData.error) {
-      console.error('OpenAI error:', openaiData.error);
+      console.error('OpenAI API error:', openaiData.error);
       return res.status(500).json({ error: 'OpenAI error: ' + openaiData.error.message });
     }
 
@@ -100,7 +120,7 @@ Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON onl
     analysisData = JSON.parse(clean);
 
   } catch (err) {
-    console.error('OpenAI call failed:', err);
+    console.error('OpenAI call failed:', err.message);
     return res.status(500).json({ error: 'AI analysis failed: ' + err.message });
   }
 
@@ -114,19 +134,16 @@ Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON onl
       tried,
       funnel_belief: belief,
       concern, resources,
-      core_desire: analysisData.core_desire,
-      main_pain: analysisData.main_pain,
-      hidden_trigger: analysisData.hidden_trigger,
-      buying_intent: analysisData.buying_intent,
+      buying_intent:     analysisData.buying_intent,
       opportunity_score: analysisData.opportunity_score,
-      funnel_type: analysisData.funnel_type,
-      headline: analysisData.headline,
-      full_analysis: JSON.stringify(analysisData),
-      created_at: new Date().toISOString()
+      solution_name:     analysisData.solution_name,
+      full_analysis:     JSON.stringify(analysisData),
+      created_at:        new Date().toISOString()
     };
 
+    const supabaseURL = new URL(process.env.SUPABASE_URL);
     const supabaseOptions = {
-      hostname: new URL(process.env.SUPABASE_URL).hostname,
+      hostname: supabaseURL.hostname,
       path: '/rest/v1/leads',
       method: 'POST',
       headers: {
@@ -139,7 +156,7 @@ Respond ONLY with a valid JSON object. No markdown. No explanation. Raw JSON onl
 
     await postJSON(supabaseOptions, supabaseBody);
   } catch (err) {
-    console.error('Supabase save error:', err);
+    console.error('Supabase save error:', err.message);
   }
 
   return res.status(200).json(analysisData);
