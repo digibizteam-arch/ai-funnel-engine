@@ -85,10 +85,11 @@ MARIA'S SERVICE:
 - Basic: ₱9,997
 
 👉 RULES:
+- Introduce price only if asked and after explaining the solution briefly
 - Recommend ONLY ONE package at a time
 - Do NOT list all options unless asked
 - Match recommendation to their readiness + budget signals
-- Introduce price ONLY after explaining the solution briefly
+
 
 💬 HOW TO PRESENT:
 “Based on what you shared, I’d recommend the [package] for your setup. This usually comes out at ₱XX,XXX — does that feel within range for you?”
