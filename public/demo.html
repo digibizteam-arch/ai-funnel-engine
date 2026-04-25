@@ -62,7 +62,7 @@
     <span class="demo-label">This funnel was generated based on your quiz answers</span>
   </div>
   <div class="demo-bar-right">
-    <a href="/chat" class="demo-cta-btn" id="chat-link">💬 I want this for my business →</a>
+    <a href="/chat.html" class="demo-cta-btn" id="chat-link">💬 I want this for my business →</a>
   </div>
 </div>
 
@@ -94,7 +94,7 @@
 
   // Update chat link with context
   if (name || email) {
-    const chatUrl = '/chat?name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + (leadId ? '&id=' + leadId : '');
+    const chatUrl = '/chat.html?name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + (leadId ? '&id=' + leadId : '');
     document.getElementById('chat-link').href = chatUrl;
   }
 
