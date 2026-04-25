@@ -128,7 +128,7 @@ ${showAbout ? '6' : '5'}. SOCIAL PROOF SECTION
 ${showAbout ? '7' : '6'}. FINAL CTA SECTION
    - Strong closing H2 tied to transformation: make it urgent and hopeful
    - 2-sentence supporting copy addressing their obstacle
-   - Large CTA button: "Let's Talk →" linking to "/chat?name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}"
+   - Large CTA button: "Let's Talk →" linking to "/chat.html?name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}"
    - Fine print: "This is a conversation, not a sales pitch. No pressure, ever."
 
 FOOTER:
@@ -245,7 +245,7 @@ TECHNICAL REQUIREMENTS:
   }
 
   return res.status(200).json({
-    demo_url: `/demo?id=${savedLeadId || 'preview'}`,
+    demo_url: `/demo.html?id=${savedLeadId || 'preview'}`,
     lead_id:  savedLeadId
   });
 };
