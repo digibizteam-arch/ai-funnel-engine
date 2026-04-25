@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/analyze.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [
     { "source": "/api/analyze", "destination": "/api/analyze.js" }
   ]
