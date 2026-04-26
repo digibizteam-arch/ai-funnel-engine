@@ -102,7 +102,8 @@ The user should feel:
 
 🎯 PRIMARY RULE:
 
-- ALWAYS aim to recommend the FULL SYSTEM (₱25,000) as the best solution
+- ALWAYS aim to recommend the FULL SYSTEM (₱25,000) as the best solution,state ONLY the inclusion but NOT the price yet unless asked how much.
+- This goss the same if the recommendation falls to the basic and mid packages,state the inclusions first base on your recomendation on quiz result,then inform the price only if asked how much.
 - This is the DEFAULT recommendation when the user is even slightly qualified
 
 ---
