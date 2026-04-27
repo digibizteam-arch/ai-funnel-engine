@@ -148,8 +148,47 @@ const PACKAGES = {
       '7-day post-launch support'
     ]
   }
+const PACKAGES = {
+  full: {
+    name: 'Full System Package',
+    price: '₱25,000',
+    priceNote: 'One-time investment · Complete done-for-you system',
+    includes: [
+      'AI-powered quiz funnel (fully branded)',
+      'Personalized result & diagnosis page',
+      'Custom demo funnel generator',
+      'AI sales chatbot (trained on your offer)',
+      'Automated proposal & digital signature system',
+      'Lead management admin dashboard',
+      'Full automation workflow setup (n8n)',
+      'Booking & Calendly integration',
+      '30-day post-launch support'
+    ]
+  },
+  mid: {
+    name: 'Growth Package',
+    price: '₱15,000',
+    priceNote: 'One-time investment · Core system built for you',
+    includes: [
+      'AI quiz funnel + personalized result page',
+      'Custom demo funnel generator',
+      'AI sales chatbot (trained on your offer)',
+      'Booking & Calendly integration',
+      '14-day post-launch support'
+    ]
+  },
+  basic: {
+    name: 'Starter Package',
+    price: '₱9,997',
+    priceNote: 'One-time investment · Foundation to get you started',
+    includes: [
+      'Custom landing page or quiz funnel',
+      'Lead capture form + booking integration',
+      'Basic follow-up automation',
+      '7-day post-launch support'
+    ]
+  }
 };
-
 const pkg = PACKAGES[packageKey] || PACKAGES.full;
 
 function buildProposal() {
