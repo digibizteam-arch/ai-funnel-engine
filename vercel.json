@@ -1,11 +1,13 @@
 {
   "rewrites": [
-    { "source": "/demo", "destination": "/demo.html" },
-    { "source": "/chat", "destination": "/chat.html" },
-
-    { "source": "/api/analyze", "destination": "/api/analyze.js" },
-    { "source": "/api/demo",    "destination": "/api/demo.js" },
-    { "source": "/api/config",  "destination": "/api/config.js" },
-    { "source": "/api/chat",    "destination": "/api/chat.js" }
+    { "source": "/api/analyze",  "destination": "/api/analyze.js" },
+    { "source": "/api/demo",     "destination": "/api/demo.js" },
+    { "source": "/api/config",   "destination": "/api/config.js" },
+    { "source": "/api/chat",     "destination": "/api/chat.js" },
+    { "source": "/api/strategy", "destination": "/api/strategy.js" },
+    { "source": "/demo",         "destination": "/demo.html" },
+    { "source": "/chat",         "destination": "/chat.html" },
+    { "source": "/admin",        "destination": "/admin.html" },
+    { "source": "/proposal",     "destination": "/proposal.html" }
   ]
 }
