@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin — Maria Angelica Scott</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f11;--bg2:#18181b;--bg3:#27272a;--bg4:#3f3f46;
+  --text:#f4f4f5;--text-mid:#a1a1aa;--text-dim:#71717a;
+  --green:#10b981;--green-dark:#059669;--amber:#f59e0b;
+  --sky:#38bdf8;--red:#ef4444;--purple:#8b5cf6;
+  --border:#27272a;--border2:#3f3f46;
+  --clay:#B8956A;--clay-dark:#8B6A42;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:380px;text-align:center}
+.login-logo{width:52px;height:52px;background:var(--clay);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 20px}
+.login-title{font-size:1.3rem;font-weight:600;margin-bottom:6px}
+.login-sub{font-size:0.82rem;color:var(--text-dim);margin-bottom:28px}
+.login-input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;font-size:0.9rem;color:var(--text);outline:none;font-family:'DM Sans',sans-serif;margin-bottom:12px;transition:border-color 0.15s}
+.login-input:focus{border-color:var(--clay)}
+.login-btn{width:100%;background:var(--clay);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:background 0.2s}
+.login-btn:hover{background:var(--clay-dark)}
+.login-err{color:var(--red);font-size:0.82rem;margin-top:8px;display:none}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-badge{width:34px;height:34px;background:var(--clay);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff}
+.hdr-title{font-size:0.95rem;font-weight:600}
+.hdr-sub{font-size:0.72rem;color:var(--clay)}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.ai-pill{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:10px;font-size:0.75rem;color:var(--text-mid)}
+.ai-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.logout-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:0.78rem;padding:6px 14px;border-radius:8px;cursor:pointer}
+.logout-btn:hover{color:var(--text);border-color:var(--text-dim)}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:16px;padding:20px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 20px;flex:1;min-width:140px}
+.stat-label{font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.stat-val{font-size:1.6rem;font-weight:600;color:var(--text)}
+.stat-sub{font-size:0.75rem;color:var(--text-dim);margin-top:2px}
+
+/* MAIN */
+.main{display:flex;gap:20px;padding:24px;flex:1;overflow:hidden}
+.pipeline{flex:1;min-width:0}
+.pipeline-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.pipeline-title{font-size:1.1rem;font-weight:600}
+.add-btn{background:var(--clay);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;padding:8px 16px;border-radius:8px;cursor:pointer;transition:background 0.2s}
+.add-btn:hover{background:var(--clay-dark)}
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;overflow-x:auto}
+.col{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;min-height:500px;min-width:180px}
+.col-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.col-title{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em}
+.col-count{font-size:0.72rem;background:var(--bg3);padding:2px 8px;border-radius:6px;color:var(--text-mid)}
+.col-new .col-title{color:var(--text-mid)}
+.col-qualified .col-title{color:var(--amber)}
+.col-demo .col-title{color:var(--sky)}
+.col-won .col-title{color:var(--green)}
+.col-lost .col-title{color:var(--red)}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:13px;cursor:pointer;transition:transform 0.15s,border-color 0.15s}
+.card:hover{transform:translateY(-2px);border-color:var(--clay)}
+.card-name{font-size:0.85rem;font-weight:600;margin-bottom:3px}
+.card-role{font-size:0.72rem;color:var(--clay);margin-bottom:6px}
+.card-problem{font-size:0.72rem;color:var(--text-dim);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;margin-bottom:8px}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.intent-badge{font-size:0.65rem;font-weight:600;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:0.06em}
+.intent-hot{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
+.intent-warm{background:#f59e0b20;color:#f59e0b;border:1px solid #f59e0b40}
+.intent-cold{background:#38bdf820;color:#38bdf8;border:1px solid #38bdf840}
+.score-dot{font-size:0.7rem;color:var(--text-dim)}
+
+/* SIDEBAR */
+.sidebar{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:calc(100vh - 160px)}
+.widget{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px}
+.widget-title{font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.dot-amber{width:7px;height:7px;background:var(--amber);border-radius:50%}
+.dot-sky{width:7px;height:7px;background:var(--sky);border-radius:50%}
+.dot-green{width:7px;height:7px;background:var(--green);border-radius:50%}
+.task-item{background:var(--bg3);border-radius:8px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-bottom:6px;font-size:0.8rem;transition:background 0.15s}
+.task-item:hover{background:var(--bg4)}
+.task-badge{font-size:0.65rem;font-weight:600;color:var(--green)}
+.task-badge.amber{color:var(--amber)}
+.task-badge.sky{color:var(--sky)}
+.tmpl-item{background:var(--bg3);border-radius:8px;padding:10px 12px;cursor:pointer;margin-bottom:8px;transition:background 0.15s}
+.tmpl-item:hover{background:var(--bg4)}
+.tmpl-hdr{display:flex;justify-content:space-between;font-size:0.8rem;font-weight:500;margin-bottom:3px}
+.tmpl-preview{font-size:0.72rem;color:var(--text-dim);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.copy-lbl{font-size:0.65rem;color:var(--sky)}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;animation:pop 0.2s ease}
+.modal-sm{max-width:440px}
+@keyframes pop{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+.modal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.modal-title{font-size:1.1rem;font-weight:600}
+.close-btn{background:none;border:none;color:var(--text-dim);font-size:1.4rem;cursor:pointer;line-height:1;padding:0}
+.close-btn:hover{color:var(--text)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.detail-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:3px}
+.detail-val{font-size:0.88rem;font-weight:500;line-height:1.4}
+.notes-area{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px;font-size:0.85rem;color:var(--text);outline:none;font-family:'DM Sans',sans-serif;resize:vertical;min-height:80px;margin-bottom:16px;transition:border-color 0.15s}
+.notes-area:focus{border-color:var(--clay)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.action-btn{padding:12px;border-radius:10px;border:none;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s}
+.action-btn:hover{opacity:0.85}
+.btn-view-demo{background:var(--sky);color:#fff}
+.btn-proposal{background:linear-gradient(135deg,var(--clay),var(--clay-dark));color:#fff;grid-column:span 2;font-size:0.9rem}
+.btn-won{background:var(--green);color:#fff}
+.btn-lost{background:var(--red);color:#fff}
+.btn-qualified{background:var(--amber);color:#fff}
+.btn-demo-sent{background:var(--sky);color:#fff}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.section-lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber);margin-bottom:10px;margin-top:14px}
+.section-lbl:first-child{margin-top:0}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:0.85rem;color:var(--text);outline:none;font-family:'DM Sans',sans-serif;margin-bottom:10px;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--clay)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-lbl{font-size:0.75rem;color:var(--text-mid);margin-bottom:4px}
+.save-btn{width:100%;background:var(--clay);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;padding:13px;border-radius:10px;cursor:pointer;transition:background 0.2s;margin-top:4px}
+.save-btn:hover{background:var(--clay-dark)}
+
+/* AI SECTION */
+.ai-section{background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:18px;margin-top:4px}
+.ai-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ai-title{font-size:0.8rem;font-weight:600;color:var(--green)}
+.regen-btn{font-size:0.72rem;color:var(--green);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.ai-content{font-size:0.82rem;line-height:1.75;color:#d4d4d8}
+.ai-content h2{font-size:0.85rem;font-weight:600;color:var(--green);margin:14px 0 5px}
+.ai-content h2:first-child{margin-top:0}
+.ai-content ul{padding-left:16px}
+.ai-content li{margin-bottom:3px}
+.spinning{display:flex;justify-content:center;padding:32px}
+.spinner{width:26px;height:26px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green);color:var(--green);padding:10px 18px;border-radius:10px;font-size:0.82rem;z-index:999;animation:slideup 0.2s ease}
+@keyframes slideup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){.kanban{grid-template-columns:repeat(3,1fr)}.sidebar{display:none}.stats-bar{gap:8px}.stat-card{min-width:120px}}
+@media(max-width:600px){.kanban{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.action-grid{grid-template-columns:1fr}.btn-proposal{grid-column:span 1}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🏗</div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">Maria Angelica Scott — System Architect</div>
+    <input class="login-input" type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Access Dashboard →</button>
+    <div class="login-err" id="login-err">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-badge">🏗</div>
+      <div>
+        <div class="hdr-title">Silent Client Closing</div>
+        <div class="hdr-sub">Operator Dashboard</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="ai-pill"><div class="ai-dot"></div> AI Ready</div>
+      <div style="text-align:right">
+        <div style="font-size:0.82rem;font-weight:500">Angelica · System Architect</div>
+        <div style="font-size:0.72rem;color:var(--text-dim)">San Pablo, PH</div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🔥 Hot Leads</div>
+      <div class="stat-val" id="stat-hot" style="color:var(--red)">0</div>
+      <div class="stat-sub">Ready to buy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Demo Generated</div>
+      <div class="stat-val" id="stat-demo" style="color:var(--sky)">0</div>
+      <div class="stat-sub">Funnels built</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Won</div>
+      <div class="stat-val" id="stat-won" style="color:var(--green)">0</div>
+      <div class="stat-sub">Closed deals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Conversion</div>
+      <div class="stat-val" id="stat-conv" style="color:var(--clay)">0%</div>
+      <div class="stat-sub">Won / total</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="pipeline">
+      <div class="pipeline-hdr">
+        <div class="pipeline-title">Leads Pipeline</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="add-btn" onclick="refreshLeads()" style="background:var(--bg3);color:var(--text-mid);border:1px solid var(--border2)">↻ Refresh</button>
+          <button class="add-btn" onclick="openAddModal()">+ Add Lead</button>
+        </div>
+      </div>
+      <div class="kanban" id="kanban"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="widget">
+        <div class="widget-title"><div class="dot-amber"></div> Today's Tasks</div>
+        <div id="task-list"><div style="font-size:0.8rem;color:var(--text-dim);text-align:center;padding:20px 0">Loading...</div></div>
+      </div>
+      <div class="widget">
+        <div class="widget-title"><div class="dot-sky"></div> Message Templates</div>
+        <div id="tmpl-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="overlay" id="lead-overlay" onclick="if(event.target===this)closeModal('lead-overlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-top">
+      <div class="modal-title" id="m-name">Lead Details</div>
+      <button class="close-btn" onclick="closeModal('lead-overlay')">×</button>
+    </div>
+
+    <div class="detail-grid">
+      <div><div class="detail-label">Role / Type</div><div class="detail-val" id="m-role">—</div></div>
+      <div><div class="detail-label">Buying Intent</div><div class="detail-val" id="m-intent">—</div></div>
+      <div><div class="detail-label">Opportunity Score</div><div class="detail-val" id="m-score">—</div></div>
+      <div><div class="detail-label">Email</div><div class="detail-val" id="m-email" style="word-break:break-all">—</div></div>
+      <div><div class="detail-label">Their Goal</div><div class="detail-val" id="m-goal">—</div></div>
+      <div><div class="detail-label">Their Problem</div><div class="detail-val" id="m-problem">—</div></div>
+      <div><div class="detail-label">Their Offer</div><div class="detail-val" id="m-offer">—</div></div>
+      <div><div class="detail-label">Investment Level</div><div class="detail-val" id="m-investment">—</div></div>
+    </div>
+
+    <div class="detail-label" style="margin-bottom:4px">AI Diagnosis</div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:0.82rem;color:var(--text-mid);line-height:1.6;margin-bottom:16px" id="m-diagnosis">—</div>
+
+    <div class="detail-label" style="margin-bottom:4px">Notes</div>
+    <textarea class="notes-area" id="m-notes" placeholder="Add your notes here..."></textarea>
+    <button style="background:var(--bg3);border:1px solid var(--border2);color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:0.78rem;padding:7px 16px;border-radius:8px;cursor:pointer;margin-bottom:16px;width:100%" onclick="saveNotes()">Save Notes</button>
+
+    <div class="divider"></div>
+
+    <div class="section-lbl">Actions</div>
+    <div class="action-grid">
+      <button class="action-btn btn-view-demo" onclick="viewDemo()">🎯 View Their Demo</button>
+      <button class="action-btn btn-demo-sent" onclick="moveStatus('demo-sent')">📤 Mark Demo Sent</button>
+      <button class="action-btn btn-qualified" onclick="moveStatus('qualified')">⭐ Mark Qualified</button>
+      <button class="action-btn btn-won" onclick="moveStatus('won')">✅ Mark Won</button>
+      <button class="action-btn btn-lost" onclick="moveStatus('lost')">✗ Mark Lost</button>
+      <button class="action-btn" style="background:var(--bg3);color:var(--text-mid);border:1px solid var(--border2)" onclick="moveStatus('new-lead')">↩ Reset to New</button>
+      <button class="action-btn btn-proposal" onclick="generateProposal()">📄 Generate Proposal</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-lbl">AI Funnel Strategy</div>
+    <button class="action-btn" style="width:100%;background:linear-gradient(135deg,var(--green),var(--sky));color:#fff;margin-bottom:12px" onclick="generateStrategy()">✨ Generate Strategy</button>
+    <div id="ai-section" style="display:none">
+      <div class="ai-section">
+        <div class="ai-hdr">
+          <div class="ai-title">AI Funnel Strategy</div>
+          <button class="regen-btn" onclick="generateStrategy()">↻ Regenerate</button>
+        </div>
+        <div class="ai-content" id="ai-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAD MODAL -->
+<div class="overlay" id="add-overlay" onclick="if(event.target===this)closeModal('add-overlay')">
+  <div class="modal modal-sm" onclick="event.stopPropagation()">
+    <div class="modal-top">
+      <div class="modal-title">Add New Lead</div>
+      <button class="close-btn" onclick="closeModal('add-overlay')">×</button>
+    </div>
+    <div class="form-lbl">Full Name *</div>
+    <input class="form-input" id="f-name" type="text" placeholder="e.g. Juan dela Cruz"/>
+    <div class="form-lbl">Email</div>
+    <input class="form-input" id="f-email" type="email" placeholder="email@example.com"/>
+    <div class="form-row">
+      <div>
+        <div class="form-lbl">Role / Type</div>
+        <input class="form-input" id="f-role" type="text" placeholder="e.g. Coach"/>
+      </div>
+      <div>
+        <div class="form-lbl">Their Offer</div>
+        <input class="form-input" id="f-offer" type="text" placeholder="e.g. 6-week program"/>
+      </div>
+    </div>
+    <div class="form-lbl">Their Main Problem</div>
+    <input class="form-input" id="f-problem" type="text" placeholder="e.g. No consistent leads"/>
+    <div class="form-lbl">Notes</div>
+    <textarea class="form-input" id="f-notes" rows="3" placeholder="Any additional context..." style="resize:vertical"></textarea>
+    <button class="save-btn" onclick="addManualLead()">Add to Pipeline →</button>
+  </div>
+</div>
+
+<script>
+const PASS = '@ng3Lica';
+const CALENDLY = 'https://calendly.com/webdevdiscoverycall/30min';
+let leads = [];
+let currentId = null;
+let supabaseUrl = '';
+let supabaseKey = '';
+
+// ── AUTH ──
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('app').style.flexDirection = 'column';
+    sessionStorage.setItem('admin_auth', '1');
+    initApp();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+
+// ── INIT ──
+async function initApp() {
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    supabaseUrl = cfg.supabase_url;
+    supabaseKey = cfg.supabase_key;
+    await fetchLeads();
+    renderTemplates();
+  } catch(e) {
+    console.error('Init error:', e);
+    toast('Failed to load config. Check your connection.');
+  }
+}
+
+async function fetchLeads() {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/leads?select=*&order=created_at.desc`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
+    );
+    const data = await res.json();
+    leads = (data || []).map(l => ({
+      ...l,
+      status: l.admin_status || 'new-lead'
+    }));
+    renderAll();
+  } catch(e) {
+    console.error('Fetch leads error:', e);
+    toast('Error loading leads');
+  }
+}
+
+async function refreshLeads() { await fetchLeads(); toast('Leads refreshed'); }
+
+// ── RENDER ──
+function renderAll() {
+  renderKanban();
+  renderStats();
+  renderTasks();
+}
+
+const COLS = [
+  { id:'new-lead',   label:'New Lead',   cls:'col-new' },
+  { id:'qualified',  label:'Qualified',  cls:'col-qualified' },
+  { id:'demo-sent',  label:'Demo Sent',  cls:'col-demo' },
+  { id:'won',        label:'Won ✓',      cls:'col-won' },
+  { id:'lost',       label:'Lost',       cls:'col-lost' }
+];
+
+function intentBadge(intent) {
+  if (!intent) return '';
+  const cls = intent === 'hot' ? 'intent-hot' : intent === 'warm' ? 'intent-warm' : 'intent-cold';
+  return `<span class="intent-badge ${cls}">${intent}</span>`;
+}
+
+function renderKanban() {
+  const kanban = document.getElementById('kanban');
+  kanban.innerHTML = COLS.map(col => {
+    const colLeads = leads.filter(l => l.status === col.id);
+    return `
+    <div class="col ${col.cls}">
+      <div class="col-hdr">
+        <div class="col-title">${col.label}</div>
+        <div class="col-count">${colLeads.length}</div>
+      </div>
+      <div class="cards">
+        ${colLeads.length === 0
+          ? `<div style="font-size:0.75rem;color:var(--text-dim);text-align:center;padding:24px 0;opacity:0.5">Empty</div>`
+          : colLeads.map(l => `
+          <div class="card" onclick="openLead('${l.id}')">
+            <div class="card-name">${l.name || 'Unknown'}</div>
+            <div class="card-role">${l.role || l.business_name || '—'}</div>
+            <div class="card-problem">${l.problem || l.challenge || '—'}</div>
+            <div class="card-footer">
+              ${intentBadge(l.buying_intent)}
+              <span class="score-dot">${l.opportunity_score ? l.opportunity_score + '/10' : ''}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStats() {
+  const total = leads.length;
+  const hot = leads.filter(l => l.buying_intent === 'hot').length;
+  const demo = leads.filter(l => l.demo_html).length;
+  const won = leads.filter(l => l.status === 'won').length;
+  const conv = total > 0 ? Math.round((won/total)*100) : 0;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-hot').textContent = hot;
+  document.getElementById('stat-demo').textContent = demo;
+  document.getElementById('stat-won').textContent = won;
+  document.getElementById('stat-conv').textContent = conv + '%';
+}
+
+function renderTasks() {
+  const newToday = leads.filter(l => {
+    if (l.status !== 'new-lead') return false;
+    const d = new Date(l.created_at);
+    const now = new Date();
+    return (now - d) < 86400000 * 2;
+  });
+  const needFollow = leads.filter(l => l.status === 'demo-sent');
+  const hotLeads = leads.filter(l => l.buying_intent === 'hot' && l.status === 'new-lead');
+
+  let h = '';
+  if (hotLeads.length) {
+    h += `<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin-bottom:6px">🔥 Hot — Contact Now</div>`;
+    hotLeads.forEach(l => { h += `<div class="task-item" onclick="openLead('${l.id}')"><span style="font-size:0.82rem;font-weight:500">${l.name}</span><span class="task-badge">HOT</span></div>`; });
+  }
+  if (newToday.length) {
+    h += `<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber);margin:${hotLeads.length?'12px':0} 0 6px">New This Week</div>`;
+    newToday.slice(0,5).forEach(l => { h += `<div class="task-item" onclick="openLead('${l.id}')"><span style="font-size:0.82rem">${l.name}</span><span class="task-badge amber">New</span></div>`; });
+  }
+  if (needFollow.length) {
+    h += `<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--sky);margin:12px 0 6px">Follow-up Needed</div>`;
+    needFollow.forEach(l => { h += `<div class="task-item" onclick="openLead('${l.id}')"><span style="font-size:0.82rem">${l.name}</span><span class="task-badge sky">→ Follow up</span></div>`; });
+  }
+  if (!h) h = `<div style="text-align:center;padding:20px 0;font-size:0.8rem;color:var(--text-dim)">All caught up ✓</div>`;
+  document.getElementById('task-list').innerHTML = h;
+}
+
+const TEMPLATES = [
+  { title:'Initial Outreach', color:'var(--sky)', body:`Hi {{name}}! 👋 I noticed you checked out our funnel quiz and I wanted to personally reach out. Based on your answers, you're dealing with {{problem}} — and I've helped others in your exact situation turn that around. Would love to show you what that could look like for you. When's a good time to chat?` },
+  { title:'Demo Follow-up', color:'var(--amber)', body:`Hey {{name}}, just checking in on the funnel preview we built for you! Did you get a chance to look it over? I'd love to hear what you thought — and answer any questions about how we'd build this for real. What stood out most to you?` },
+  { title:'Gentle Nudge', color:'var(--green)', body:`Hi {{name}} — I know things get busy. I just wanted to check in one more time because I genuinely believe the system we'd build could solve {{problem}} for you. If timing isn't right, no pressure at all. But if you're still curious, I'm here. 😊` },
+  { title:'Proposal Sent', color:'var(--purple)', body:`Hi {{name}}! I've put together a proposal for you based on everything you shared. Take your time reviewing it — and if anything looks off or you have questions, just reply here. I want to make sure this feels right for you before we move forward.` },
+];
+
+function renderTemplates() {
+  document.getElementById('tmpl-list').innerHTML = TEMPLATES.map(t =>
+    `<div class="tmpl-item" onclick="copyTemplate('${t.title}')">
+      <div class="tmpl-hdr"><span>${t.title}</span><span class="copy-lbl" style="color:${t.color}">copy</span></div>
+      <div class="tmpl-preview">${t.body}</div>
+    </div>`
+  ).join('');
+}
+
+function copyTemplate(title) {
+  const t = TEMPLATES.find(x => x.title === title);
+  const l = currentId ? leads.find(x => x.id === currentId) : null;
+  let msg = t.body;
+  if (l) {
+    msg = msg.replace(/{{name}}/g, l.name || 'there')
+             .replace(/{{problem}}/g, l.problem || l.challenge || 'your current challenge');
+  }
+  navigator.clipboard.writeText(msg).then(() => toast('Template copied to clipboard'));
+}
+
+// ── LEAD DETAIL ──
+function openLead(id) {
+  currentId = id;
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+
+  document.getElementById('m-name').textContent = l.name || 'Unknown Lead';
+  document.getElementById('m-role').textContent = l.role || l.business_name || '—';
+  document.getElementById('m-email').textContent = l.email || '—';
+  document.getElementById('m-intent').innerHTML = intentBadge(l.buying_intent) || '—';
+  document.getElementById('m-score').textContent = l.opportunity_score ? l.opportunity_score + ' / 10' : '—';
+  document.getElementById('m-goal').textContent = l.goal || '—';
+  document.getElementById('m-problem').textContent = l.problem || l.challenge || '—';
+  document.getElementById('m-offer').textContent = l.offer_name || '—';
+  document.getElementById('m-investment').textContent = l.investment || l.resources || '—';
+  document.getElementById('m-diagnosis').textContent = l.headline || l.full_analysis ? JSON.parse(l.full_analysis||'{}').diagnosis || '—' : '—';
+  document.getElementById('m-notes').value = l.admin_notes || '';
+  document.getElementById('ai-section').style.display = 'none';
+  document.getElementById('lead-overlay').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'lead-overlay') currentId = null;
+}
+
+async function saveNotes() {
+  if (!currentId) return;
+  const notes = document.getElementById('m-notes').value;
+  const l = leads.find(x => x.id === currentId);
+  if (l) l.admin_notes = notes;
+  try {
+    await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${currentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json','apikey':supabaseKey,'Authorization':'Bearer '+supabaseKey,'Prefer':'return=minimal' },
+      body: JSON.stringify({ admin_notes: notes })
+    });
+    toast('Notes saved');
+  } catch(e) { toast('Error saving notes'); }
+}
+
+async function moveStatus(status) {
+  if (!currentId) return;
+  const l = leads.find(x => x.id === currentId);
+  if (l) l.status = status;
+  try {
+    await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${currentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json','apikey':supabaseKey,'Authorization':'Bearer '+supabaseKey,'Prefer':'return=minimal' },
+      body: JSON.stringify({ admin_status: status })
+    });
+  } catch(e) { console.error(e); }
+  closeModal('lead-overlay');
+  renderAll();
+  toast('Lead updated to ' + status.replace('-',' '));
+}
+
+function viewDemo() {
+  if (!currentId) return;
+  window.open(`/demo?id=${currentId}`, '_blank');
+}
+
+// ── PROPOSAL GENERATION ──
+async function generateProposal() {
+  if (!currentId) return;
+  const l = leads.find(x => x.id === currentId);
+  if (!l) return;
+  closeModal('lead-overlay');
+
+  // Open proposal page with lead data
+  const params = new URLSearchParams({
+    id:        currentId,
+    name:      l.name || '',
+    email:     l.email || '',
+    role:      l.role || l.business_name || '',
+    offer:     l.offer_name || '',
+    price:     l.offer_price || '',
+    client:    l.ideal_client || '',
+    goal:      l.goal || '',
+    problem:   l.problem || l.challenge || '',
+    transform: l.offer_transform || '',
+    intent:    l.buying_intent || '',
+    score:     l.opportunity_score || ''
+  });
+  window.open(`/proposal?${params.toString()}`, '_blank');
+}
+
+// ── AI STRATEGY ──
+async function generateStrategy() {
+  const l = leads.find(x => x.id === currentId);
+  if (!l) return;
+  document.getElementById('ai-section').style.display = 'block';
+  document.getElementById('ai-content').innerHTML = '<div class="spinning"><div class="spinner"></div></div>';
+
+  const prompt = `You are an elite funnel strategist. Generate a complete client acquisition strategy for:
+
+Role: ${l.role || l.business_name || 'Business owner'}
+Offer: ${l.offer_name || 'Service'}
+Ideal Client: ${l.ideal_client || 'Not specified'}
+Main Problem: ${l.problem || l.challenge || 'Not specified'}
+Goal: ${l.goal || 'Not specified'}
+Buying Intent: ${l.buying_intent || 'warm'}
+
+Use ## headings for these sections:
+## Primary Headline
+## Pain Points to Address (3 bullets)
+## Funnel Structure (5 steps)
+## Follow-up Day 2 Message
+## Follow-up Day 7 Message
+
+Premium tone. Specific. No fluff.`;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: l.name, email: l.email, role: l.role, goal: l.goal, challenge: l.problem, impact: '', dream: l.offer_transform, metric: '', tried: '', belief: '', concern: l.obstacle, resources: l.investment, _strategy_mode: true, _strategy_prompt: prompt })
+    });
+    // Fallback: just call OpenAI directly via a simple fetch
+    const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch(e) {}
+
+  // Use the Anthropic API via artifacts pattern
+  try {
+    const res = await fetch('/api/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead: l })
+    });
+    const data = await res.json();
+    document.getElementById('ai-content').innerHTML = formatAI(data.strategy || 'No strategy generated.');
+  } catch(e) {
+    document.getElementById('ai-content').innerHTML = '<span style="color:var(--red)">Error generating strategy. Try again.</span>';
+  }
+}
+
+function formatAI(text) {
+  return text
+    .replace(/## (.+)/g, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]+?<\/li>)/g, '<ul>$1</ul>')
+    .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
+    .replace(/\n\n/g, '<p></p>')
+    .replace(/\n/g, '<br>');
+}
+
+// ── MANUAL ADD LEAD ──
+function openAddModal() { document.getElementById('add-overlay').classList.add('open'); }
+
+async function addManualLead() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Name is required'); return; }
+  const lead = {
+    name, email: document.getElementById('f-email').value.trim(),
+    role: document.getElementById('f-role').value.trim(),
+    offer_name: document.getElementById('f-offer').value.trim(),
+    problem: document.getElementById('f-problem').value.trim(),
+    admin_notes: document.getElementById('f-notes').value.trim(),
+    admin_status: 'new-lead', buying_intent: 'cold',
+    created_at: new Date().toISOString()
+  };
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','apikey':supabaseKey,'Authorization':'Bearer '+supabaseKey,'Prefer':'return=representation' },
+      body: JSON.stringify(lead)
+    });
+    const data = await res.json();
+    if (Array.isArray(data) && data[0]) leads.unshift({ ...data[0], status: 'new-lead' });
+    closeModal('add-overlay');
+    ['f-name','f-email','f-role','f-offer','f-problem','f-notes'].forEach(id => document.getElementById(id).value = '');
+    renderAll();
+    toast('Lead added to pipeline');
+  } catch(e) { toast('Error adding lead'); }
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// ── AUTO LOGIN CHECK ──
+if (sessionStorage.getItem('admin_auth') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
+  initApp();
+}
+</script>
+</body>
+</html>
