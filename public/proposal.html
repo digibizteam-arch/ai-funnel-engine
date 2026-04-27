@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Your Proposal — Maria Angelica Scott</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F5F0E8;--cream-mid:#EDE5D6;--sand:#D4C4A8;
+  --clay:#B8956A;--clay-dark:#8B6A42;--bark:#3D2B1F;
+  --bark-soft:#5C4033;--white:#FFFDF9;--text:#3D2B1F;--text-mid:#7A6152;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* Loading */
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;text-align:center;padding:24px}
+.spinner{width:40px;height:40px;border:3px solid var(--sand);border-top-color:var(--clay);border-radius:50%;animation:spin 0.9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Proposal */
+#proposal-content{display:none;max-width:760px;margin:0 auto;padding:40px 24px 80px}
+
+.proposal-header{text-align:center;padding:48px 0 36px;border-bottom:2px solid var(--sand);margin-bottom:36px}
+.proposal-brand{font-size:0.78rem;color:var(--text-mid);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+.proposal-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin-bottom:12px}
+.proposal-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.6}
+.proposal-meta{display:flex;gap:24px;justify-content:center;margin-top:20px;flex-wrap:wrap;font-size:0.82rem;color:var(--text-mid)}
+.proposal-meta span{display:flex;align-items:center;gap:5px}
+
+.section{background:var(--white);border:1px solid var(--cream-mid);border-radius:16px;padding:28px;margin-bottom:20px}
+.section-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--bark);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--cream-mid)}
+
+.situation-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+.situation-bullets li{padding-left:18px;position:relative;font-size:0.9rem;line-height:1.55;color:var(--text)}
+.situation-bullets li::before{content:'•';position:absolute;left:0;color:var(--clay);font-weight:bold}
+
+.package-box{background:var(--bark);border-radius:14px;padding:28px;color:var(--white);text-align:center;margin-bottom:16px}
+.package-name{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px}
+.package-price{font-size:2.4rem;font-weight:700;color:var(--clay);margin-bottom:4px;font-family:'Playfair Display',serif}
+.package-note{font-size:0.82rem;opacity:0.65;margin-bottom:20px}
+.package-includes{text-align:left;display:flex;flex-direction:column;gap:8px}
+.include-item{display:flex;align-items:flex-start;gap:10px;font-size:0.88rem}
+.include-check{width:20px;height:20px;border-radius:50%;background:var(--clay);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+
+.timeline-steps{display:flex;flex-direction:column;gap:12px}
+.timeline-step{display:flex;align-items:flex-start;gap:14px}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--clay);color:white;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;flex-shrink:0;margin-top:1px}
+.step-content{}
+.step-title{font-weight:600;font-size:0.92rem;margin-bottom:2px}
+.step-desc{font-size:0.82rem;color:var(--text-mid);line-height:1.5}
+
+.terms-list{display:flex;flex-direction:column;gap:8px}
+.term-item{font-size:0.85rem;color:var(--text-mid);line-height:1.55;padding-left:16px;position:relative}
+.term-item::before{content:'·';position:absolute;left:0;color:var(--clay)}
+
+/* SIGNATURE */
+.sig-section{background:var(--white);border:2px solid var(--clay);border-radius:16px;padding:32px;margin-bottom:20px}
+.sig-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px;text-align:center}
+.sig-sub{font-size:0.85rem;color:var(--text-mid);text-align:center;margin-bottom:28px;line-height:1.6}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.sig-field{display:flex;flex-direction:column;gap:6px}
+.sig-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-mid)}
+.sig-input{border:none;border-bottom:2px solid var(--sand);padding:8px 0;font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--bark);outline:none;background:transparent;transition:border-color 0.15s;width:100%}
+.sig-input:focus{border-color:var(--clay)}
+.sig-input::placeholder{font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--sand)}
+.checkbox-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;cursor:pointer}
+.checkbox-row input{margin-top:3px;accent-color:var(--clay);width:16px;height:16px;flex-shrink:0}
+.checkbox-label{font-size:0.85rem;color:var(--text-mid);line-height:1.5}
+.accept-btn{width:100%;background:var(--bark);color:var(--white);border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:16px;border-radius:100px;cursor:pointer;transition:background 0.2s,transform 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.accept-btn:hover{background:var(--bark-soft);transform:translateY(-2px)}
+.accept-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.sig-err{color:#e53e3e;font-size:0.82rem;text-align:center;margin-top:8px;display:none}
+
+/* SUCCESS */
+#success-screen{display:none;max-width:540px;margin:0 auto;padding:80px 24px;text-align:center}
+.success-icon{font-size:3rem;margin-bottom:20px}
+.success-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:12px}
+.success-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.65;margin-bottom:32px}
+.calendly-btn{display:inline-block;background:var(--clay);color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:16px 40px;border-radius:100px;text-decoration:none;transition:background 0.2s,transform 0.15s}
+.calendly-btn:hover{background:var(--clay-dark);transform:translateY(-2px)}
+
+@media(max-width:540px){.sig-grid{grid-template-columns:1fr}.proposal-meta{gap:12px}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--text-mid);font-size:0.92rem">Building your proposal...</p>
+</div>
+
+<div id="proposal-content"></div>
+
+<div id="success-screen">
+  <div class="success-icon">🎉</div>
+  <h2 class="success-title">Proposal Accepted!</h2>
+  <p class="success-sub">Thank you for signing! Your proposal has been recorded. The next step is to book your onboarding call with Maria so we can get started building your system.</p>
+  <a href="https://calendly.com/webdevdiscoverycall/30min" target="_blank" class="calendly-btn">📅 Book Your Onboarding Call →</a>
+  <p style="margin-top:16px;font-size:0.78rem;color:var(--text-mid)">Usually takes 30 minutes · No preparation needed</p>
+</div>
+
+<script>
+const CALENDLY = 'https://calendly.com/webdevdiscoverycall/30min';
+const params = new URLSearchParams(window.location.search);
+const leadId   = params.get('id') || '';
+const name     = params.get('name') || 'Valued Client';
+const email    = params.get('email') || '';
+const role     = params.get('role') || '';
+const offer    = params.get('offer') || 'Your Service';
+const price    = params.get('price') || '';
+const client   = params.get('client') || '';
+const goal     = params.get('goal') || '';
+const problem  = params.get('problem') || '';
+const transform= params.get('transform') || '';
+const intent   = params.get('intent') || 'warm';
+const score    = params.get('score') || '';
+const firstName = name.split(' ')[0];
+const today = new Date().toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+
+// Determine package based on intent/score
+function getPackage() {
+  const s = parseInt(score) || 5;
+  if (intent === 'hot' || s >= 8) {
+    return {
+      name: 'Full System Package',
+      price: '₱25,000',
+      priceNote: 'One-time investment · All-inclusive',
+      includes: [
+        'Complete AI-powered quiz funnel',
+        'Personalized result & diagnosis page',
+        'Custom demo funnel generator',
+        'AI sales chatbot (personalized to your offer)',
+        'Automated booking & proposal system',
+        'Lead management admin dashboard',
+        'Full automation workflow (n8n)',
+        '30-day post-launch support'
+      ]
+    };
+  } else if (intent === 'warm' || s >= 5) {
+    return {
+      name: 'Growth Package',
+      price: '₱15,000',
+      priceNote: 'One-time investment · Core system',
+      includes: [
+        'AI quiz funnel + result page',
+        'Custom demo funnel generator',
+        'AI sales chatbot',
+        'Booking & Calendly integration',
+        '14-day post-launch support'
+      ]
+    };
+  } else {
+    return {
+      name: 'Starter Package',
+      price: '₱9,997',
+      priceNote: 'One-time investment · Foundation system',
+      includes: [
+        'Custom landing page or quiz funnel',
+        'Lead capture + booking integration',
+        'Basic follow-up automation',
+        '7-day post-launch support'
+      ]
+    };
+  }
+}
+
+const pkg = getPackage();
+
+function buildProposal() {
+  const html = `
+  <div class="proposal-header">
+    <div class="proposal-brand">Maria Angelica Scott — System Architect</div>
+    <h1 class="proposal-title">Proposal for ${firstName}</h1>
+    <p class="proposal-sub">A done-for-you funnel and automation system — built around your exact offer, client, and goal.</p>
+    <div class="proposal-meta">
+      <span>📅 ${today}</span>
+      <span>📧 ${email || 'On file'}</span>
+      <span>⭐ Opportunity Score: ${score || '—'}/10</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Your Situation</div>
+    <ul class="situation-bullets">
+      <li>You are a <strong>${role || 'business owner'}</strong> offering <strong>${offer || 'your service'}</strong></li>
+      ${client ? `<li>Your ideal client: <strong>${client}</strong></li>` : ''}
+      ${goal ? `<li>Your goal: <strong>${goal}</strong></li>` : ''}
+      ${problem ? `<li>Current challenge: <strong>${problem}</strong></li>` : ''}
+      ${transform ? `<li>Desired outcome: <strong>${transform}</strong></li>` : ''}
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Recommended Package</div>
+    <div class="package-box">
+      <div class="package-name">${pkg.name}</div>
+      <div class="package-price">${pkg.price}</div>
+      <div class="package-note">${pkg.priceNote}</div>
+      <div class="package-includes">
+        ${pkg.includes.map(item => `
+        <div class="include-item">
+          <div class="include-check">✓</div>
+          <span>${item}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Timeline & Delivery</div>
+    <div class="timeline-steps">
+      <div class="timeline-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Onboarding Call (Day 1)</div>
+          <div class="step-desc">30-minute call to finalize all details, branding, and content. We align on your exact offer and target client.</div>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Build Phase (Days 2–5)</div>
+          <div class="step-desc">Full system build: quiz funnel, result page, demo generator, chatbot, and automation. You'll receive a preview link.</div>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Review & Revisions (Day 6)</div>
+          <div class="step-desc">You review everything. We make any adjustments to copy, design, or flow until it feels exactly right.</div>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Launch (Day 7)</div>
+          <div class="step-desc">Your system goes live. We do a final walkthrough so you know exactly how to use everything.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Terms & Conditions</div>
+    <div class="terms-list">
+      <div class="term-item">50% deposit required to begin. Remaining 50% due upon delivery.</div>
+      <div class="term-item">Delivery within 7 business days from onboarding call.</div>
+      <div class="term-item">2 rounds of revisions included. Additional revisions billed at ₱1,500/hr.</div>
+      <div class="term-item">All files and access transferred to client upon full payment.</div>
+      <div class="term-item">Support period begins on launch day as specified per package.</div>
+      <div class="term-item">This proposal is valid for 7 days from the date above.</div>
+    </div>
+  </div>
+
+  <div class="sig-section" id="sig-section">
+    <div class="sig-title">Accept This Proposal</div>
+    <div class="sig-sub">By signing below, you confirm that you've read and agree to the terms outlined in this proposal and are ready to move forward.</div>
+    <div class="sig-grid">
+      <div class="sig-field">
+        <div class="sig-label">Your Full Name *</div>
+        <input class="sig-input" id="sig-name" type="text" placeholder="Type your full name" autocomplete="name"/>
+      </div>
+      <div class="sig-field">
+        <div class="sig-label">Today's Date *</div>
+        <input class="sig-input" id="sig-date" type="text" value="${today}" readonly style="color:var(--text-mid)"/>
+      </div>
+    </div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="sig-agree"/>
+      <span class="checkbox-label">I have read this proposal, I understand and agree to the terms and conditions, and I am authorized to enter into this agreement.</span>
+    </label>
+    <button class="accept-btn" id="accept-btn" onclick="acceptProposal()">
+      ✍️ Sign & Accept Proposal
+    </button>
+    <div class="sig-err" id="sig-err">Please enter your full name and check the agreement box.</div>
+  </div>`;
+
+  document.getElementById('proposal-content').innerHTML = html;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('proposal-content').style.display = 'block';
+}
+
+async function acceptProposal() {
+  const sigName = document.getElementById('sig-name').value.trim();
+  const agreed  = document.getElementById('sig-agree').checked;
+  const err = document.getElementById('sig-err');
+
+  if (!sigName || !agreed) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+
+  const btn = document.getElementById('accept-btn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Processing...';
+
+  // Save acceptance to Supabase
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    if (leadId) {
+      await fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type':'application/json','apikey':cfg.supabase_key,'Authorization':'Bearer '+cfg.supabase_key,'Prefer':'return=minimal' },
+        body: JSON.stringify({
+          admin_status: 'won',
+          proposal_signed_by: sigName,
+          proposal_signed_at: new Date().toISOString(),
+          proposal_package: pkg.name,
+          proposal_price: pkg.price
+        })
+      });
+    }
+  } catch(e) { console.error('Save error:', e); }
+
+  // Show success
+  document.getElementById('proposal-content').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Build on load
+buildProposal();
+</script>
+</body>
+</html>
