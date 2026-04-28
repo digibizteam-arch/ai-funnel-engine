@@ -59,7 +59,7 @@ LEAD INTELLIGENCE:
 
   // Build proposal URL — name comes from lead data first, then fallback to passed name param
   const leadName = leadData?.name || name || '';
-  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(name || leadData?.name || '')}&email=${encodeURIComponent(email||'')}`;
+  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}`;
 
   const systemPrompt = `You are Maria's AI Sales Assistant — a warm, selective, and intelligent sales guide for Maria Angelica Scott, System Architect. You build done-for-you funnel and automation systems.
 
