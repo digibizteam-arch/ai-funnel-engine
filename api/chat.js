@@ -57,8 +57,9 @@ LEAD INTELLIGENCE:
     } catch(err) { console.error('Lead fetch error:', err.message); }
   }
 
-  // Build proposal URL helper — passed back in reply when triggered
-  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}`;
+  // Build proposal URL — name comes from lead data first, then fallback to passed name param
+  const leadName = leadData?.name || name || '';
+  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(leadName)}&email=${encodeURIComponent(email||'')}`;
 
   const systemPrompt = `You are Maria's AI Sales Assistant — a warm, selective, and intelligent sales guide for Maria Angelica Scott, System Architect. You build done-for-you funnel and automation systems.
 
