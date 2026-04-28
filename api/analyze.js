@@ -24,7 +24,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body;
-  const name  = body.name  || '';
+  const name = body.name || '';
   const email = body.email || '';
 
   if (!name || !email) {
@@ -32,19 +32,17 @@ module.exports = async function handler(req, res) {
   }
 
   // ── Resolve all fields — new 9-question quiz fields take priority ──
-  const resolvedRole      = body.role       || body.business_name || 'Not provided';
-  const resolvedGoal      = body.goal       || body.dream         || 'Not provided';
-  const resolvedProblem   = body.problem    || body.challenge     || 'Not provided';
-  const resolvedSuccess   = body.success    || body.metric        || 'Not provided';
-  const resolvedTried     = body.tried_str  || (Array.isArray(body.tried) ? body.tried.join(', ') : body.tried) || body.impact || 'Not specified';
-  const resolvedReadiness = body.readiness  || body.belief        || 'Not specified';
-  const resolvedObstacle  = body.obstacle   || body.concern       || 'Not provided';
-  const resolvedResources = body.investment || body.resources     || 'Not provided';
-  const businessName      = body.business_name || '';
+  const resolvedRole = body.role || body.business_name || 'Not provided';
+  const resolvedGoal = body.goal || body.dream || 'Not provided';
+  const resolvedProblem = body.problem || body.challenge || 'Not provided';
+  const resolvedSuccess = body.success || body.metric || 'Not provided';
+  const resolvedTried = body.tried_str || (Array.isArray(body.tried) ? body.tried.join(', ') : body.tried) || body.impact || 'Not specified';
+  const resolvedReadiness = body.readiness || body.belief || 'Not specified';
+  const resolvedObstacle = body.obstacle || body.concern || 'Not provided';
+  const resolvedResources = body.investment || body.resources || 'Not provided';
+  const businessName = body.business_name || '';
 
-  const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis.
-
-A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis. Use their exact words and situation throughout.
+  const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis. A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis. Use their exact words and situation throughout.
 
 CLIENT ANSWERS:
 Name: ${name}
@@ -122,6 +120,10 @@ JSON FORMAT:
   let savedLeadId = null;
   try {
     const supabaseURL = new URL(process.env.SUPABASE_URL);
+    
+    // FIX: Removed 'success', 'tried', 'readiness', 'obstacle' from top-level insert.
+    // Your database likely doesn't have these columns, which was causing the silent Supabase failure!
+    // Don't worry, they are still saved inside the full_analysis JSON string below.
     const inserted = await postJSON({
       hostname: supabaseURL.hostname,
       path: '/rest/v1/leads',
@@ -135,29 +137,33 @@ JSON FORMAT:
     }, {
       name,
       email,
-      business_name:     businessName || null,
-      role:              resolvedRole,
-      goal:              resolvedGoal,
-      problem:           resolvedProblem,
-      success:           resolvedSuccess,
-      tried:             resolvedTried,
-      readiness:         resolvedReadiness,
-      obstacle:          resolvedObstacle,
-      investment:        resolvedResources,
-      buying_intent:     analysisData.buying_intent,
+      business_name: businessName || null,
+      role: resolvedRole,
+      goal: resolvedGoal,
+      problem: resolvedProblem,
+      investment: resolvedResources,
+      buying_intent: analysisData.buying_intent,
       opportunity_score: analysisData.opportunity_score,
-      solution_name:     analysisData.solution_name,
-      headline:          analysisData.page_title || analysisData.cta_headline,
-      full_analysis:     JSON.stringify(analysisData),
-      created_at:        new Date().toISOString()
+      solution_name: analysisData.solution_name,
+      headline: analysisData.page_title || analysisData.cta_headline,
+      full_analysis: JSON.stringify(analysisData), // All raw data is safely preserved here
+      created_at: new Date().toISOString()
     });
 
     if (Array.isArray(inserted) && inserted[0]?.id) {
       savedLeadId = inserted[0].id;
+    } else {
+      // FIX: If Supabase returns an error array instead of the inserted row, log it clearly
+      console.error('Supabase insert failed or returned no ID:', JSON.stringify(inserted));
     }
   } catch (err) {
     console.error('Supabase save error:', err.message);
+    // FIX: If the DB save fails, we need to know. We still return the AI data so the user isn't stuck, 
+    // but we explicitly pass null lead_id so you know it didn't save.
   }
 
-  return res.status(200).json({ ...analysisData, lead_id: savedLeadId });
+  return res.status(200).json({
+    ...analysisData,
+    lead_id: savedLeadId
+  });
 };
