@@ -25,14 +25,28 @@ module.exports = async function handler(req, res) {
 
   const {
     name, email, business_name,
-    goal, challenge, impact,
-    dream, metric, tried,
-    belief, concern, resources
+    // New 9-question quiz fields
+    role, problem, goal, success,
+    tried, tried_str, readiness,
+    obstacle, investment,
+    // Legacy 10-question fields (fallback)
+    challenge, impact, dream, metric, belief, concern, resources
   } = req.body;
 
   if (!name || !email) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  // Resolve fields — new quiz takes priority, legacy fields as fallback
+  const resolvedRole     = role || business_name || 'Not provided';
+  const resolvedGoal     = goal || dream || 'Not provided';
+  const resolvedProblem  = problem || challenge || 'Not provided';
+  const resolvedImpact   = impact || 'Not provided';
+  const resolvedSuccess  = success || metric || 'Not provided';
+  const resolvedTried    = tried_str || (Array.isArray(tried) ? tried.join(', ') : tried) || 'Not specified';
+  const resolvedReadiness= readiness || belief || 'Not specified';
+  const resolvedObstacle = obstacle || concern || 'Not provided';
+  const resolvedResources= investment || resources || 'Not provided';
 
   const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis.
 
@@ -40,16 +54,15 @@ A potential client just completed a discovery questionnaire. Your job is to prod
 
 CLIENT ANSWERS:
 Name: ${name}
-Business: ${business_name || 'Not provided'}
-Primary goal: ${goal}
-Biggest challenge: ${challenge}
-How it impacts them: ${impact}
-Ideal outcome if solved: ${dream}
-Specific target metric: ${metric || 'Not specified'}
-What they have tried: ${tried}
-How important they think a funnel is: ${belief}
-Biggest hesitation: ${concern}
-Resources available: ${resources}
+Role / Business Type: ${resolvedRole}
+Primary goal: ${resolvedGoal}
+Biggest challenge: ${resolvedProblem}
+How it impacts them: ${resolvedImpact}
+Ideal outcome if solved: ${resolvedSuccess}
+What they have tried: ${resolvedTried}
+Readiness / Funnel belief: ${resolvedReadiness}
+Biggest obstacle: ${resolvedObstacle}
+Resources / Investment level: ${resolvedResources}
 
 OUTPUT RULES:
 - Use their name (${name}) naturally in bullet points
@@ -128,15 +141,22 @@ JSON FORMAT:
   try {
     const supabaseBody = {
       name, email,
-      business_name: business_name || null,
-      goal, challenge, impact, dream,
-      metric: metric || null,
-      tried,
-      funnel_belief: belief,
-      concern, resources,
+      business_name:     business_name || null,
+      // New quiz fields
+      role:              resolvedRole,
+      goal:              resolvedGoal,
+      problem:           resolvedProblem,
+      impact:            resolvedImpact,
+      success:           resolvedSuccess,
+      tried:             resolvedTried,
+      readiness:         resolvedReadiness,
+      obstacle:          resolvedObstacle,
+      investment:        resolvedResources,
+      // AI output
       buying_intent:     analysisData.buying_intent,
       opportunity_score: analysisData.opportunity_score,
       solution_name:     analysisData.solution_name,
+      headline:          analysisData.headline,
       full_analysis:     JSON.stringify(analysisData),
       created_at:        new Date().toISOString()
     };
