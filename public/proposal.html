@@ -7,41 +7,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --cream:#F5F0E8;--cream-mid:#EDE5D6;--sand:#D4C4A8;
-  --clay:#B8956A;--clay-dark:#8B6A42;--bark:#3D2B1F;
-  --bark-soft:#5C4033;--white:#FFFDF9;--text:#3D2B1F;--text-mid:#7A6152;
-}
+:root{--cream:#F5F0E8;--cream-mid:#EDE5D6;--sand:#D4C4A8;--clay:#B8956A;--clay-dark:#8B6A42;--bark:#3D2B1F;--bark-soft:#5C4033;--white:#FFFDF9;--text:#3D2B1F;--text-mid:#7A6152;}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
 #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;text-align:center;padding:24px}
 .spinner{width:40px;height:40px;border:3px solid var(--sand);border-top-color:var(--clay);border-radius:50%;animation:spin 0.9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#proposal-content{display:none;max-width:760px;margin:0 auto;padding:40px 24px 80px}
+#proposal-content{display:none;max-width:780px;margin:0 auto;padding:40px 24px 80px}
 .proposal-header{text-align:center;padding:48px 0 36px;border-bottom:2px solid var(--sand);margin-bottom:36px}
 .proposal-brand{font-size:0.78rem;color:var(--text-mid);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
-.proposal-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin-bottom:12px}
-.proposal-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.6}
-.proposal-meta{display:flex;gap:24px;justify-content:center;margin-top:20px;flex-wrap:wrap;font-size:0.82rem;color:var(--text-mid)}
+.proposal-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3rem);line-height:1.15;margin-bottom:12px}
+.proposal-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.6;max-width:520px;margin:0 auto}
+.proposal-meta{display:flex;gap:20px;justify-content:center;margin-top:20px;flex-wrap:wrap;font-size:0.82rem;color:var(--text-mid)}
 .section{background:var(--white);border:1px solid var(--cream-mid);border-radius:16px;padding:28px;margin-bottom:20px}
 .section-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--bark);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--cream-mid)}
 .situation-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
 .situation-bullets li{padding-left:18px;position:relative;font-size:0.9rem;line-height:1.55}
 .situation-bullets li::before{content:'•';position:absolute;left:0;color:var(--clay);font-weight:bold}
-.package-box{background:var(--bark);border-radius:14px;padding:28px;color:var(--white);text-align:center;margin-bottom:16px}
+/* ROI box */
+.roi-box{background:linear-gradient(135deg,var(--bark),var(--bark-soft));border-radius:14px;padding:24px;color:var(--white);margin-bottom:16px}
+.roi-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:12px;color:var(--sand)}
+.roi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+.roi-item{background:rgba(255,255,255,0.08);border-radius:10px;padding:14px;text-align:center}
+.roi-num{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--clay);font-weight:700}
+.roi-label{font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:4px}
+/* Package box */
+.package-box{background:var(--bark);border-radius:14px;padding:28px;color:var(--white);margin-bottom:16px}
 .package-name{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px}
 .package-price{font-size:2.4rem;font-weight:700;color:var(--clay);margin-bottom:4px;font-family:'Playfair Display',serif}
-.package-note{font-size:0.82rem;opacity:0.65;margin-bottom:20px}
-.package-includes{text-align:left;display:flex;flex-direction:column;gap:8px}
-.include-item{display:flex;align-items:flex-start;gap:10px;font-size:0.88rem}
-.include-check{width:20px;height:20px;border-radius:50%;background:var(--clay);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
-.timeline-steps{display:flex;flex-direction:column;gap:12px}
+.package-note{font-size:0.82rem;opacity:0.65;margin-bottom:24px}
+.include-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.include-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.include-check{width:22px;height:22px;border-radius:50%;background:var(--clay);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px}
+.include-text{}
+.include-name{font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:3px}
+.include-why{font-size:0.78rem;color:rgba(255,255,255,0.55);line-height:1.5}
+/* Timeline */
+.timeline-steps{display:flex;flex-direction:column;gap:14px}
 .timeline-step{display:flex;align-items:flex-start;gap:14px}
 .step-num{width:30px;height:30px;border-radius:50%;background:var(--clay);color:white;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;flex-shrink:0;margin-top:1px}
 .step-title{font-weight:600;font-size:0.92rem;margin-bottom:2px}
 .step-desc{font-size:0.82rem;color:var(--text-mid);line-height:1.5}
+/* Terms */
 .terms-list{display:flex;flex-direction:column;gap:8px}
 .term-item{font-size:0.85rem;color:var(--text-mid);line-height:1.55;padding-left:16px;position:relative}
 .term-item::before{content:'·';position:absolute;left:0;color:var(--clay)}
+/* Signature */
 .sig-section{background:var(--white);border:2px solid var(--clay);border-radius:16px;padding:32px;margin-bottom:20px}
 .sig-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px;text-align:center}
 .sig-sub{font-size:0.85rem;color:var(--text-mid);text-align:center;margin-bottom:28px;line-height:1.6}
@@ -58,14 +68,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .accept-btn:hover{background:var(--bark-soft);transform:translateY(-2px)}
 .accept-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 .sig-err{color:#e53e3e;font-size:0.82rem;text-align:center;margin-top:8px;display:none}
-#success-screen{display:none;max-width:540px;margin:0 auto;padding:80px 24px;text-align:center}
+/* Print styles for PDF download */
+@media print {
+  body { background: white !important; }
+  #loading, #success-screen { display: none !important; }
+  #proposal-content { display: block !important; padding: 0 !important; }
+  .sig-section { border: 2px solid #B8956A !important; }
+  .accept-btn, .sig-err, #sig-agree, .checkbox-row { display: none !important; }
+  .section { break-inside: avoid; }
+  .package-box { background: #3D2B1F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .roi-box { background: #3D2B1F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .signed-stamp { display: block !important; }
+  .no-print { display: none !important; }
+}
+.signed-stamp {
+  display: none;
+  background: #f0faf5;
+  border: 1.5px solid #2D6A4F;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: #2D6A4F;
+  line-height: 1.6;
+}
+.download-btn {
+  width: 100%;
+  background: var(--cream-mid);
+  color: var(--bark);
+  border: 1.5px solid var(--sand);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  margin-bottom: 14px;
+}
+.download-btn:hover { background: var(--sand); transform: translateY(-1px); }
 .success-icon{font-size:3rem;margin-bottom:20px}
 .success-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:12px}
 .success-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.65;margin-bottom:32px}
 .calendly-btn{display:inline-block;background:var(--clay);color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:16px 40px;border-radius:100px;text-decoration:none;transition:background 0.2s,transform 0.15s}
 .calendly-btn:hover{background:var(--clay-dark);transform:translateY(-2px)}
-.chat-back{display:inline-block;margin-top:16px;font-size:0.85rem;color:var(--clay);cursor:pointer;text-decoration:underline}
-@media(max-width:540px){.sig-grid{grid-template-columns:1fr}.proposal-meta{gap:12px}}
+@media(max-width:540px){.sig-grid{grid-template-columns:1fr}.roi-grid{grid-template-columns:1fr 1fr}.proposal-meta{gap:10px}}
 </style>
 </head>
 <body>
@@ -80,82 +132,121 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 <div id="success-screen">
   <div class="success-icon">🎉</div>
   <h2 class="success-title">Proposal Accepted!</h2>
-  <p class="success-sub">Thank you for signing! The next step is to book your onboarding call with Maria so we can get started building your system right away.</p>
+  <p class="success-sub">Your signed proposal is ready to download. Keep a copy for your records, then book your onboarding call below to get started.</p>
+  <button class="download-btn" onclick="downloadProposal()">⬇ Download Signed Proposal</button>
   <a href="https://calendly.com/webdevdiscoverycall/30min" target="_blank" class="calendly-btn">📅 Book Your Onboarding Call →</a>
   <p style="margin-top:14px;font-size:0.78rem;color:var(--text-mid)">30 minutes · No preparation needed · Usually within 24 hours</p>
 </div>
 
 <script>
-const CALENDLY = 'https://calendly.com/webdevdiscoverycall/30min';
-
 const params    = new URLSearchParams(window.location.search);
 const leadId    = params.get('id') || '';
-const name      = params.get('name') || 'Valued Client';
+const name      = params.get('name') || '';
 const email     = params.get('email') || '';
 const role      = params.get('role') || '';
-const offer     = params.get('offer') || 'Your Service';
+const offer     = params.get('offer') || '';
 const price     = params.get('price') || '';
 const client    = params.get('client') || '';
 const goal      = params.get('goal') || '';
 const problem   = params.get('problem') || '';
 const transform = params.get('transform') || '';
 const solution  = params.get('solution') || '';
-
-// ── CRITICAL: Package comes ONLY from URL param set by chatbot ──
-// No auto-logic. No score/intent guessing. Bot decides, proposal displays.
 const packageKey = (params.get('package') || 'full').toLowerCase();
 
-const firstName = name.split(' ')[0];
-const today = new Date().toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+// Fix name display — use full name, never fallback to "Valued"
+const displayName = name && name.trim() ? name.trim() : 'You';
+const firstName   = displayName.split(' ')[0];
+const today = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
 
+// Determine if advisor/coach type for ROI section
+const ADVISOR_ROLES = ['advisor','coach','trainer','consultant','financial','insurance','sales professional'];
+const isAdvisor = ADVISOR_ROLES.some(r => (role||'').toLowerCase().includes(r));
+
+// Parse offer price for ROI calculation
+function parsePrice(p) {
+  if (!p) return 0;
+  const num = p.replace(/[^0-9.]/g,'');
+  return parseFloat(num) || 0;
+}
+const offerVal = parsePrice(price);
+
+// ── PACKAGES with real service descriptions ──
 const PACKAGES = {
   full: {
     name: 'Full System Package',
     price: '₱25,000',
     priceNote: 'One-time investment · Complete done-for-you system',
-    includes: [
-      'AI-powered quiz funnel (fully branded)',
-      'Personalized result & diagnosis page',
-      'Custom demo funnel generator',
-      'AI sales chatbot (trained on your offer)',
-      'Automated proposal & digital signature system',
-      'Lead management admin dashboard',
-      'Full automation workflow setup (n8n)',
-      'Booking & Calendly integration',
-      '30-day post-launch support'
+    services: [
+      { name: 'Professional Landing Page', why: 'Psychology-driven design that speaks directly to your ideal client — attracting only qualified leads who already resonate with what you offer.' },
+      { name: 'Lead Generation Quiz & Diagnostic Funnel', why: 'Filters and qualifies your leads automatically — so only the right people move forward, saving you time on unqualified conversations.' },
+      { name: 'Personalized AI Result & Diagnosis Page', why: 'Delivers a custom diagnosis based on their answers — builds deep trust and perceived value before you ever speak to them.' },
+      { name: 'Funnel Strategy & User Journey Mapping', why: 'Maps the complete path from stranger to ready buyer — educating and preparing them so they arrive at your call already convinced.' },
+      { name: 'AI Sales Chatbot (trained on your offer)', why: 'Handles questions, presents your offer, and guides the conversation toward booking — even while you\'re offline.' },
+      { name: 'Booking & Calendly Integration', why: 'Seamless appointment setting built into the flow — leads book directly without back-and-forth messages.' },
     ]
   },
   mid: {
     name: 'Growth Package',
     price: '₱15,000',
     priceNote: 'One-time investment · Core system built for you',
-    includes: [
-      'AI quiz funnel + personalized result page',
-      'Custom demo funnel generator',
-      'AI sales chatbot (trained on your offer)',
-      'Booking & Calendly integration',
-      '14-day post-launch support'
+    services: [
+      { name: 'Professional Landing Page', why: 'Psychology-driven design that attracts only qualified leads who resonate with your offer.' },
+      { name: 'Lead Generation Quiz & Diagnostic Funnel', why: 'Filters and qualifies leads automatically — only serious prospects move forward.' },
+      { name: 'Personalized AI Result & Diagnosis Page', why: 'Builds trust and perceived value before you ever get on a call.' },
+      { name: 'AI Sales Chatbot (trained on your offer)', why: 'Presents your offer and guides leads toward booking — 24/7.' },
+      { name: 'Booking & Calendly Integration', why: 'Direct appointment setting built into the funnel — no friction.' },
     ]
   },
   basic: {
     name: 'Starter Package',
     price: '₱9,997',
     priceNote: 'One-time investment · Foundation to get you started',
-    includes: [
-      'Custom landing page or quiz funnel',
-      'Lead capture form + booking integration',
-      'Basic follow-up automation',
-      '7-day post-launch support'
+    services: [
+      { name: 'Professional Landing Page', why: 'Psychology-based design that attracts and filters your ideal client from the first click.' },
+      { name: 'Funnel Strategy & User Journey Mapping', why: 'A clear path from visitor to booked appointment — built around your specific offer.' },
+      { name: 'Booking & Calendly Integration', why: 'Seamless appointment setting so leads can book directly without extra steps.' },
     ]
   }
 };
 
 const pkg = PACKAGES[packageKey] || PACKAGES.full;
 
+function buildROISection() {
+  if (!isAdvisor || !offerVal) return '';
+  const closedPerMonth = 2;
+  const revenueGain = offerVal * closedPerMonth;
+  const paybackDays = Math.ceil(25000 / (revenueGain / 30));
+  return `
+  <div class="section">
+    <div class="section-title">Why This Investment Makes Sense for You</div>
+    <div class="roi-box">
+      <div class="roi-title">Quick ROI Estimate</div>
+      <p style="font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:16px">
+        If this system helps you close just <strong style="color:var(--sand)">2 more qualified clients per month</strong> at your current offer price of <strong style="color:var(--sand)">${price}</strong>:
+      </p>
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="roi-num">₱${revenueGain.toLocaleString()}</div>
+          <div class="roi-label">Added revenue per month</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-num">${paybackDays}d</div>
+          <div class="roi-label">Days to pay itself back</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-num">∞</div>
+          <div class="roi-label">Keeps working after that</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--text-mid);font-style:italic;text-align:center">*Illustrative estimate based on your offer price. Actual results depend on traffic and conversion.</p>
+  </div>`;
+}
+
 function buildProposal() {
   const situationItems = [
     role      ? `You are a <strong>${role}</strong>` : null,
-    offer     ? `Your offer: <strong>${offer}</strong>${price ? ` (${price})` : ''}` : null,
+    offer     ? `Your offer: <strong>${offer}</strong>${price ? ` at <strong>${price}</strong>` : ''}` : null,
     client    ? `Your ideal client: <strong>${client}</strong>` : null,
     goal      ? `Your goal: <strong>${goal}</strong>` : null,
     problem   ? `Current challenge: <strong>${problem}</strong>` : null,
@@ -166,8 +257,8 @@ function buildProposal() {
   const html = `
   <div class="proposal-header">
     <div class="proposal-brand">Maria Angelica Scott — System Architect</div>
-    <h1 class="proposal-title">Proposal for ${firstName}</h1>
-    <p class="proposal-sub">A done-for-you funnel and automation system, built around your exact offer and goals.</p>
+    <h1 class="proposal-title">Proposal for ${displayName}</h1>
+    <p class="proposal-sub">A done-for-you funnel and automation system, built around your exact offer, client, and goal.</p>
     <div class="proposal-meta">
       <span>📅 ${today}</span>
       ${email ? `<span>📧 ${email}</span>` : ''}
@@ -175,60 +266,40 @@ function buildProposal() {
     </div>
   </div>
 
+  ${situationItems.length ? `
   <div class="section">
     <div class="section-title">Your Situation</div>
     <ul class="situation-bullets">
-      ${situationItems.map(i => `<li>${i}</li>`).join('')}
+      ${situationItems.map(i=>`<li>${i}</li>`).join('')}
     </ul>
-  </div>
+  </div>` : ''}
+
+  ${buildROISection()}
 
   <div class="section">
-    <div class="section-title">What's Included</div>
+    <div class="section-title">What's Included & Why It Matters</div>
     <div class="package-box">
       <div class="package-name">${pkg.name}</div>
       <div class="package-price">${pkg.price}</div>
       <div class="package-note">${pkg.priceNote}</div>
-      <div class="package-includes">
-        ${pkg.includes.map(item => `
-        <div class="include-item">
-          <div class="include-check">✓</div>
-          <span>${item}</span>
-        </div>`).join('')}
-      </div>
+      ${pkg.services.map(s=>`
+      <div class="include-item">
+        <div class="include-check">✓</div>
+        <div class="include-text">
+          <div class="include-name">${s.name}</div>
+          <div class="include-why">${s.why}</div>
+        </div>
+      </div>`).join('')}
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">Timeline & Delivery</div>
     <div class="timeline-steps">
-      <div class="timeline-step">
-        <div class="step-num">1</div>
-        <div>
-          <div class="step-title">Onboarding Call (Day 1)</div>
-          <div class="step-desc">30-minute call to align on all details — branding, offer, and target client. No prep needed.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="step-num">2</div>
-        <div>
-          <div class="step-title">Build Phase (Days 2–5)</div>
-          <div class="step-desc">Full system build. You'll receive a private preview link to review everything before launch.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="step-num">3</div>
-        <div>
-          <div class="step-title">Revisions (Day 6)</div>
-          <div class="step-desc">We adjust anything that doesn't feel right — copy, design, flow — until it's exactly you.</div>
-        </div>
-      </div>
-      <div class="timeline-step">
-        <div class="step-num">4</div>
-        <div>
-          <div class="step-title">Launch (Day 7)</div>
-          <div class="step-desc">System goes live. Full walkthrough so you know exactly how to use and monitor everything.</div>
-        </div>
-      </div>
+      <div class="timeline-step"><div class="step-num">1</div><div><div class="step-title">Onboarding Call (Day 1)</div><div class="step-desc">30-minute call to align on all details — branding, offer, and target client. No prep needed.</div></div></div>
+      <div class="timeline-step"><div class="step-num">2</div><div><div class="step-title">Build Phase (Days 2–5)</div><div class="step-desc">Full system build. You'll receive a private preview link to review everything before launch.</div></div></div>
+      <div class="timeline-step"><div class="step-num">3</div><div><div class="step-title">Revisions (Day 6)</div><div class="step-desc">We adjust anything that doesn't feel right — copy, design, flow — until it's exactly you.</div></div></div>
+      <div class="timeline-step"><div class="step-num">4</div><div><div class="step-title">Launch (Day 7)</div><div class="step-desc">System goes live. Full walkthrough so you know exactly how to use and monitor everything.</div></div></div>
     </div>
   </div>
 
@@ -239,7 +310,6 @@ function buildProposal() {
       <div class="term-item">Delivery within 7 business days from onboarding call.</div>
       <div class="term-item">2 rounds of revisions included. Additional revisions billed at ₱1,500/hr.</div>
       <div class="term-item">All files, credentials, and access transferred to client upon full payment.</div>
-      <div class="term-item">Support period begins on launch day as specified per package.</div>
       <div class="term-item">Prices are fixed. No discounts, installments, or payment plans apply.</div>
       <div class="term-item">This proposal is valid for 7 days from the date above.</div>
     </div>
@@ -247,11 +317,11 @@ function buildProposal() {
 
   <div class="sig-section">
     <div class="sig-title">Accept This Proposal</div>
-    <div class="sig-sub">By signing below, you confirm that you have read and agree to the terms, and you are ready to move forward with the <strong>${pkg.name}</strong>.</div>
+    <div class="sig-sub">By signing below, you confirm that you've read and agree to the terms, and you are ready to move forward with the <strong>${pkg.name}</strong>.</div>
     <div class="sig-grid">
       <div class="sig-field">
         <div class="sig-label">Your Full Name *</div>
-        <input class="sig-input" id="sig-name" type="text" placeholder="Type your full name" autocomplete="name"/>
+        <input class="sig-input" id="sig-name" type="text" placeholder="Type your full name" autocomplete="name" value="${displayName !== 'You' ? displayName : ''}"/>
       </div>
       <div class="sig-field">
         <div class="sig-label">Today's Date</div>
@@ -262,10 +332,12 @@ function buildProposal() {
       <input type="checkbox" id="sig-agree"/>
       <span class="checkbox-label">I have read this proposal, I understand and agree to all terms and conditions, and I am authorized to enter into this agreement.</span>
     </label>
-    <button class="accept-btn" id="accept-btn" onclick="acceptProposal()">
-      ✍️ Sign & Accept Proposal
-    </button>
+    <button class="accept-btn" id="accept-btn" onclick="acceptProposal()">✍️ Sign & Accept Proposal</button>
     <div class="sig-err" id="sig-err">Please enter your full name and check the agreement box to continue.</div>
+    <div class="signed-stamp" id="signed-stamp">
+      ✓ Digitally accepted by <strong id="stamp-name"></strong> on <strong id="stamp-date"></strong><br/>
+      This document serves as confirmation of agreement to the terms outlined above.
+    </div>
   </div>`;
 
   document.getElementById('proposal-content').innerHTML = html;
@@ -273,43 +345,74 @@ function buildProposal() {
   document.getElementById('proposal-content').style.display = 'block';
 }
 
+let signedName = '';
+let signedDate = '';
+
 async function acceptProposal() {
-  const sigName = document.getElementById('sig-name').value.trim();
+  signedName = document.getElementById('sig-name').value.trim();
   const agreed  = document.getElementById('sig-agree').checked;
   const err     = document.getElementById('sig-err');
-
-  if (!sigName || !agreed) { err.style.display = 'block'; return; }
+  if (!signedName || !agreed) { err.style.display = 'block'; return; }
   err.style.display = 'none';
-
   const btn = document.getElementById('accept-btn');
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Processing...';
+  btn.disabled = true; btn.innerHTML = '⏳ Processing...';
+
+  signedDate = today;
+
+  // Show signed stamp on proposal before hiding
+  document.getElementById('stamp-name').textContent = signedName;
+  document.getElementById('stamp-date').textContent = signedDate;
+  document.getElementById('signed-stamp').style.display = 'block';
+  document.getElementById('sig-agree').closest('.checkbox-row').style.display = 'none';
+  btn.style.display = 'none';
 
   try {
-    const cfg = await fetch('/api/config').then(r => r.json());
+    const cfg = await fetch('/api/config').then(r=>r.json());
     if (leadId) {
-      await fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type':'application/json',
-          'apikey':cfg.supabase_key,
-          'Authorization':'Bearer '+cfg.supabase_key,
-          'Prefer':'return=minimal'
-        },
-        body: JSON.stringify({
-          admin_status:       'won',
-          proposal_signed_by: sigName,
+      await fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':cfg.supabase_key,'Authorization':'Bearer '+cfg.supabase_key,'Prefer':'return=minimal'},
+        body:JSON.stringify({
+          admin_status:'won',
+          proposal_signed_by: signedName,
           proposal_signed_at: new Date().toISOString(),
           proposal_package:   pkg.name,
           proposal_price:     pkg.price
         })
       });
     }
-  } catch(e) { console.error('Save error:', e); }
+  } catch(e){ console.error(e); }
 
   document.getElementById('proposal-content').style.display = 'none';
   document.getElementById('success-screen').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function downloadProposal() {
+  // Show proposal content temporarily for printing
+  const success = document.getElementById('success-screen');
+  const content = document.getElementById('proposal-content');
+
+  // Make stamp visible, hide success screen
+  success.style.display = 'none';
+  content.style.display = 'block';
+
+  // Ensure stamp is visible for print
+  const stamp = document.getElementById('signed-stamp');
+  if (stamp) stamp.style.display = 'block';
+
+  // Set document title for PDF filename
+  const safeName = signedName ? signedName.replace(/\s+/g,'-') : displayName.replace(/\s+/g,'-');
+  const origTitle = document.title;
+  document.title = `Proposal-${safeName}-${new Date().toISOString().slice(0,10)}`;
+
+  // Print (browser saves as PDF)
+  window.print();
+
+  // Restore after print dialog closes
+  document.title = origTitle;
+  content.style.display = 'none';
+  success.style.display = 'block';
 }
 
 buildProposal();
