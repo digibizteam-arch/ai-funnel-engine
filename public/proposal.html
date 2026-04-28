@@ -70,15 +70,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .sig-err{color:#e53e3e;font-size:0.82rem;text-align:center;margin-top:8px;display:none}
 /* Print styles for PDF download */
 @media print {
-  body { background: white !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html { margin: 0 !important; padding: 0 !important; }
+  body { background: white !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
   #loading, #success-screen { display: none !important; }
-  #proposal-content { display: block !important; padding: 0 !important; }
-  .proposal-header { padding: 24px 0 20px !important; }
+  #proposal-content { display: block !important; padding: 16px 32px !important; max-width: 100% !important; margin: 0 !important; }
+  .proposal-header { padding: 16px 0 20px !important; }
   .sig-section { border: 2px solid #B8956A !important; }
   .accept-btn, .sig-err, #sig-agree, .checkbox-row { display: none !important; }
-  .section { break-inside: avoid; }
-  .package-box { background: #3D2B1F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .roi-box { background: #3D2B1F !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .section { break-inside: avoid; margin-bottom: 12px !important; }
+  .package-box { background: #3D2B1F !important; }
+  .roi-box { background: #3D2B1F !important; }
   .signed-stamp { display: block !important; }
   .no-print { display: none !important; }
 }
@@ -190,7 +192,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 <script>
 const params    = new URLSearchParams(window.location.search);
 const leadId    = params.get('id') || '';
-const name      = params.get('name') || '';
+let   name      = params.get('name') || '';
 const email     = params.get('email') || '';
 const role      = params.get('role') || '';
 const offer     = params.get('offer') || '';
@@ -202,10 +204,34 @@ const transform = params.get('transform') || '';
 const solution  = params.get('solution') || '';
 const packageKey = (params.get('package') || 'full').toLowerCase();
 
-// Fix name display — never show "You", always show actual name
-const displayName = (name && name.trim() && name.trim().toLowerCase() !== 'you') ? name.trim() : '';
-const firstName   = displayName ? displayName.split(' ')[0] : '';
 const today = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+
+// Always fetch name from Supabase if URL param is missing or generic
+async function resolveNameAndBuild() {
+  // If name is missing or looks like a placeholder, try fetching from Supabase
+  const needsFetch = !name || name.trim() === '' || name.trim().toLowerCase() === 'you';
+  if (needsFetch && leadId) {
+    try {
+      const cfg = await fetch('/api/config').then(r => r.json());
+      const res = await fetch(
+        `${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}&select=name,email`,
+        { headers: { 'apikey': cfg.supabase_key, 'Authorization': 'Bearer ' + cfg.supabase_key } }
+      );
+      const data = await res.json();
+      if (data && data[0] && data[0].name) {
+        name = data[0].name;
+      }
+    } catch(e) { console.error('Name fetch error:', e); }
+  }
+  buildProposal();
+}
+
+// Compute display name after resolution
+function getDisplayName() {
+  const n = (name || '').trim();
+  if (!n || n.toLowerCase() === 'you') return '';
+  return n;
+}
 
 // Determine if advisor/coach type for ROI section
 const ADVISOR_ROLES = ['advisor','coach','trainer','consultant','financial','insurance','sales professional'];
@@ -293,6 +319,9 @@ function buildROISection() {
 }
 
 function buildProposal() {
+  const displayName = getDisplayName();
+  const firstName   = displayName ? displayName.split(' ')[0] : '';
+
   const situationItems = [
     role      ? `You are a <strong>${role}</strong>` : null,
     offer     ? `Your offer: <strong>${offer}</strong>${price ? ` at <strong>${price}</strong>` : ''}` : null,
@@ -464,7 +493,7 @@ function downloadProposal() {
   success.style.display = 'flex';
 }
 
-buildProposal();
+resolveNameAndBuild();
 </script>
 </body>
 </html>
