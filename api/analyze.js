@@ -23,95 +23,72 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const {
-    name, email, business_name,
-    // New 9-question quiz fields
-    role, problem, goal, success,
-    tried, tried_str, readiness,
-    obstacle, investment,
-    // Legacy 10-question fields (fallback)
-    challenge, impact, dream, metric, belief, concern, resources
-  } = req.body;
+  const body = req.body;
+  const name  = body.name  || '';
+  const email = body.email || '';
 
   if (!name || !email) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Resolve fields — new quiz takes priority, legacy fields as fallback
-  const resolvedRole     = role || business_name || 'Not provided';
-  const resolvedGoal     = goal || dream || 'Not provided';
-  const resolvedProblem  = problem || challenge || 'Not provided';
-  const resolvedImpact   = impact || 'Not provided';
-  const resolvedSuccess  = success || metric || 'Not provided';
-  const resolvedTried    = tried_str || (Array.isArray(tried) ? tried.join(', ') : tried) || 'Not specified';
-  const resolvedReadiness= readiness || belief || 'Not specified';
-  const resolvedObstacle = obstacle || concern || 'Not provided';
-  const resolvedResources= investment || resources || 'Not provided';
+  // ── Resolve all fields — new 9-question quiz fields take priority ──
+  const resolvedRole      = body.role       || body.business_name || 'Not provided';
+  const resolvedGoal      = body.goal       || body.dream         || 'Not provided';
+  const resolvedProblem   = body.problem    || body.challenge     || 'Not provided';
+  const resolvedSuccess   = body.success    || body.metric        || 'Not provided';
+  const resolvedTried     = body.tried_str  || (Array.isArray(body.tried) ? body.tried.join(', ') : body.tried) || body.impact || 'Not specified';
+  const resolvedReadiness = body.readiness  || body.belief        || 'Not specified';
+  const resolvedObstacle  = body.obstacle   || body.concern       || 'Not provided';
+  const resolvedResources = body.investment || body.resources     || 'Not provided';
+  const businessName      = body.business_name || '';
 
   const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis.
 
-A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis — not generic advice. Use their exact words and situation throughout.
+A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis. Use their exact words and situation throughout.
 
 CLIENT ANSWERS:
 Name: ${name}
 Role / Business Type: ${resolvedRole}
+Business: ${businessName || resolvedRole}
 Primary goal: ${resolvedGoal}
 Biggest challenge: ${resolvedProblem}
-How it impacts them: ${resolvedImpact}
-Ideal outcome if solved: ${resolvedSuccess}
+What success looks like: ${resolvedSuccess}
 What they have tried: ${resolvedTried}
-Readiness / Funnel belief: ${resolvedReadiness}
+Readiness level: ${resolvedReadiness}
 Biggest obstacle: ${resolvedObstacle}
 Resources / Investment level: ${resolvedResources}
 
 OUTPUT RULES:
 - Use their name (${name}) naturally in bullet points
-- Reference their exact goal, challenge, and dream using their own words
+- Reference their exact goal and challenge using their own words
 - Be specific — no generic statements
-- Tone: warm, direct, expert — like a trusted advisor who truly understands them
+- Tone: warm, direct, expert — like a trusted advisor
 - Respond ONLY with a valid raw JSON object. No markdown. No code fences. No explanation.
 
 JSON FORMAT:
 {
   "page_title": "Your Personalized Funnel Diagnosis",
-
   "situation_bullets": [
-    "You're a [their business/role] who's currently [restate their challenge in their own words]",
+    "You're a [their role] who's currently [restate their challenge in their own words]",
     "Your top goal is to [restate their goal exactly]",
-    "Ideally achieving [their specific metric or dream outcome]",
-    "The biggest friction point is that [restate their concern]"
+    "Ideally [their specific success outcome]",
+    "The biggest friction point is [restate their obstacle]"
   ],
-
-  "diagnosis": "2-3 sentence paragraph that goes deep into WHY they are stuck. Be specific to their challenge and what they told you. Use the word 'you' to make it personal. Reference the gap between where they are and where they want to be. This is the core insight — not surface level.",
-
-  "agitation_footnote": "One sentence on what this blind spot is costing them — tied to their specific impact answer.",
-
-  "next_step": "2-3 sentences describing the single most important action they should take RIGHT NOW to move toward their dream. Be very specific to their situation. Address their concern (${concern}) naturally without dismissing it.",
-
-  "next_step_footnote": "One short sentence reinforcing why this step matters most for them specifically.",
-
-  "solution_name": "A short name for their ideal solution — e.g. 'A Value-First Lead Qualification Funnel' or 'An Automated Client Attraction System'",
-
-  "solution_desc": "2 sentences explaining how this solution directly addresses their challenge and gets them to their dream. Mention their resources (${resources}) to show it fits their situation.",
-
-  "cta_headline": "A personalized CTA headline tied to their dream metric or outcome — e.g. 'Ready to Get [their metric] Without [their pain]?'",
-
-  "cta_body": "2 sentences. First: what we will do for them (done-for-you, specific). Second: one line that speaks directly to their concern (${concern}) to remove the hesitation.",
-
+  "diagnosis": "2-3 sentence paragraph on WHY they are stuck. Specific to their challenge. Use the word you. Reference the gap between where they are and where they want to be.",
+  "agitation_footnote": "One sentence on what this is costing them right now.",
+  "next_step": "2-3 sentences on the single most important action they should take RIGHT NOW. Specific to their situation. Address their obstacle naturally.",
+  "next_step_footnote": "One short sentence reinforcing why this step matters most.",
+  "solution_name": "Short name for their ideal solution e.g. A Value-First Lead Qualification Funnel",
+  "solution_desc": "2 sentences on how this solution addresses their challenge and gets them to their goal. Reference their resources to show it fits.",
+  "cta_headline": "Personalized CTA headline tied to their goal or outcome",
+  "cta_body": "2 sentences. First: what we will build for them. Second: speak to their obstacle to remove hesitation.",
   "buying_intent": "cold or warm or hot",
   "opportunity_score": 7
 }`;
 
   let analysisData;
   try {
-    const openAIBody = {
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.75,
-      max_tokens: 900
-    };
-
-    const openAIOptions = {
+    const openAIData = await postJSON({
       hostname: 'api.openai.com',
       path: '/v1/chat/completions',
       method: 'POST',
@@ -119,16 +96,20 @@ JSON FORMAT:
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       }
-    };
+    }, {
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.75,
+      max_tokens: 900
+    });
 
-    const openaiData = await postJSON(openAIOptions, openAIBody);
-
-    if (openaiData.error) {
-      console.error('OpenAI API error:', openaiData.error);
-      return res.status(500).json({ error: 'OpenAI error: ' + openaiData.error.message });
+    if (openAIData.error) {
+      console.error('OpenAI API error:', openAIData.error);
+      return res.status(500).json({ error: 'OpenAI error: ' + openAIData.error.message });
     }
 
-    const raw = openaiData.choices?.[0]?.message?.content?.trim();
+    const raw = openAIData.choices?.[0]?.message?.content?.trim();
+    if (!raw) throw new Error('Empty response from OpenAI');
     const clean = raw.replace(/^```json\n?/, '').replace(/^```\n?/, '').replace(/```$/, '').trim();
     analysisData = JSON.parse(clean);
 
@@ -137,32 +118,11 @@ JSON FORMAT:
     return res.status(500).json({ error: 'AI analysis failed: ' + err.message });
   }
 
-  // Save to Supabase
+  // ── Save to Supabase ──
+  let savedLeadId = null;
   try {
-    const supabaseBody = {
-      name, email,
-      business_name:     business_name || null,
-      // New quiz fields
-      role:              resolvedRole,
-      goal:              resolvedGoal,
-      problem:           resolvedProblem,
-      impact:            resolvedImpact,
-      success:           resolvedSuccess,
-      tried:             resolvedTried,
-      readiness:         resolvedReadiness,
-      obstacle:          resolvedObstacle,
-      investment:        resolvedResources,
-      // AI output
-      buying_intent:     analysisData.buying_intent,
-      opportunity_score: analysisData.opportunity_score,
-      solution_name:     analysisData.solution_name,
-      headline:          analysisData.headline,
-      full_analysis:     JSON.stringify(analysisData),
-      created_at:        new Date().toISOString()
-    };
-
     const supabaseURL = new URL(process.env.SUPABASE_URL);
-    const supabaseOptions = {
+    const inserted = await postJSON({
       hostname: supabaseURL.hostname,
       path: '/rest/v1/leads',
       method: 'POST',
@@ -172,37 +132,32 @@ JSON FORMAT:
         'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         'Prefer': 'return=representation'
       }
-    };
+    }, {
+      name,
+      email,
+      business_name:     businessName || null,
+      role:              resolvedRole,
+      goal:              resolvedGoal,
+      problem:           resolvedProblem,
+      success:           resolvedSuccess,
+      tried:             resolvedTried,
+      readiness:         resolvedReadiness,
+      obstacle:          resolvedObstacle,
+      investment:        resolvedResources,
+      buying_intent:     analysisData.buying_intent,
+      opportunity_score: analysisData.opportunity_score,
+      solution_name:     analysisData.solution_name,
+      headline:          analysisData.page_title || analysisData.cta_headline,
+      full_analysis:     JSON.stringify(analysisData),
+      created_at:        new Date().toISOString()
+    });
 
-    await postJSON(supabaseOptions, supabaseBody);
+    if (Array.isArray(inserted) && inserted[0]?.id) {
+      savedLeadId = inserted[0].id;
+    }
   } catch (err) {
     console.error('Supabase save error:', err.message);
   }
 
-  // Try to extract the saved lead id
-  let leadId = null;
-  try {
-    const supaURL = new URL(process.env.SUPABASE_URL);
-    const checkOpts = {
-      hostname: supaURL.hostname,
-      path: '/rest/v1/leads?email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=1&select=id',
-      method: 'GET',
-      headers: {
-        'apikey': process.env.SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + process.env.SUPABASE_ANON_KEY
-      }
-    };
-    const rows = await new Promise((resolve, reject) => {
-      const req = require('https').request(checkOpts, (res) => {
-        let d = '';
-        res.on('data', c => d += c);
-        res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve([]); } });
-      });
-      req.on('error', reject);
-      req.end();
-    });
-    if (rows && rows[0] && rows[0].id) leadId = rows[0].id;
-  } catch(e) { console.error('lead_id fetch error:', e.message); }
-
-  return res.status(200).json({ ...analysisData, lead_id: leadId });
+  return res.status(200).json({ ...analysisData, lead_id: savedLeadId });
 };
