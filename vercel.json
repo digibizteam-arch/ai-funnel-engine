@@ -8,6 +8,7 @@
     { "source": "/demo",         "destination": "/demo.html" },
     { "source": "/chat",         "destination": "/chat.html" },
     { "source": "/admin",        "destination": "/admin.html" },
-    { "source": "/proposal",     "destination": "/proposal.html" }
+    { "source": "/proposal",     "destination": "/proposal.html" },
+    { "source": "/api/delete", "destination": "/api/delete-lead.js" }
   ]
 }
