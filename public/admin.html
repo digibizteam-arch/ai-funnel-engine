@@ -426,16 +426,23 @@ function renderKanban() {
       <div class="cards">
         ${colLeads.length === 0
           ? `<div style="font-size:0.75rem;color:var(--text-dim);text-align:center;padding:24px 0;opacity:0.5">Empty</div>`
-          : colLeads.map(l => `
+          : colLeads.map(l => {
+              const displayName = l.name || 'Unknown Lead';
+              const displayEmail = l.email || '';
+              const displayRole = l.role || l.business_name || '';
+              const displayProblem = l.problem || l.challenge || l.goal || '';
+              return `
           <div class="card" onclick="openLead('${l.id}')">
-            <div class="card-name">${l.name || 'Unknown'}</div>
-            <div class="card-role">${l.role || l.business_name || '—'}</div>
-            <div class="card-problem">${l.problem || l.challenge || '—'}</div>
+            <div class="card-name">${displayName}</div>
+            ${displayEmail ? `<div class="card-role" style="color:var(--text-dim);font-size:0.7rem">${displayEmail}</div>` : ''}
+            ${displayRole ? `<div class="card-role">${displayRole}</div>` : ''}
+            ${displayProblem ? `<div class="card-problem">${displayProblem}</div>` : ''}
             <div class="card-footer">
               ${intentBadge(l.buying_intent)}
               <span class="score-dot">${l.opportunity_score ? l.opportunity_score + '/10' : ''}</span>
             </div>
-          </div>`).join('')}
+          </div>`;
+            }).join('')}
       </div>
     </div>`;
   }).join('');
@@ -514,16 +521,26 @@ function openLead(id) {
   const l = leads.find(x => x.id === id);
   if (!l) return;
 
-  document.getElementById('m-name').textContent = l.name || 'Unknown Lead';
+  const displayName = l.name || 'Unknown Lead';
+  document.getElementById('m-name').textContent = displayName;
   document.getElementById('m-role').textContent = l.role || l.business_name || '—';
   document.getElementById('m-email').textContent = l.email || '—';
-  document.getElementById('m-intent').innerHTML = intentBadge(l.buying_intent) || '—';
+  document.getElementById('m-intent').innerHTML = intentBadge(l.buying_intent) || '<span style="color:var(--text-dim)">—</span>';
   document.getElementById('m-score').textContent = l.opportunity_score ? l.opportunity_score + ' / 10' : '—';
   document.getElementById('m-goal').textContent = l.goal || '—';
   document.getElementById('m-problem').textContent = l.problem || l.challenge || '—';
   document.getElementById('m-offer').textContent = l.offer_name || '—';
   document.getElementById('m-investment').textContent = l.investment || l.resources || '—';
-  document.getElementById('m-diagnosis').textContent = l.headline || l.full_analysis ? JSON.parse(l.full_analysis||'{}').diagnosis || '—' : '—';
+
+  // Parse diagnosis from full_analysis JSON if available
+  let diagnosis = l.headline || '—';
+  if (l.full_analysis) {
+    try {
+      const parsed = JSON.parse(l.full_analysis);
+      diagnosis = parsed.diagnosis || parsed.headline || l.headline || '—';
+    } catch(e) { diagnosis = l.headline || '—'; }
+  }
+  document.getElementById('m-diagnosis').textContent = diagnosis;
   document.getElementById('m-notes').value = l.admin_notes || '';
   document.getElementById('ai-section').style.display = 'none';
   document.getElementById('lead-overlay').classList.add('open');
@@ -577,7 +594,6 @@ async function generateProposal() {
   if (!l) return;
   closeModal('lead-overlay');
 
-  // Open proposal page with lead data
   const params = new URLSearchParams({
     id:        currentId,
     name:      l.name || '',
@@ -589,8 +605,8 @@ async function generateProposal() {
     goal:      l.goal || '',
     problem:   l.problem || l.challenge || '',
     transform: l.offer_transform || '',
-    intent:    l.buying_intent || '',
-    score:     l.opportunity_score || ''
+    solution:  l.solution_name || '',
+    package:   'full'
   });
   window.open(`/proposal?${params.toString()}`, '_blank');
 }
