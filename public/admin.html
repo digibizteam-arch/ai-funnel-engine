@@ -427,18 +427,18 @@ function renderKanban() {
         ${colLeads.length === 0
           ? `<div style="font-size:0.75rem;color:var(--text-dim);text-align:center;padding:24px 0;opacity:0.5">Empty</div>`
           : colLeads.map(l => {
-              const displayName = l.name || 'Unknown Lead';
-              const displayEmail = l.email || '';
-              const displayRole = l.role || l.business_name || '';
-              const displayProblem = l.problem || l.challenge || l.goal || '';
+              const displayName    = l.name || 'Unknown Lead';
+              const displayEmail   = l.email || '';
+              const displayRole    = l.role || l.business_name || '';
+              const displayProblem = l.problem || l.challenge || l.goal || l.offer_name || '';
               return `
           <div class="card" onclick="openLead('${l.id}')">
             <div class="card-name">${displayName}</div>
-            ${displayEmail ? `<div class="card-role" style="color:var(--text-dim);font-size:0.7rem">${displayEmail}</div>` : ''}
+            ${displayEmail ? `<div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:3px;word-break:break-all">${displayEmail}</div>` : ''}
             ${displayRole ? `<div class="card-role">${displayRole}</div>` : ''}
             ${displayProblem ? `<div class="card-problem">${displayProblem}</div>` : ''}
-            <div class="card-footer">
-              ${intentBadge(l.buying_intent)}
+            <div class="card-footer" style="margin-top:${displayProblem || displayRole ? '8px' : '4px'}">
+              ${l.buying_intent ? intentBadge(l.buying_intent) : '<span style="font-size:0.65rem;color:var(--text-dim)">No score yet</span>'}
               <span class="score-dot">${l.opportunity_score ? l.opportunity_score + '/10' : ''}</span>
             </div>
           </div>`;
@@ -521,24 +521,25 @@ function openLead(id) {
   const l = leads.find(x => x.id === id);
   if (!l) return;
 
-  const displayName = l.name || 'Unknown Lead';
-  document.getElementById('m-name').textContent = displayName;
-  document.getElementById('m-role').textContent = l.role || l.business_name || '—';
-  document.getElementById('m-email').textContent = l.email || '—';
-  document.getElementById('m-intent').innerHTML = intentBadge(l.buying_intent) || '<span style="color:var(--text-dim)">—</span>';
-  document.getElementById('m-score').textContent = l.opportunity_score ? l.opportunity_score + ' / 10' : '—';
-  document.getElementById('m-goal').textContent = l.goal || '—';
-  document.getElementById('m-problem').textContent = l.problem || l.challenge || '—';
-  document.getElementById('m-offer').textContent = l.offer_name || '—';
-  document.getElementById('m-investment').textContent = l.investment || l.resources || '—';
+  document.getElementById('m-name').textContent = l.name || 'Unknown Lead';
+  document.getElementById('m-role').textContent = l.role || l.business_name || 'Not specified';
+  document.getElementById('m-email').textContent = l.email || 'Not provided';
+  document.getElementById('m-intent').innerHTML = l.buying_intent ? intentBadge(l.buying_intent) : '<span style="color:var(--text-dim);font-size:0.82rem">Not scored yet</span>';
+  document.getElementById('m-score').textContent = l.opportunity_score ? l.opportunity_score + ' / 10' : 'Not scored yet';
+  document.getElementById('m-goal').textContent = l.goal || 'Not specified';
+  document.getElementById('m-problem').textContent = l.problem || l.challenge || 'Not specified';
+  document.getElementById('m-offer').textContent = l.offer_name || 'Not specified';
+  document.getElementById('m-investment').textContent = l.investment || l.resources || 'Not specified';
 
   // Parse diagnosis from full_analysis JSON if available
-  let diagnosis = l.headline || '—';
+  let diagnosis = 'No AI diagnosis yet — this lead was added manually or hasn\'t completed the full quiz.';
   if (l.full_analysis) {
     try {
       const parsed = JSON.parse(l.full_analysis);
-      diagnosis = parsed.diagnosis || parsed.headline || l.headline || '—';
-    } catch(e) { diagnosis = l.headline || '—'; }
+      diagnosis = parsed.diagnosis || parsed.headline || l.headline || diagnosis;
+    } catch(e) { diagnosis = l.headline || diagnosis; }
+  } else if (l.headline) {
+    diagnosis = l.headline;
   }
   document.getElementById('m-diagnosis').textContent = diagnosis;
   document.getElementById('m-notes').value = l.admin_notes || '';
