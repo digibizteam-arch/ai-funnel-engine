@@ -306,10 +306,7 @@ function buildHTML(c, roleType, colors, chatUrl, name, showAbout) {
  </div>
  </footer>
 
- <!-- UNMISSABLE FLOATING CTA BAR -->
- <div class="floating-cta-generated">
- <a href="${chatUrl}" class="floating-cta-btn">I Want This For My Business →</a>
- </div>
+ 
 
 </body>
 </html>`;
