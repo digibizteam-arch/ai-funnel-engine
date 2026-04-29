@@ -505,6 +505,4 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({ demo_url: `/demo?id=${savedLeadId||'preview'}`, lead_id: savedLeadId });
 };
 
-
-demo.js done
 Done
