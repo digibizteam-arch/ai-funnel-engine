@@ -1,104 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Your Funnel Preview — Maria Angelica Scott</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'DM Sans',sans-serif;background:#0f0f0f;color:#fff;min-height:100vh;display:flex;flex-direction:column}
-    .demo-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(13,13,13,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(184,149,106,0.3);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
-    .demo-left{display:flex;align-items:center;gap:10px;min-width:0}
-    .demo-badge{background:#B8956A;color:#fff;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:4px 12px;border-radius:100px;white-space:nowrap;flex-shrink:0}
-    .demo-label{font-size:0.78rem;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .demo-cta{background:#B8956A;color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;padding:9px 20px;border-radius:100px;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;white-space:nowrap;flex-shrink:0}
-    .demo-cta:hover{background:#8B6A42;transform:translateY(-1px)}
-    #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:24px;text-align:center;padding-top:80px}
-    .spinner{width:42px;height:42px;border:3px solid rgba(255,255,255,0.08);border-top-color:#B8956A;border-radius:50%;animation:spin 0.9s linear infinite}
-    #error-state{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;text-align:center;padding:24px;padding-top:80px}
-    #preview-wrap{display:none;flex:1;padding-top:52px}
-    #preview-frame{width:100%;height:calc(100vh - 52px);border:none;display:block}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+ <title>Your Funnel Preview — Maria Angelica Scott</title>
+ <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+ <style>
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'DM Sans',sans-serif;background:#0f0f0f;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+ .demo-bar{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(13,13,13,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(184,149,106,0.3);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+ .demo-left{display:flex;align-items:center;gap:10px;min-width:0}
+ .demo-badge{background:#B8956A;color:#fff;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:4px 12px;border-radius:100px;white-space:nowrap;flex-shrink:0}
+ .demo-label{font-size:0.78rem;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .demo-cta-top{background:#B8956A;color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;padding:9px 20px;border-radius:100px;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;white-space:nowrap;flex-shrink:0}
+ .demo-cta-top:hover{background:#8B6A42;transform:translateY(-1px)}
+ 
+ /* UNMISSABLE FLOATING CTA BAR */
+ .floating-cta-wrap{position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,13,0.98);backdrop-filter:blur(16px);border-top:1px solid rgba(184,149,106,0.4);padding:14px 24px;z-index:10000;display:flex;justify-content:center;box-shadow:0-10px 40px rgba(0,0,0,0.5)}
+ .floating-cta{background:#B8956A;color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:18px 36px;border-radius:100px;cursor:pointer;text-decoration:none;display:inline-block;text-align:center;width:100%;max-width:500px;transition:all 0.2s;box-shadow:0 8px 24px rgba(184,149,106,0.4)}
+ .floating-cta:hover{background:#8B6A42;transform:translateY(-2px);box-shadow:0 12px 32px rgba(184,149,106,0.6)}
+
+ #loading{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:24px;text-align:center;padding-top:80px}
+ .spinner{width:42px;height:42px;border:3px solid rgba(255,255,255,0.08);border-top-color:#B8956A;border-radius:50%;animation:spin 0.9s linear infinite}
+ #error-state{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;text-align:center;padding:24px;padding-top:80px}
+ #preview-wrap{display:none;flex:1;padding-top:52px;padding-bottom:80px} /* Padding bottom added so floating bar doesn't block content */
+ #preview-frame{width:100%;height:calc(100vh - 140px);border:none;display:block}
+ @keyframes spin{to{transform:rotate(360deg)}}
+ </style>
 </head>
 <body>
-<div class="demo-bar">
-  <div class="demo-left">
-    <span class="demo-badge">🎯 Demo Preview</span>
-    <span class="demo-label">Generated based on your quiz answers</span>
-  </div>
-  <a href="/chat" class="demo-cta" id="chat-link">💬 I want this for my business →</a>
-</div>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <div style="font-size:1.05rem;font-weight:500">Loading your personalized funnel preview...</div>
-  <div style="font-size:0.83rem;color:rgba(255,255,255,0.4);max-width:300px;line-height:1.6">We built this based on your exact quiz answers. Just a moment.</div>
-</div>
+ <div class="demo-bar">
+ <div class="demo-left">
+ <span class="demo-badge">🎯 Demo Preview</span>
+ <span class="demo-label">Generated based on your quiz answers</span>
+ </div>
+ <a href="/chat" class="demo-cta-top" id="chat-link-top">I want this →</a>
+ </div>
 
-<div id="error-state">
-  <div style="font-size:2.5rem">⚠️</div>
-  <div style="font-size:1.05rem;font-weight:500">Preview not found</div>
-  <div style="font-size:0.83rem;color:rgba(255,255,255,0.4);max-width:300px;line-height:1.6">This demo link may have expired. Go back and generate a new preview.</div>
-  <a href="/" style="margin-top:8px;color:#B8956A;font-size:0.88rem;text-decoration:none">← Back to quiz</a>
-</div>
+ <div id="loading">
+ <div class="spinner"></div>
+ <div style="font-size:1.05rem;font-weight:500">Building your personalized funnel preview...</div>
+ <div id="loading-sub" style="font-size:0.83rem;color:rgba(255,255,255,0.4);max-width:320px;line-height:1.6">Our AI is crafting your custom copy. This usually takes 15-30 seconds.</div>
+ </div>
 
-<div id="preview-wrap">
-  <iframe id="preview-frame" title="Your Funnel Preview" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
-</div>
+ <div id="error-state">
+ <div style="font-size:2.5rem">⚠️</div>
+ <div style="font-size:1.05rem;font-weight:500">Preview not found</div>
+ <div style="font-size:0.83rem;color:rgba(255,255,255,0.4);max-width:300px;line-height:1.6">This demo link may have expired or is still generating. Please try refreshing, or go back and generate a new preview.</div>
+ <a href="/" style="margin-top:8px;color:#B8956A;font-size:0.88rem;text-decoration:none">← Back to quiz</a>
+ </div>
+
+ <div id="preview-wrap">
+ <iframe id="preview-frame" title="Your Funnel Preview" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+ </div>
+
+ <!-- UNMISSABLE FLOATING CTA BAR -->
+ <div class="floating-cta-wrap" id="floating-bar" style="display:none">
+ <a href="/chat" class="floating-cta" id="chat-link-bottom">I Want This For My Business →</a>
+ </div>
 
 <script>
-  const params  = new URLSearchParams(window.location.search);
-  const leadId  = params.get('id');
-  const name    = params.get('name') || '';
-  const email   = params.get('email') || '';
+ const params = new URLSearchParams(window.location.search);
+ const leadId = params.get('id');
+ const name = params.get('name') || '';
+ const email = params.get('email') || '';
 
-  // Update chat link
-  const chatParams = new URLSearchParams();
-  if (name)   chatParams.set('name', name);
-  if (email)  chatParams.set('email', email);
-  if (leadId) chatParams.set('id', leadId);
-  const chatUrl = '/chat' + (chatParams.toString() ? '?' + chatParams.toString() : '');
-  document.getElementById('chat-link').href = chatUrl;
+ // Update both CTA links
+ const chatParams = new URLSearchParams();
+ if (name) chatParams.set('name', name);
+ if (email) chatParams.set('email', email);
+ if (leadId) chatParams.set('id', leadId);
+ const chatUrl = '/chat' + (chatParams.toString() ? '?' + chatParams.toString() : '');
+ document.getElementById('chat-link-top').href = chatUrl;
+ document.getElementById('chat-link-bottom').href = chatUrl;
 
-  async function loadDemo() {
-    if (!leadId || leadId === 'preview') { showError(); return; }
-    try {
-      // Get config first
-      const cfg = await fetch('/api/config').then(r => r.json());
+ let pollAttempts = 0;
+ const maxPolls = 12; // 12 * 5000ms = 60 seconds max wait
 
-      // Fetch demo HTML from Supabase
-      const res = await fetch(
-        `${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}&select=demo_html,name`,
-        { headers: { 'apikey': cfg.supabase_key, 'Authorization': 'Bearer ' + cfg.supabase_key } }
-      );
-      const data = await res.json();
+ async function loadDemo() {
+ if (!leadId || leadId === 'preview') { showError(); return; }
 
-      if (!data || !data[0] || !data[0].demo_html) { showError(); return; }
+ try {
+ const cfgRes = await fetch('/api/config');
+ if (!cfgRes.ok) throw new Error('Config fetch failed');
+ const cfg = await cfgRes.json();
 
-      const html = data[0].demo_html;
-      const blob = new Blob([html], { type: 'text/html' });
-      const url  = URL.createObjectURL(blob);
-      const frame = document.getElementById('preview-frame');
-      frame.src = url;
-      frame.onload = () => {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('preview-wrap').style.display = 'flex';
-        document.getElementById('preview-wrap').style.flexDirection = 'column';
-      };
-    } catch(err) {
-      console.error(err);
-      showError();
-    }
-  }
+ // Start polling Supabase
+ pollForHTML(cfg);
 
-  function showError() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error-state').style.display = 'flex';
-  }
+ } catch(err) {
+ console.error('Init error, retrying in 5s...', err);
+ pollAttempts++;
+ if (pollAttempts < maxPolls) {
+ setTimeout(loadDemo, 5000);
+ document.getElementById('loading-sub').textContent = `Still connecting... (Attempt ${pollAttempts + 1})`;
+ } else {
+ showError();
+ }
+ }
+ }
 
-  loadDemo();
+ async function pollForHTML(cfg) {
+ try {
+ const res = await fetch(
+ `${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}&select=demo_html,name`,
+ { headers: { 'apikey': cfg.supabase_key, 'Authorization': 'Bearer ' + cfg.supabase_key } }
+ );
+ const data = await res.json();
+
+ if (data && data[0] && data[0].demo_html && data[0].demo_html.length > 100) {
+ // SUCCESS: HTML is ready
+ const html = data[0].demo_html;
+ const blob = new Blob([html], { type: 'text/html' });
+ const url = URL.createObjectURL(blob);
+ const frame = document.getElementById('preview-frame');
+ frame.src = url;
+ frame.onload = () => {
+ document.getElementById('loading').style.display = 'none';
+ document.getElementById('preview-wrap').style.display = 'flex';
+ document.getElementById('floating-bar').style.display = 'flex';
+ };
+ } else {
+ // PENDING: HTML not saved yet, poll again
+ pollAttempts++;
+ if (pollAttempts < maxPolls) {
+ document.getElementById('loading-sub').textContent = `AI is still writing your copy... (Checking status ${pollAttempts * 5}s)`;
+ setTimeout(() => pollForHTML(cfg), 5000);
+ } else {
+ showError();
+ }
+ }
+ } catch(err) {
+ console.error('Polling error, retrying...', err);
+ pollAttempts++;
+ if (pollAttempts < maxPolls) {
+ setTimeout(() => pollForHTML(cfg), 5000);
+ } else {
+ showError();
+ }
+ }
+ }
+
+ function showError() {
+ document.getElementById('loading').style.display = 'none';
+ document.getElementById('error-state').style.display = 'flex';
+ }
+
+ loadDemo();
 </script>
 </body>
 </html>
