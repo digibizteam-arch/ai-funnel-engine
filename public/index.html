@@ -110,6 +110,19 @@
     .vibe-name { font-size: 0.82rem; font-weight: 600; color: var(--bark); }
     .vibe-desc { font-size: 0.72rem; color: var(--text-mid); line-height: 1.4; }
 
+    /* ─── DEMO LOADING STATE ─── */
+    #demo-loading-state .reassurance-card {
+      background: var(--cream);
+      border: 1px solid var(--cream-mid);
+      border-radius: 14px;
+      padding: 16px 20px;
+    }
+
+    @keyframes progressPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
     @media (max-width: 540px) { .q-card, .diag-card { padding: 22px 16px; } .cta-block { padding: 26px 18px; } .vibe-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -351,8 +364,45 @@
           </div>
         </div>
 
-        <button id="demo-btn" onclick="generateDemo()" style="width:100%;background:var(--bark);color:var(--white);border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;padding:16px 32px;border-radius:100px;cursor:pointer;margin-top:8px;transition:background 0.2s,transform 0.15s">Generate My Free Funnel Preview →</button>
-        <p style="text-align:center;font-size:0.75rem;color:var(--text-mid);margin-top:12px;opacity:0.7">Your preview opens in a new tab · No sign-up required</p>
+        <!-- ── GENERATE BUTTON + LOADING STATE ── -->
+        <button id="demo-btn" onclick="generateDemo()" style="width:100%;background:var(--bark);color:var(--white);border:none;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:16px 32px;border-radius:100px;cursor:pointer;margin-top:8px;transition:background 0.2s,transform 0.15s;position:relative;overflow:hidden">
+          <span id="demo-btn-text">Generate My Free Funnel Preview →</span>
+        </button>
+
+        <!-- PRE-CLICK: expectation setter -->
+        <div id="demo-pre-info" style="text-align:center;margin-top:14px">
+          <p style="font-size:0.75rem;color:var(--text-mid);opacity:0.7">Your preview opens in a new tab &nbsp;·&nbsp; Takes 60–90 seconds &nbsp;·&nbsp; Worth the wait</p>
+        </div>
+
+        <!-- POST-CLICK: animated loading state -->
+        <div id="demo-loading-state" style="display:none;margin-top:20px">
+
+          <!-- Progress bar -->
+          <div style="height:3px;background:var(--cream-mid);border-radius:100px;overflow:hidden;margin-bottom:16px">
+            <div id="demo-progress-bar" style="height:100%;background:var(--clay);border-radius:100px;width:0%;transition:width 0.8s ease"></div>
+          </div>
+
+          <!-- Rotating status message -->
+          <div style="text-align:center;margin-bottom:18px">
+            <div id="demo-status-msg" style="font-size:0.88rem;color:var(--clay);font-weight:500;min-height:22px;transition:opacity 0.3s">🧠 Analyzing your quiz answers...</div>
+          </div>
+
+          <!-- Reassurance card -->
+          <div style="background:var(--cream);border:1px solid var(--cream-mid);border-radius:14px;padding:18px 20px">
+            <div style="font-size:0.78rem;font-weight:600;color:var(--bark);margin-bottom:10px;display:flex;align-items:center;gap:7px">
+              <span style="width:18px;height:18px;border-radius:50%;background:var(--clay);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</span>
+              Your result is fully personalized
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-mid);line-height:1.6;margin-bottom:12px">Every headline, section, and call-to-action is written around your exact answers — your offer, your client, your goal.</p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="font-size:0.75rem;color:var(--text-mid);display:flex;align-items:center;gap:7px"><span style="color:var(--clay);font-weight:600">→</span> Once it opens, review the copy and design</div>
+              <div style="font-size:0.75rem;color:var(--text-mid);display:flex;align-items:center;gap:7px"><span style="color:var(--clay);font-weight:600">→</span> Tell us what you'd like adjusted before we build the real thing</div>
+              <div style="font-size:0.75rem;color:var(--text-mid);display:flex;align-items:center;gap:7px"><span style="color:var(--clay);font-weight:600">→</span> Click "I want this" in the preview to move to the next step</div>
+            </div>
+          </div>
+        </div>
+        <!-- ── END LOADING STATE ── -->
+
       </div>
     </div>
   </div>
@@ -462,10 +512,7 @@
       document.getElementById('cta-title').textContent             = data.cta_headline || 'Ready to See Real Results?';
       document.getElementById('cta-body').textContent              = data.cta_body || "We'll build your complete funnel — done for you, in days.";
 
-      // Store lead_id for demo generation
       if (data.lead_id) window._leadId = data.lead_id;
-
-      // Show bridge section
       document.getElementById('bridge-section').style.display = 'block';
 
     } catch(err) {
@@ -474,23 +521,76 @@
     }
   }
 
-  // ─── BRIDGE / DEMO GENERATION ───
+  // ── DEMO LOADING STATE ──
+  const DEMO_MESSAGES = [
+    '🧠 Analyzing your quiz answers...',
+    '🎯 Identifying your ideal client\'s deepest pain points...',
+    '✍️ Writing psychology-driven copy for your offer...',
+    '🎨 Applying your chosen design vibe...',
+    '⚡ Building your funnel sections...',
+    '🔗 Almost ready — opening your preview...'
+  ];
+  let demoMsgInterval = null;
+  let demoProgressInterval = null;
+
+  function startDemoLoadingUI() {
+    document.getElementById('demo-btn').disabled = true;
+    document.getElementById('demo-btn').style.opacity = '0.65';
+    document.getElementById('demo-btn-text').textContent = 'Generating your preview...';
+    document.getElementById('demo-pre-info').style.display = 'none';
+    document.getElementById('demo-loading-state').style.display = 'block';
+
+    let msgIndex = 0;
+    const statusMsg = document.getElementById('demo-status-msg');
+    demoMsgInterval = setInterval(() => {
+      statusMsg.style.opacity = '0';
+      setTimeout(() => {
+        msgIndex = (msgIndex + 1) % DEMO_MESSAGES.length;
+        statusMsg.textContent = DEMO_MESSAGES[msgIndex];
+        statusMsg.style.opacity = '1';
+      }, 300);
+    }, 12000);
+
+    let progress = 0;
+    demoProgressInterval = setInterval(() => {
+      progress += (90 - progress) * 0.04;
+      document.getElementById('demo-progress-bar').style.width = Math.min(progress, 90) + '%';
+    }, 1000);
+  }
+
+  function completeDemoLoadingUI() {
+    clearInterval(demoMsgInterval);
+    clearInterval(demoProgressInterval);
+    document.getElementById('demo-progress-bar').style.width = '100%';
+    const msg = document.getElementById('demo-status-msg');
+    if (msg) { msg.textContent = '✅ Preview ready — opening in new tab...'; msg.style.opacity = '1'; }
+  }
+
+  function resetDemoLoadingUI() {
+    clearInterval(demoMsgInterval);
+    clearInterval(demoProgressInterval);
+    document.getElementById('demo-btn').disabled = false;
+    document.getElementById('demo-btn').style.opacity = '1';
+    document.getElementById('demo-btn-text').textContent = 'Generate My Free Funnel Preview →';
+    document.getElementById('demo-pre-info').style.display = 'block';
+    document.getElementById('demo-loading-state').style.display = 'none';
+    document.getElementById('demo-progress-bar').style.width = '0%';
+  }
+
   async function generateDemo() {
-    const offer        = document.getElementById('b-offer').value.trim();
-    const price        = document.getElementById('b-price').value.trim();
-    const client       = document.getElementById('b-client').value.trim();
-    const pain         = document.getElementById('b-pain').value.trim();
-    const transform    = document.getElementById('b-transform').value.trim();
-    const vibe         = window._selectedVibe || '';
+    const offer     = document.getElementById('b-offer').value.trim();
+    const price     = document.getElementById('b-price').value.trim();
+    const client    = document.getElementById('b-client').value.trim();
+    const pain      = document.getElementById('b-pain').value.trim();
+    const transform = document.getElementById('b-transform').value.trim();
+    const vibe      = window._selectedVibe || '';
 
     if (!offer || !client || !pain || !transform) {
       alert('Please fill in all fields to generate your funnel preview.');
       return;
     }
 
-    const btn = document.getElementById('demo-btn');
-    btn.disabled = true;
-    btn.textContent = 'Generating your funnel...';
+    startDemoLoadingUI();
 
     try {
       const res = await fetch('/api/demo', {
@@ -508,16 +608,16 @@
       });
       const data = await res.json();
       if (data.demo_url) {
-        window.open(data.demo_url, '_blank');
+        completeDemoLoadingUI();
+        setTimeout(() => { window.open(data.demo_url, '_blank'); resetDemoLoadingUI(); }, 800);
       } else {
         alert('Something went wrong generating your demo. Please try again.');
+        resetDemoLoadingUI();
       }
     } catch(err) {
       alert('Something went wrong. Please try again.');
+      resetDemoLoadingUI();
       console.error(err);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Generate My Free Funnel Preview →';
     }
   }
 
