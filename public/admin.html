@@ -590,7 +590,39 @@ function viewDemo() {
   if (!currentId) return;
   window.open(`/demo?id=${currentId}`, '_blank');
 }
+// ── DELETE LEAD ──
+async function deleteLead() {
+  if (!currentId) return;
+  const l = leads.find(x => x.id === currentId);
+  if (!l) return;
 
+  // Double confirmation — safety net
+  const first = confirm(`Are you sure you want to delete "${l.name || 'this lead'}"?\n\nThis cannot be undone.`);
+  if (!first) return;
+
+  const second = confirm(`Second confirmation:\n\nPermanently delete "${l.name || 'this lead'}" and all their data?`);
+  if (!second) return;
+
+  try {
+    const res = await fetch('/api/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: currentId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      leads = leads.filter(x => x.id !== currentId);
+      closeModal('lead-overlay');
+      renderAll();
+      toast('Lead deleted successfully');
+    } else {
+      toast('Error: ' + (data.error || 'Could not delete lead'));
+    }
+  } catch(e) {
+    toast('Network error — could not delete lead');
+    console.error(e);
+  }
+  
 // ── PROPOSAL GENERATION ──
 async function generateProposal() {
   if (!currentId) return;
