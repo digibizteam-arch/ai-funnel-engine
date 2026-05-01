@@ -59,7 +59,7 @@ LEAD INTELLIGENCE:
 
   // Build proposal URL — name comes from lead data first, then fallback to passed name param
   const leadName = leadData?.name || name || '';
-  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}`;
+  const proposalBase = `/proposal?id=${lead_id||''}&name=${encodeURIComponent(leadName)}&email=${encodeURIComponent(email||'')}`;
 
   const systemPrompt = `You are Maria's AI Sales Assistant — a warm, selective, and intelligent sales guide for Maria Angelica Scott, System Architect. You build done-for-you funnel and automation systems.
 
@@ -171,7 +171,7 @@ TONE: Warm, confident, direct. Like a trusted advisor who's genuinely invested i
       const match = reply.match(/\[PROPOSAL:(full|mid|basic)\]/i);
       if (match) {
         proposalPackage = match[1].toLowerCase();
-        const proposalUrl = `${proposalBase}&package=${proposalPackage}&problem=${encodeURIComponent(leadData?.problem||'')}&goal=${encodeURIComponent(leadData?.goal||'')}&solution=${encodeURIComponent(leadData?.solution_name||'')}`;
+        const proposalUrl = `${proposalBase}&package=${proposalPackage}&role=${encodeURIComponent(leadData?.role||'')}&offer=${encodeURIComponent(leadData?.offer_name||'')}&price=${encodeURIComponent(leadData?.offer_price||'')}&client=${encodeURIComponent(leadData?.ideal_client||'')}&goal=${encodeURIComponent(leadData?.goal||'')}&problem=${encodeURIComponent(leadData?.problem||'')}&transform=${encodeURIComponent(leadData?.offer_transform||'')}&solution=${encodeURIComponent(leadData?.solution_name||'')}`;
         const linkHtml = `<a href="${proposalUrl}" target="_blank" rel="noopener noreferrer">📄 View Your Proposal →</a>`;
         reply = reply.replace(/\[PROPOSAL:(full|mid|basic)\]/i, linkHtml);
       }
