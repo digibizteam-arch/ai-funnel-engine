@@ -546,6 +546,26 @@ function openLead(id) {
   }
   document.getElementById('m-diagnosis').textContent = diagnosis;
   document.getElementById('m-notes').value = l.admin_notes || '';
+
+  // Show/hide copy-code-btn based on whether demo was generated
+  const copyBtn = document.getElementById('copy-code-btn');
+  const hasdemo = !!(l.demo_html || l.demo_generated_at);
+  copyBtn.style.display = hasdemo ? 'block' : 'none';
+
+  // Show demo status indicator
+  const viewDemoBtn = document.querySelector('.btn-view-demo');
+  if (viewDemoBtn) {
+    if (hasdemo) {
+      viewDemoBtn.textContent = '🎯 View Their Demo';
+      viewDemoBtn.style.opacity = '1';
+      viewDemoBtn.title = 'Open their generated funnel preview';
+    } else {
+      viewDemoBtn.textContent = '🚫 No Demo Yet';
+      viewDemoBtn.style.opacity = '0.5';
+      viewDemoBtn.title = 'This lead has not generated a funnel demo yet';
+    }
+  }
+
   document.getElementById('ai-section').style.display = 'none';
   document.getElementById('lead-overlay').classList.add('open');
 }
@@ -588,41 +608,90 @@ async function moveStatus(status) {
 
 function viewDemo() {
   if (!currentId) return;
+  const l = leads.find(x => x.id === currentId);
+  if (!l) return;
+
+  if (!l.demo_html && !l.demo_generated_at) {
+    toast('⚠️ No demo generated yet for this lead');
+    return;
+  }
   window.open(`/demo?id=${currentId}`, '_blank');
 }
-// ── DELETE LEAD ──
-async function deleteLead() {
+
+// ── COPY FUNNEL CODE ──
+async function copyFunnelCode() {
+  if (!currentId) return;
+  const btn = document.getElementById('copy-code-btn');
+  btn.textContent = '⏳ Loading...';
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/leads?id=eq.${currentId}&select=demo_html`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
+    );
+    const data = await res.json();
+    const html = data?.[0]?.demo_html;
+    if (!html) {
+      toast('No funnel code found for this lead');
+      btn.textContent = '📋 Copy Funnel Code';
+      return;
+    }
+    await navigator.clipboard.writeText(html);
+    btn.textContent = '✅ Copied!';
+    toast('Funnel code copied — ready to deploy');
+    setTimeout(() => { btn.textContent = '📋 Copy Funnel Code'; }, 3000);
+  } catch(e) {
+    toast('Error copying code');
+    btn.textContent = '📋 Copy Funnel Code';
+    console.error(e);
+  }
+}
+
+// ── REGENERATE DEMO ──
+async function regenerateDemo() {
   if (!currentId) return;
   const l = leads.find(x => x.id === currentId);
   if (!l) return;
 
-  const first = confirm(`Are you sure you want to delete "${l.name || 'this lead'}"?\n\nThis cannot be undone.`);
-  if (!first) return;
+  const confirmed = confirm(`Regenerate demo funnel for "${l.name}"?\n\nThis will replace their current preview with a new improved version.`);
+  if (!confirmed) return;
 
-  const second = confirm(`Second confirmation:\n\nPermanently delete "${l.name || 'this lead'}" and all their data?`);
-  if (!second) return;
+  closeModal('lead-overlay');
+  toast('🔄 Regenerating demo — this takes 15–30 seconds...');
 
   try {
-    const res = await fetch('/api/delete', {
+    const res = await fetch('/api/demo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lead_id: currentId })
+      body: JSON.stringify({
+        lead_id:   currentId,
+        name:      l.name || '',
+        email:     l.email || '',
+        role:      l.role || l.business_name || '',
+        goal:      l.goal || '',
+        problem:   l.problem || l.challenge || '',
+        offer:     l.offer_name || 'Your Service',
+        price:     l.offer_price || '',
+        client:    l.ideal_client || 'Your ideal client',
+        pain:      l.offer_pain || l.problem || 'Their main challenge',
+        transform: l.offer_transform || l.success || 'Their desired outcome',
+        vibe:      l.design_vibe || 'bold-premium'
+      })
     });
     const data = await res.json();
-    if (data.success) {
-      leads = leads.filter(x => x.id !== currentId);
-      closeModal('lead-overlay');
-      renderAll();
-      toast('Lead deleted successfully');
+    if (data.demo_url) {
+      const idx = leads.findIndex(x => x.id === currentId);
+      if (idx !== -1) leads[idx].demo_generated_at = new Date().toISOString();
+      toast('✅ Demo regenerated! Opening preview...');
+      setTimeout(() => window.open(data.demo_url, '_blank'), 800);
     } else {
-      toast('Error: ' + (data.error || 'Could not delete lead'));
+      toast('Error: ' + (data.error || 'Could not regenerate demo'));
     }
   } catch(e) {
-    toast('Network error — could not delete lead');
+    toast('Network error — could not regenerate demo');
     console.error(e);
   }
 }
-  
+
 // ── PROPOSAL GENERATION ──
 async function generateProposal() {
   if (!currentId) return;
