@@ -506,6 +506,28 @@ function downloadProposal() {
   success.style.display = 'flex';
 }
 
+trackProposalView();async function trackProposalView() {
+  if (!leadId) return;
+
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+
+    await fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.supabase_key,
+        'Authorization': 'Bearer ' + cfg.supabase_key,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        proposal_viewed_at: new Date().toISOString()
+      })
+    });
+  } catch (e) {
+    console.error('Proposal view tracking failed:', e);
+  }
+}
 resolveNameAndBuild();
 </script>
 </body>
