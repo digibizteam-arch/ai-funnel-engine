@@ -314,19 +314,19 @@
     }
 
     .step-card {
-      background: #fff;
-      border: 1px solid #f3f4f6;
-      border-radius: 1rem;
-      padding: 2rem;
-      font-size: 0.875rem;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      border-radius: 1.75rem !important;
+      padding: 2.5rem !important;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
-    .step-card:hover {
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
+    .step-card h3 {
+      font-size: 1.75rem;
+      line-height: 1.3;
     }
 
+    .step-card .w-16 {
+      box-shadow: 0 10px 15px -3px rgba(184, 149, 106, 0.3);
+    }
     .cta-panel {
       margin-top: 4rem;
       background: linear-gradient(135deg, #f3e8ff, #ede9fe);
@@ -440,12 +440,12 @@
       padding-top: 2rem;
       border-top: 1px solid #E5E7EB;
     }
-        /* ====================== ENHANCED PROFESSIONAL STYLING (Final) ====================== */
+            /* ====================== ENHANCED PROFESSIONAL STYLING (Final) ====================== */
     .next-steps, .testimonial, .about {
       scroll-margin-top: 80px;
     }
 
-    /* Override old rules */
+    /* High-specificity overrides */
     .eyebrow {
       font-size: 0.875rem !important;
       color: #B8956A !important;
@@ -469,28 +469,37 @@
 
     .step-card {
       border-radius: 1.75rem !important;
-      padding: 2.25rem !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      padding: 2.5rem !important;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     .step-card:hover {
       transform: translateY(-8px) !important;
       box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15) !important;
-      border-color: rgba(184, 149, 106, 0.3) !important;
+      border-color: rgba(184, 149, 106, 0.4) !important;
+    }
+
+    .step-card h3 {
+      font-size: 1.75rem !important;
+      line-height: 1.3 !important;
+    }
+
+    .step-card .w-16 {
+      box-shadow: 0 10px 15px -3px rgba(184, 149, 106, 0.3) !important;
     }
 
     .primary-btn {
       background: linear-gradient(135deg, #B8956A, #C9A84C) !important;
       color: #fff !important;
       font-weight: 700 !important;
-      letter-spacing: 0.025em;
-      box-shadow: 0 10px 25px rgba(184, 149, 106, 0.3) !important;
+      letter-spacing: 0.025em !important;
+      box-shadow: 0 10px 25px rgba(184, 149, 106, 0.35) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     .primary-btn:hover {
       transform: translateY(-3px) !important;
-      box-shadow: 0 20px 40px rgba(184, 149, 106, 0.4) !important;
+      box-shadow: 0 20px 40px rgba(184, 149, 106, 0.45) !important;
     }
 
     .cta-panel {
@@ -659,61 +668,71 @@
 
    <!-- Hidden until the preview is actually loaded -->
   <div id="post-demo-content">
-
     <!-- ====================== WHAT'S NEXT ====================== -->
-    <section class="next-steps py-20 bg-white">
+    <section class="next-steps py-24 bg-white">
       <div class="container mx-auto px-4 max-w-6xl">
-        <div class="next-steps-content text-center max-w-3xl mx-auto">
+        <div class="next-steps-content text-center max-w-4xl mx-auto">
+          
           <span class="eyebrow text-[#B8956A] font-semibold tracking-[0.125em] text-sm">YOUR NEXT STEP</span>
           
-          <h2 class="text-4xl md:text-5xl font-bold mt-4 mb-6 leading-tight tracking-tight">
+          <h2 class="text-5xl md:text-6xl font-bold mt-6 mb-8 leading-[1.05] tracking-tighter">
             You've seen the vision.<br>Now let's make it yours.
           </h2>
           
-          <p class="lead text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+          <p class="lead text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             This personalized funnel was built specifically for how you work as a Filipino Financial Advisor.
           </p>
 
-          <div class="steps-grid grid md:grid-cols-3 gap-8 mt-16">
-            
-            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">1</div>
-              <h3 class="text-2xl font-semibold mb-4">Review the Flow</h3>
-              <p class="text-gray-600 leading-relaxed">
+                   <!-- Enhanced Steps Grid -->
+          <div class="steps-grid grid md:grid-cols-3 gap-8 mt-20">
+           
+            <div class="step-card group bg-white border border-gray-100 rounded-3xl p-10 overflow-hidden text-left hover:border-[#B8956A]/40 hover:shadow-2xl transition-all duration-500">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-4xl mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                1
+              </div>
+              <h3 class="text-3xl font-semibold mb-5 tracking-tight">Review the Flow</h3>
+              <p class="text-gray-600 leading-relaxed text-[1.08rem]">
                 Study how each page attracts, qualifies, and nurtures ideal clients automatically — designed around your natural strengths and lifestyle.
               </p>
             </div>
 
-            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">2</div>
-              <h3 class="text-2xl font-semibold mb-4">Imagine the Freedom</h3>
-              <p class="text-gray-600 leading-relaxed">
+            <div class="step-card group bg-white border border-gray-100 rounded-3xl p-10 overflow-hidden text-left hover:border-[#B8956A]/40 hover:shadow-2xl transition-all duration-500">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-4xl mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                2
+              </div>
+              <h3 class="text-3xl font-semibold mb-5 tracking-tight">Imagine the Freedom</h3>
+              <p class="text-gray-600 leading-relaxed text-[1.08rem]">
                 Picture consistent high-quality leads coming in while you focus on deep client work and family time instead of constant follow-ups.
               </p>
             </div>
 
-            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">3</div>
-              <h3 class="text-2xl font-semibold mb-4">Take the Next Step</h3>
-              <p class="text-gray-600 leading-relaxed">
+            <div class="step-card group bg-white border border-gray-100 rounded-3xl p-10 overflow-hidden text-left hover:border-[#B8956A]/40 hover:shadow-2xl transition-all duration-500">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-4xl mb-8 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                3
+              </div>
+              <h3 class="text-3xl font-semibold mb-5 tracking-tight">Take the Next Step</h3>
+              <p class="text-gray-600 leading-relaxed text-[1.08rem]">
                 If this aligns with the kind of calm, professional practice you want to build, let's discuss how to make this live for you.
               </p>
             </div>
           </div>
 
-          <div class="cta-panel mt-20 bg-gradient-to-br from-[#F8F4ED] to-[#F5F0E6] border border-[#EDE4D4] rounded-3xl p-10 md:p-16 shadow-sm">
-            <div class="max-w-xl mx-auto text-center">
-              <h3 class="text-3xl font-semibold mb-5 tracking-tight">Ready to build your silent client acquisition system?</h3>
-              <p class="text-gray-600 mb-9 text-lg">
+          <!-- CTA Panel -->
+          <div class="cta-panel mt-20 bg-gradient-to-br from-[#F8F4ED] to-[#F5F0E6] border border-[#EDE4D4] rounded-3xl p-12 md:p-16 shadow-sm">
+            <div class="max-w-2xl mx-auto text-center">
+              <h3 class="text-3xl md:text-4xl font-semibold mb-6 tracking-tight">
+                Ready to build your silent client acquisition system?
+              </h3>
+              <p class="text-gray-600 mb-10 text-lg leading-relaxed">
                 Click below and I’ll show you the exact, low-pressure path forward — customized to your current workload and goals.
               </p>
-              <a href="#" id="chat-link-bottom" class="primary-btn inline-block text-lg px-12 py-5">
+              <a href="#" id="chat-link-bottom" class="primary-btn inline-block text-lg px-14 py-6">
                 Yes, I Want This For My Business
               </a>
             </div>
           </div>
 
-          <p class="small-note text-gray-500 mt-10">
+          <p class="small-note text-gray-500 mt-10 text-base">
             No hard sales. Just a clear conversation about whether this is the right fit for you right now.
           </p>
         </div>
