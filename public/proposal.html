@@ -195,7 +195,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <button class="download-btn" onclick="downloadProposal()">⬇ Download Signed Proposal</button>
 
   <div class="next-step-label">→ Your next step</div>
-  <a href="https://calendly.com/webdevdiscoverycall/30min" target="_blank" class="calendly-btn">📅 Book Your Onboarding Call</a>
+  <a href="https://calendly.com/webdevdiscoverycall/30min"
+   target="_blank"
+   class="calendly-btn"
+   onclick="trackBookingClick()">📅 Book Your Onboarding Call</a>
   <p class="success-fine">30 minutes · No preparation needed · Usually within 24 hours</p>
 </div>
 
@@ -215,7 +218,7 @@ const solution  = params.get('solution') || '';
 const packageKey = (params.get('package') || 'full').toLowerCase();
 
 const today = new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-
+let displayName = '';
 // Always fetch name from Supabase if URL param is missing or generic
 async function resolveNameAndBuild() {
   // If name is missing or looks like a placeholder, try fetching from Supabase
@@ -332,7 +335,7 @@ function buildROISection() {
 }
 
 function buildProposal() {
-  const displayName = getDisplayName();
+  displayName = getDisplayName();
   const firstName   = displayName ? displayName.split(' ')[0] : '';
 
   const situationItems = [
@@ -506,7 +509,7 @@ function downloadProposal() {
   success.style.display = 'flex';
 }
 
-trackProposalView();async function trackProposalView() {
+async function trackProposalView() {
   if (!leadId) return;
 
   try {
@@ -528,7 +531,31 @@ trackProposalView();async function trackProposalView() {
     console.error('Proposal view tracking failed:', e);
   }
 }
-resolveNameAndBuild();
+ function trackBookingClick() {
+  if (!leadId) return;
+
+  fetch('/api/config')
+    .then(r => r.json())
+    .then(cfg => {
+      return fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': cfg.supabase_key,
+          'Authorization': 'Bearer ' + cfg.supabase_key,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          booking_clicked_at: new Date().toISOString()
+        })
+      });
+    })
+    .catch(err => console.error('Booking tracking error:', err));
+}
+(async () => {
+  await resolveNameAndBuild();
+  await trackProposalView();
+})();
 </script>
 </body>
 </html>
