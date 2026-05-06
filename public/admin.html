@@ -702,7 +702,35 @@ async function regenerateDemo() {
     console.error(e);
   }
 }
+async function deleteLead() {
+    if (!currentId) return;
+    
+    // Optional: add a confirmation dialog
+    if (!confirm("Are you sure you want to delete this lead?")) return;
 
+    try {
+        const res = await fetch('/api/delete-lead', { // Adjust this URL to match your server route
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lead_id: currentId })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            toast("Lead deleted successfully");
+            // Update local state and refresh UI
+            leads = leads.filter(l => l.id !== currentId);
+            currentId = null;
+            closeModal('lead-overlay');
+            renderAll();
+        } else {
+            throw new Error(data.error || "Failed to delete");
+        }
+    } catch (err) {
+        console.error("Delete error:", err);
+        toast("Error: " + err.message);
+    }
+}
 // ── PROPOSAL GENERATION ──
 async function generateProposal() {
   if (!currentId) return;
