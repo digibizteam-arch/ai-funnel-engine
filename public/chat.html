@@ -141,8 +141,29 @@
   const messages = [];
   let isTyping = false;
 
-  // Opening message
-  window.addEventListener('DOMContentLoaded', () => {
+  // Opening message + tracking
+window.addEventListener('DOMContentLoaded', () => {
+
+  // ✅ TRACK: Chat Started (better placement)
+  if (leadId) {
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(cfg => {
+        return fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': cfg.supabase_key,
+            'Authorization': 'Bearer ' + cfg.supabase_key,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            chat_started_at: new Date().toISOString()
+          })
+        });
+      })
+      .catch(err => console.error('Chat tracking error:', err));
+  }
     setTimeout(() => {
       const greeting = userName
         ? `Hey ${userName.split(' ')[0]}! 👋 I'm Maria's AI assistant. I've seen your quiz results and the funnel preview we built for you — and I have to say, there's a real opportunity here.`
