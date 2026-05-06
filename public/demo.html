@@ -440,6 +440,71 @@
       padding-top: 2rem;
       border-top: 1px solid #E5E7EB;
     }
+        /* ====================== ENHANCED PROFESSIONAL STYLING (Final) ====================== */
+    .next-steps, .testimonial, .about {
+      scroll-margin-top: 80px;
+    }
+
+    /* Override old rules */
+    .eyebrow {
+      font-size: 0.875rem !important;
+      color: #B8956A !important;
+      font-weight: 600;
+      letter-spacing: 0.125em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+
+    .eyebrow:after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 1px;
+      background: #B8956A;
+      bottom: -6px;
+      left: 0;
+    }
+
+    .step-card {
+      border-radius: 1.75rem !important;
+      padding: 2.25rem !important;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .step-card:hover {
+      transform: translateY(-8px) !important;
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15) !important;
+      border-color: rgba(184, 149, 106, 0.3) !important;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #B8956A, #C9A84C) !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.025em;
+      box-shadow: 0 10px 25px rgba(184, 149, 106, 0.3) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 20px 40px rgba(184, 149, 106, 0.4) !important;
+    }
+
+    .cta-panel {
+      background: linear-gradient(135deg, #F8F4ED, #F5F0E6) !important;
+      border-color: #EDE4D4 !important;
+    }
+
+    .video-frame {
+      transition: transform 0.4s ease;
+    }
+
+    .video-frame:hover {
+      transform: scale(1.02);
+    }
 
     /* Tablet and up */
     @media (min-width: 768px) {
@@ -592,89 +657,94 @@
     </iframe>
   </div>
 
-  <!-- Hidden until the preview is actually loaded -->
+   <!-- Hidden until the preview is actually loaded -->
   <div id="post-demo-content">
 
-    <section class="next-steps py-16 bg-white">
+    <!-- ====================== WHAT'S NEXT ====================== -->
+    <section class="next-steps py-20 bg-white">
       <div class="container mx-auto px-4 max-w-6xl">
         <div class="next-steps-content text-center max-w-3xl mx-auto">
-          <span class="eyebrow text-[#8B5CF6] font-semibold tracking-wider">What's next?</span>
-          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mt-3 mb-6 leading-tight">
-            You've seen your personalized funnel demo. Here's your next move.
+          <span class="eyebrow text-[#B8956A] font-semibold tracking-[0.125em] text-sm">YOUR NEXT STEP</span>
+          
+          <h2 class="text-4xl md:text-5xl font-bold mt-4 mb-6 leading-tight tracking-tight">
+            You've seen the vision.<br>Now let's make it yours.
           </h2>
+          
           <p class="lead text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Based on your quiz answers and assessment, you're now seeing a funnel demo
-            tailored to how you actually work as a Filipino Financial Advisor.
+            This personalized funnel was built specifically for how you work as a Filipino Financial Advisor.
           </p>
 
-          <div class="steps-grid grid md:grid-cols-3 gap-6 mt-12">
-            <div class="step-card bg-white border border-gray-100 rounded-2xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
-              <h3 class="text-xl font-semibold mb-3">1. Review your funnel flow</h3>
-              <p class="text-gray-600">
-                Look at how each step attracts, qualifies, and follows up with your ideal clients—
-                without you needing to be online 24/7.
+          <div class="steps-grid grid md:grid-cols-3 gap-8 mt-16">
+            
+            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">1</div>
+              <h3 class="text-2xl font-semibold mb-4">Review the Flow</h3>
+              <p class="text-gray-600 leading-relaxed">
+                Study how each page attracts, qualifies, and nurtures ideal clients automatically — designed around your natural strengths and lifestyle.
               </p>
             </div>
 
-            <div class="step-card bg-white border border-gray-100 rounded-2xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
-              <h3 class="text-xl font-semibold mb-3">2. Imagine this running silently</h3>
-              <p class="text-gray-600">
-                Picture this system handling cold leads, nurturing them, and booking calls,
-                while you stay focused on deep work and existing clients.
+            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">2</div>
+              <h3 class="text-2xl font-semibold mb-4">Imagine the Freedom</h3>
+              <p class="text-gray-600 leading-relaxed">
+                Picture consistent high-quality leads coming in while you focus on deep client work and family time instead of constant follow-ups.
               </p>
             </div>
 
-            <div class="step-card bg-white border border-gray-100 rounded-2xl p-8 text-left shadow-sm hover:shadow-md transition-shadow">
-              <h3 class="text-xl font-semibold mb-3">3. Decide if this is for you</h3>
-              <p class="text-gray-600">
-                If you want this kind of quiet, consistent lead flow working in the background,
-                take the next step below.
+            <div class="step-card bg-white border border-gray-100 rounded-3xl p-9 text-left hover:border-[#B8956A]/30 hover:shadow-xl transition-all duration-300">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B8956A] to-[#C9A84C] flex items-center justify-center text-white font-bold text-2xl mb-6">3</div>
+              <h3 class="text-2xl font-semibold mb-4">Take the Next Step</h3>
+              <p class="text-gray-600 leading-relaxed">
+                If this aligns with the kind of calm, professional practice you want to build, let's discuss how to make this live for you.
               </p>
             </div>
           </div>
 
-          <div class="cta-panel mt-16 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-3xl p-8 md:p-12">
-            <div class="max-w-2xl mx-auto text-center">
-              <h3 class="text-2xl font-semibold mb-4">Ready to see how this works in your business?</h3>
-              <p class="text-gray-600 mb-8">
-                Click the button below to learn the exact next steps to turn this demo into a live,
-                done-for-you system.
+          <div class="cta-panel mt-20 bg-gradient-to-br from-[#F8F4ED] to-[#F5F0E6] border border-[#EDE4D4] rounded-3xl p-10 md:p-16 shadow-sm">
+            <div class="max-w-xl mx-auto text-center">
+              <h3 class="text-3xl font-semibold mb-5 tracking-tight">Ready to build your silent client acquisition system?</h3>
+              <p class="text-gray-600 mb-9 text-lg">
+                Click below and I’ll show you the exact, low-pressure path forward — customized to your current workload and goals.
               </p>
-              <a href="#" id="chat-link-bottom" class="primary-btn inline-block">
-                I want this for my business
+              <a href="#" id="chat-link-bottom" class="primary-btn inline-block text-lg px-12 py-5">
+                Yes, I Want This For My Business
               </a>
             </div>
           </div>
 
-          <p class="small-note text-sm text-gray-500 mt-8 max-w-md mx-auto">
-            After you click, you'll see the clear, no-pressure path to get this built—
-            tailored to your workload, personality, and goals.
+          <p class="small-note text-gray-500 mt-10">
+            No hard sales. Just a clear conversation about whether this is the right fit for you right now.
           </p>
         </div>
       </div>
     </section>
 
-    <section class="testimonial py-16 bg-gray-50" id="next-step">
+    <!-- ====================== TESTIMONIAL ====================== -->
+    <section class="testimonial py-20 bg-gray-50">
       <div class="container mx-auto px-4 max-w-6xl">
-        <div class="testimonial-grid grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          <div class="testimonial-copy order-2 lg:order-1">
-            <span class="eyebrow text-[#8B5CF6] font-semibold tracking-wider">Client story</span>
-            <h2 class="text-3xl md:text-4xl font-bold mt-3 mb-6 leading-tight">
-              What it feels like when the system works for you
+        <div class="testimonial-grid grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          
+          <div class="testimonial-copy">
+            <span class="eyebrow text-[#B8956A] font-semibold tracking-[0.125em] text-sm">REAL RESULT</span>
+            <h2 class="text-4xl md:text-5xl font-bold mt-4 mb-8 leading-tight tracking-tight">
+              “I finally have peace of mind with my client flow”
             </h2>
-            <p class="lead text-lg text-gray-600 mb-6">
-              Instead of chasing people who "might" be interested, this funnel pre-qualifies leads,
-              nurtures them, and brings only the right people to your calendar.
-            </p>
+            
+            <div class="border-l-4 border-[#B8956A] pl-6 mb-8">
+              <p class="text-xl italic text-gray-700">
+                The system brings me pre-qualified, serious clients without me chasing or sounding salesy. 
+                My calendar is filling with the right people.
+              </p>
+            </div>
+            
             <p class="text-gray-600">
-              Listen to how this funnel system and course helped a fellow Financial Advisor create
-              a more peaceful, predictable client flow—without aggressive selling or endless messaging.
+              Listen to how this funnel + systems approach helped a fellow Financial Advisor create consistent results while protecting her energy and family time.
             </p>
           </div>
 
-          <div class="testimonial-video order-1 lg:order-2">
-            <div class="video-frame bg-black rounded-3xl overflow-hidden shadow-2xl aspect-[9/16] max-w-[320px] mx-auto lg:mx-0">
+          <div class="testimonial-video">
+            <div class="video-frame bg-black rounded-3xl overflow-hidden shadow-2xl aspect-[9/16] max-w-[340px] mx-auto lg:mx-0 ring-1 ring-gray-200">
               <iframe
                 width="100%"
                 height="100%"
@@ -682,7 +752,6 @@
                 title="Testimonial from the Course and the Funnel System"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen>
               </iframe>
             </div>
@@ -691,39 +760,41 @@
       </div>
     </section>
 
-    <section class="about py-16">
+    <!-- ====================== ABOUT ME ====================== -->
+    <section class="about py-20 bg-white">
       <div class="container mx-auto px-4 max-w-6xl">
-        <div class="about-grid grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          <div class="about-image flex justify-center md:justify-start">
+        <div class="about-grid grid md:grid-cols-2 gap-16 lg:gap-20 items-center">
+          
+          <div class="about-image">
             <img
               src="https://file-hosting.dashnexpages.net/ascottdigitalbiz/.editor/1771100434-0183.png"
               alt="Maria Angelica Scott - Financial Advisor Systems Designer"
-              class="rounded-3xl shadow-xl max-w-full h-auto">
+              class="rounded-3xl shadow-2xl max-w-full h-auto ring-1 ring-gray-100">
           </div>
 
           <div class="about-copy">
-            <span class="eyebrow text-[#8B5CF6] font-semibold tracking-wider">About Maria</span>
-            <h2 class="text-3xl md:text-4xl font-bold mt-3 mb-6 leading-tight">
-              Designing quiet systems for introverted advisors
+            <span class="eyebrow text-[#B8956A] font-semibold tracking-[0.125em] text-sm">ABOUT MARIA ANGELICA SCOTT</span>
+            
+            <h2 class="text-4xl md:text-5xl font-bold mt-4 mb-8 leading-tight tracking-tight">
+              Systems designed for introverted, purpose-driven advisors
             </h2>
-            <p class="lead text-lg text-gray-600 mb-6">
-              I'm Maria Angelica Scott. As an introvert and a mother to a son with autism,
-              I understand that time is not just money—time is presence.
+            
+            <p class="text-lg text-gray-700 mb-6">
+              I'm Maria Angelica Scott — a Financial Advisor Systems Designer, introvert, and mother to a wonderful son with autism.
             </p>
-            <p class="text-gray-600 mb-6">
-              For the Filipino Financial Advisor who prefers deep work over cold calls,
-              my mission is to give you back your time through silent, efficient automation.
+            
+            <p class="text-gray-600 mb-6 leading-relaxed">
+              I deeply understand the need for <strong>calm, efficient systems</strong> that respect your energy instead of draining it.
             </p>
-            <p class="text-gray-600">
-              I build systems that respect your energy and protect your peace. Based in the Philippines,
-              I combine deep technical expertise with an understanding of our unique financial industry.
-              I don't just build pages; I build freedom.
+            
+            <p class="text-gray-600 leading-relaxed">
+              My mission is simple: help Filipino Financial Advisors like you attract high-quality clients through quiet automation, 
+              so you can focus on what truly matters — deep client relationships and family presence.
             </p>
 
-            <div class="final-cta-wrap mt-12 pt-8 border-t border-gray-200">
-              <a href="#" id="chat-link-final" class="primary-btn inline-block">
-                💬 I want this for my business — get started now <span class="cta-arrow">→</span>
+            <div class="final-cta-wrap mt-12 pt-10 border-t border-gray-200">
+              <a href="#" id="chat-link-final" class="primary-btn inline-block text-lg px-12 py-5">
+                💬 Let’s Build This For You — Message Me Now
               </a>
             </div>
           </div>
@@ -732,7 +803,6 @@
     </section>
 
   </div>
-
   <script>
     const params = new URLSearchParams(window.location.search);
     const leadId = params.get('id');
