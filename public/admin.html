@@ -538,11 +538,11 @@ function openLead(id) {
   document.getElementById('m-problem').textContent = l.problem || l.challenge || 'Not specified';
   document.getElementById('m-offer').textContent = l.offer_name || 'Not specified';
   document.getElementById('m-investment').textContent = l.investment || l.resources || 'Not specified';
-  document.getElementById('m-chat-started').textContent = l.chat_started_at || 'Not tracked';
-  document.getElementById('m-proposal-generated').textContent = l.proposal_generated_at || 'Not tracked';
-  document.getElementById('m-proposal-viewed').textContent = l.proposal_viewed_at || 'Not tracked';
-  document.getElementById('m-proposal-signed').textContent = l.proposal_signed_at || 'Not tracked';
-  document.getElementById('m-booking-clicked').textContent = l.booking_clicked_at || 'Not tracked';
+  document.getElementById('m-chat-started').textContent = formatTimestamp(l.chat_started_at);
+  document.getElementById('m-proposal-generated').textContent = formatTimestamp(l.proposal_generated_at);
+  document.getElementById('m-proposal-viewed').textContent = formatTimestamp(l.proposal_viewed_at);
+  document.getElementById('m-proposal-signed').textContent = formatTimestamp(l.proposal_signed_at);
+  document.getElementById('m-booking-clicked').textContent = formatTimestamp(l.booking_clicked_at);
   
 
   // Parse diagnosis from full_analysis JSON if available
@@ -819,7 +819,21 @@ async function addManualLead() {
     toast('Lead added to pipeline');
   } catch(e) { toast('Error adding lead'); }
 }
+function formatTimestamp(ts) {
+  if (!ts) return 'Not tracked';
 
+  const date = new Date(ts);
+  if (isNaN(date)) return ts; // fallback if already formatted
+
+  return date.toLocaleString('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+}
 // ── TOAST ──
 function toast(msg) {
   const t = document.createElement('div');
