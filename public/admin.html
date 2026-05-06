@@ -264,6 +264,11 @@ a{color:inherit;text-decoration:none}
       <div><div class="detail-label">Their Problem</div><div class="detail-val" id="m-problem">—</div></div>
       <div><div class="detail-label">Their Offer</div><div class="detail-val" id="m-offer">—</div></div>
       <div><div class="detail-label">Investment Level</div><div class="detail-val" id="m-investment">—</div></div>
+      <div><div class="detail-label">Chat Started</div><div class="detail-val" id="m-chat-started">—</div></div>
+      <div><div class="detail-label">Proposal Generated</div><div class="detail-val" id="m-proposal-generated">—</div></div>
+      <div><div class="detail-label">Proposal Viewed</div><div class="detail-val" id="m-proposal-viewed">—</div></div>
+      <div><div class="detail-label">Proposal Accepted</div><div class="detail-val" id="m-proposal-signed">—</div></div>
+      <div><div class="detail-label">Booking Clicked</div><div class="detail-val" id="m-booking-clicked">—</div></div>
     </div>
 
     <div class="detail-label" style="margin-bottom:4px">AI Diagnosis</div>
@@ -533,6 +538,12 @@ function openLead(id) {
   document.getElementById('m-problem').textContent = l.problem || l.challenge || 'Not specified';
   document.getElementById('m-offer').textContent = l.offer_name || 'Not specified';
   document.getElementById('m-investment').textContent = l.investment || l.resources || 'Not specified';
+  document.getElementById('m-chat-started').textContent = l.chat_started_at || 'Not tracked';
+  document.getElementById('m-proposal-generated').textContent = l.proposal_generated_at || 'Not tracked';
+  document.getElementById('m-proposal-viewed').textContent = l.proposal_viewed_at || 'Not tracked';
+  document.getElementById('m-proposal-signed').textContent = l.proposal_signed_at || 'Not tracked';
+  document.getElementById('m-booking-clicked').textContent = l.booking_clicked_at || 'Not tracked';
+  
 
   // Parse diagnosis from full_analysis JSON if available
   let diagnosis = 'No AI diagnosis yet — this lead was added manually or hasn\'t completed the full quiz.';
