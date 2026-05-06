@@ -167,15 +167,44 @@ TONE: Warm, confident, direct. Like a trusted advisor who's genuinely invested i
 
     // Detect proposal trigger and replace with real link
     let proposalPackage = null;
-    if (reply && reply.includes('[PROPOSAL:')) {
-      const match = reply.match(/\[PROPOSAL:(full|mid|basic)\]/i);
-      if (match) {
-        proposalPackage = match[1].toLowerCase();
-        const proposalUrl = `${proposalBase}&package=${proposalPackage}&role=${encodeURIComponent(leadData?.role||'')}&offer=${encodeURIComponent(leadData?.offer_name||'')}&price=${encodeURIComponent(leadData?.offer_price||'')}&client=${encodeURIComponent(leadData?.ideal_client||'')}&goal=${encodeURIComponent(leadData?.goal||'')}&problem=${encodeURIComponent(leadData?.problem||'')}&transform=${encodeURIComponent(leadData?.offer_transform||'')}&solution=${encodeURIComponent(leadData?.solution_name||'')}`;
-        const linkHtml = `<a href="${proposalUrl}" target="_blank" rel="noopener noreferrer">📄 View Your Proposal →</a>`;
-        reply = reply.replace(/\[PROPOSAL:(full|mid|basic)\]/i, linkHtml);
+   if (reply && reply.includes('[PROPOSAL:')) {
+  const match = reply.match(/\[PROPOSAL:(full|mid|basic)\]/i);
+
+  if (match) {
+    proposalPackage = match[1].toLowerCase();
+
+    // ✅ TRACK: Proposal Generated (SAFE ADDITION)
+    if (lead_id) {
+      try {
+        const supabaseURL = new URL(process.env.SUPABASE_URL);
+
+        await postJSON({
+          hostname: supabaseURL.hostname,
+          path: `/rest/v1/leads?id=eq.${lead_id}`,
+          method: 'PATCH',
+          headers: {
+            'apikey': process.env.SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          }
+        }, {
+          proposal_generated_at: new Date().toISOString()
+        });
+
+      } catch (err) {
+        console.error('Proposal tracking error:', err.message);
       }
     }
+
+    // 🔽 YOUR ORIGINAL CODE (UNCHANGED)
+    const proposalUrl = `${proposalBase}&package=${proposalPackage}&role=${encodeURIComponent(leadData?.role||'')}&offer=${encodeURIComponent(leadData?.offer_name||'')}&price=${encodeURIComponent(leadData?.offer_price||'')}&client=${encodeURIComponent(leadData?.ideal_client||'')}&goal=${encodeURIComponent(leadData?.goal||'')}&problem=${encodeURIComponent(leadData?.problem||'')}&transform=${encodeURIComponent(leadData?.offer_transform||'')}&solution=${encodeURIComponent(leadData?.solution_name||'')}`;
+
+    const linkHtml = `<a href="${proposalUrl}" target="_blank" rel="noopener noreferrer">📄 View Your Proposal →</a>`;
+
+    reply = reply.replace(/\[PROPOSAL:(full|mid|basic)\]/i, linkHtml);
+  }
+}
 
     return res.status(200).json({ reply, proposal_package: proposalPackage });
 
