@@ -62,6 +62,7 @@ OUTPUT RULES:
 - Be specific — no generic statements
 - Tone: warm, direct, expert — like a trusted advisor
 - Respond ONLY with a valid raw JSON object. No markdown. No code fences. No explanation.
+- For buying_intent: score 8-10 with clear budget and urgency = "hot". Score 5-7 or budget unclear = "warm". Score 1-4 or no budget = "cold".
 
 JSON FORMAT:
 {
@@ -80,7 +81,7 @@ JSON FORMAT:
   "solution_desc": "2 sentences on how this solution addresses their challenge and gets them to their goal. Reference their resources to show it fits.",
   "cta_headline": "Personalized CTA headline tied to their goal or outcome",
   "cta_body": "2 sentences. First: what we will build for them. Second: speak to their obstacle to remove hesitation.",
-  "buying_intent": "cold or warm or hot",
+  "buying_intent": "Use EXACTLY one of: hot, warm, cold. Rules — hot: score 8-10 AND has budget AND expresses urgency or strong desire to start now; warm: score 5-7 OR has budget but uncertain timing; cold: score 1-4 OR no budget OR just exploring with no urgency",
   "opportunity_score": 7
 }`;
 
