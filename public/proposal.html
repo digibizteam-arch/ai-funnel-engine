@@ -515,6 +515,14 @@ async function trackProposalView() {
   try {
     const cfg = await fetch('/api/config').then(r => r.json());
 
+    // Check if already tracked — write once only
+    const check = await fetch(
+      `${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}&select=proposal_viewed_at`,
+      { headers: { 'apikey': cfg.supabase_key, 'Authorization': 'Bearer ' + cfg.supabase_key } }
+    ).then(r => r.json());
+
+    if (check && check[0] && check[0].proposal_viewed_at) return;
+
     await fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
       method: 'PATCH',
       headers: {
@@ -523,9 +531,7 @@ async function trackProposalView() {
         'Authorization': 'Bearer ' + cfg.supabase_key,
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({
-        proposal_viewed_at: new Date().toISOString()
-      })
+      body: JSON.stringify({ proposal_viewed_at: new Date().toISOString() })
     });
   } catch (e) {
     console.error('Proposal view tracking failed:', e);
