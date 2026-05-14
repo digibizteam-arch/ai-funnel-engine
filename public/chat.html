@@ -144,22 +144,28 @@
   // Opening message + tracking
 window.addEventListener('DOMContentLoaded', () => {
 
-  // ✅ TRACK: Chat Started (better placement)
+// TRACK: Chat Started — write once only, skip if already set
   if (leadId) {
     fetch('/api/config')
       .then(r => r.json())
       .then(cfg => {
-        return fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': cfg.supabase_key,
-            'Authorization': 'Bearer ' + cfg.supabase_key,
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            chat_started_at: new Date().toISOString()
-          })
+        return fetch(
+          `${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}&select=chat_started_at`,
+          { headers: { 'apikey': cfg.supabase_key, 'Authorization': 'Bearer ' + cfg.supabase_key } }
+        )
+        .then(r => r.json())
+        .then(data => {
+          if (data && data[0] && data[0].chat_started_at) return;
+          return fetch(`${cfg.supabase_url}/rest/v1/leads?id=eq.${leadId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': cfg.supabase_key,
+              'Authorization': 'Bearer ' + cfg.supabase_key,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ chat_started_at: new Date().toISOString() })
+          });
         });
       })
       .catch(err => console.error('Chat tracking error:', err));
