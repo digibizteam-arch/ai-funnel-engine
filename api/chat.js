@@ -173,24 +173,35 @@ TONE: Warm, confident, direct. Like a trusted advisor who's genuinely invested i
   if (match) {
     proposalPackage = match[1].toLowerCase();
 
-    // ✅ TRACK: Proposal Generated (SAFE ADDITION)
+   // TRACK: Proposal Generated — write once only
     if (lead_id) {
       try {
         const supabaseURL = new URL(process.env.SUPABASE_URL);
 
-        await postJSON({
+        // Check if already tracked first
+        const existing = await postJSON({
           hostname: supabaseURL.hostname,
-          path: `/rest/v1/leads?id=eq.${lead_id}`,
-          method: 'PATCH',
+          path: `/rest/v1/leads?id=eq.${lead_id}&select=proposal_generated_at`,
+          method: 'GET',
           headers: {
             'apikey': process.env.SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
           }
-        }, {
-          proposal_generated_at: new Date().toISOString()
-        });
+        }, {});
+
+        if (!Array.isArray(existing) || !existing[0]?.proposal_generated_at) {
+          await postJSON({
+            hostname: supabaseURL.hostname,
+            path: `/rest/v1/leads?id=eq.${lead_id}`,
+            method: 'PATCH',
+            headers: {
+              'apikey': process.env.SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            }
+          }, { proposal_generated_at: new Date().toISOString() });
+        }
 
       } catch (err) {
         console.error('Proposal tracking error:', err.message);
