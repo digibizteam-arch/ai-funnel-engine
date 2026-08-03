@@ -307,7 +307,7 @@ try {
       'Content-Type': 'application/json',
       'apikey': process.env.SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-      'Prefer': 'return=minimal'
+      'Prefer': 'return=representation'
     }
   }, {
     follow_up_stage: 0,
