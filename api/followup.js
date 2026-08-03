@@ -362,8 +362,26 @@ const html = emailContent.html;
         html
       );
 
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + 7);
+      const scheduleDays = {
+  0: 5,
+  1: 7,
+  2: 7,
+  3: 9,
+  4: 15,
+  5: 15,
+  6: 30,
+  7: 30
+};
+
+const currentStage =
+  lead.followup_stage || 0;
+
+const nextDate = new Date();
+
+nextDate.setDate(
+  nextDate.getDate() +
+  (scheduleDays[currentStage] || 7)
+);
 
       await postJSON({
         hostname: supabaseURL.hostname,
@@ -376,7 +394,10 @@ const html = emailContent.html;
           'Prefer': 'return=representation'
         }
       }, {
-        followup_stage: (lead.followup_stage || 0) + 1,
+        followup_stage:
+((lead.followup_stage || 0) + 1) > 7
+? 0
+: ((lead.followup_stage || 0) + 1),
         last_email_sent_at: new Date().toISOString(),
         next_followup_at: nextDate.toISOString()
       });
