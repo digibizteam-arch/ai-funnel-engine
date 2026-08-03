@@ -302,7 +302,7 @@ if (savedLeadId) {
 try {
   const supabaseURL = new URL(process.env.SUPABASE_URL);
 
-  await postJSON({
+  const patchResult = await postJSON({
     hostname: supabaseURL.hostname,
     path: `/rest/v1/leads?id=eq.${savedLeadId}`,
     method: 'PATCH',
