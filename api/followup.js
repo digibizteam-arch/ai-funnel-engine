@@ -2,18 +2,30 @@ const https = require('https');
 
 function postJSON(options, body) {
   return new Promise((resolve, reject) => {
+
     const req = https.request(options, (res) => {
+
       let data = '';
 
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => {
+        data += chunk;
+      });
 
       res.on('end', () => {
+
+        // Empty response is valid for PATCH/DELETE
+        if (!data || data.trim() === '') {
+          return resolve({});
+        }
+
         try {
           resolve(JSON.parse(data));
         } catch (e) {
           reject(new Error('JSON parse failed: ' + data));
         }
+
       });
+
     });
 
     req.on('error', reject);
@@ -23,9 +35,9 @@ function postJSON(options, body) {
     }
 
     req.end();
+
   });
 }
-
 async function sendEmail(to, subject, html) {
   return postJSON({
     hostname: 'api.resend.com',
@@ -144,7 +156,7 @@ module.exports = async function handler(req, res) {
           'Content-Type': 'application/json',
           'apikey': process.env.SUPABASE_ANON_KEY,
           'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=minimal'
+          'Prefer': 'return=representation'
         }
       }, {
         followup_stage: (lead.followup_stage || 0) + 1,
