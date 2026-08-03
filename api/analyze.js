@@ -172,7 +172,134 @@ JSON FORMAT:
       // FIX: If Supabase returns an error array instead of the inserted row, log it clearly
       console.error('Supabase insert failed or returned no ID:', JSON.stringify(inserted));
     }
+// ===== DIAGNOSIS EMAIL =====
+if (savedLeadId) {
+  try {
 
+    const chatLink =
+      `${req.headers.origin || 'https://YOUR-VERCEL-DOMAIN.vercel.app'}/chat?id=${savedLeadId}`;
+
+    const emailResult = await sendEmail(
+      email,
+      'Your Personalized Funnel Diagnosis Is Ready',
+      `
+      <div style="font-family:Arial,sans-serif;max-width:700px;margin:auto;padding:20px;">
+
+        <h1 style="color:#0F766E;">
+          ${analysisData.page_title}
+        </h1>
+
+        <p>Hi ${name},</p>
+
+        <p>
+          Thank you for completing the Funnel Assessment.
+          Based on your answers, here is your personalized diagnosis.
+        </p>
+
+        <h2>Your Current Situation</h2>
+
+        <ul>
+          ${(analysisData.situation_bullets || [])
+            .map(item => `<li>${item}</li>`)
+            .join('')}
+        </ul>
+
+        <h2>Diagnosis</h2>
+
+        <p>
+          ${analysisData.diagnosis}
+        </p>
+
+        <p>
+          <em>${analysisData.agitation_footnote}</em>
+        </p>
+
+        <h2>Recommended Next Step</h2>
+
+        <p>
+          ${analysisData.next_step}
+        </p>
+
+        <p>
+          <strong>${analysisData.next_step_footnote}</strong>
+        </p>
+
+        <h2>Recommended Solution</h2>
+
+        <h3>
+          ${analysisData.solution_name}
+        </h3>
+
+        <p>
+          ${analysisData.solution_desc}
+        </p>
+
+        <div
+          style="
+            background:#ECFDF5;
+            border:1px solid #10B981;
+            border-radius:10px;
+            padding:15px;
+            margin-top:25px;
+          "
+        >
+          <strong>
+            Opportunity Score:
+            ${analysisData.opportunity_score}/10
+          </strong>
+        </div>
+
+        <hr style="margin:30px 0;">
+
+        <h2>
+          ${analysisData.cta_headline}
+        </h2>
+
+        <p>
+          ${analysisData.cta_body}
+        </p>
+
+        <div style="margin-top:30px;text-align:center;">
+
+          <a
+            href="${chatLink}"
+            style="
+              background:#0F766E;
+              color:#ffffff;
+              padding:15px 25px;
+              border-radius:8px;
+              text-decoration:none;
+              display:inline-block;
+              font-weight:bold;
+            "
+          >
+            Continue My Strategy Session
+          </a>
+
+        </div>
+
+        <p
+          style="
+            margin-top:25px;
+            color:#666;
+            font-size:14px;
+            text-align:center;
+          "
+        >
+          Click the button above to learn more about your diagnosis,
+          ask questions, and explore the best strategy for your business.
+        </p>
+
+      </div>
+      `
+    );
+
+    console.log('Diagnosis email sent:', emailResult);
+
+  } catch (emailError) {
+    console.error('Resend email error:', emailError);
+  }
+}
   } catch (err) {
     console.error('Supabase save error:', err.message);
     // FIX: If the DB save fails, we need to know. We still return the AI data so the user isn't stuck, 
