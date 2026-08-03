@@ -10,5 +10,12 @@
     { "source": "/admin",        "destination": "/admin.html" },
     { "source": "/proposal",     "destination": "/proposal.html" },
     { "source": "/api/delete", "destination": "/api/delete-lead.js" }
+  ],
+  "crons": [
+    {
+      "path": "/api/followup",
+      "schedule": "0 2 * * *"
+    }
   ]
 }
+
