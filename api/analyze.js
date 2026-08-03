@@ -165,7 +165,10 @@ JSON FORMAT:
       full_analysis: JSON.stringify(analysisData), // All raw data is safely preserved here
       created_at: new Date().toISOString()
     });
-
+    console.log(
+  'INSERT RESPONSE:',
+  JSON.stringify(inserted, null, 2)
+);
     if (Array.isArray(inserted) && inserted[0]?.id) {
       savedLeadId = inserted[0].id;
     } else {
