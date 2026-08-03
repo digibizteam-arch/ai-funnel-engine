@@ -54,7 +54,269 @@ async function sendEmail(to, subject, html) {
     html
   });
 }
+function generateFollowupContent(lead, stage) {
 
+  let analysis = {};
+
+  try {
+    analysis = lead.full_analysis
+      ? JSON.parse(lead.full_analysis)
+      : {};
+  } catch (e) {
+    console.log("Full analysis parse failed");
+  }
+
+
+  const goal = lead.goal || "growing your business";
+  const problem = lead.problem || "generating consistent results";
+
+  const diagnosis = analysis.diagnosis || "";
+  const solution = analysis.solution_name || "a better conversion system";
+
+
+  const chatLink =
+    `https://ai-funnel-engine.vercel.app/chat?id=${lead.id}`;
+
+
+  const templates = {
+
+
+    0: {
+      subject: "Have You Reviewed Your Funnel Diagnosis?",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      When you completed your assessment, you shared that your goal is:
+      </p>
+
+      <p><strong>${goal}</strong></p>
+
+      <p>
+      You also mentioned that one of your biggest challenges is:
+      </p>
+
+      <p><strong>${problem}</strong></p>
+
+      <p>
+      After reviewing your answers, one thing became clear:
+      </p>
+
+      <p>
+      ${diagnosis}
+      </p>
+
+      <p>
+      Your recommended next step is:
+      <strong>${solution}</strong>
+      </p>
+
+      <br>
+
+      <a href="${chatLink}">
+      Continue My Strategy Session
+      </a>
+      `
+    },
+
+
+    1: {
+      subject: "You Might Be Solving The Wrong Problem",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      One thing stood out from your assessment.
+      </p>
+
+      <p>
+      Many business owners try to solve problems like:
+      <strong>${problem}</strong>
+      </p>
+
+      <p>
+      But the real issue is often not the effort.
+      It's having the right system that turns attention into opportunities.
+      </p>
+
+      <p>
+      Your assessment pointed toward:
+      <strong>${solution}</strong>
+      </p>
+
+      <br>
+
+      <a href="${chatLink}">
+      Continue My Strategy Session
+      </a>
+      `
+    },
+
+
+    2: {
+      subject: "What Happens If Nothing Changes?",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      A question worth considering:
+      </p>
+
+      <p>
+      What happens if the challenge you identified:
+      </p>
+
+      <p>
+      <strong>${problem}</strong>
+      </p>
+
+      <p>
+      stays the same for the next 6 to 12 months?
+      </p>
+
+      <p>
+      The goal is not just to fix a problem.
+      It's to create a system that supports the future you want.
+      </p>
+
+      <a href="${chatLink}">
+      Review My Strategy
+      </a>
+      `
+    },
+
+
+    3: {
+      subject: "The Real Bottleneck Behind Growth",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      After analyzing your answers, the biggest opportunity is not simply getting more attention.
+      </p>
+
+      <p>
+      It's creating a predictable process that guides prospects from interest to decision.
+      </p>
+
+      <p>
+      That is where:
+      <strong>${solution}</strong>
+      comes in.
+      </p>
+
+      <a href="${chatLink}">
+      Continue My Strategy Session
+      </a>
+      `
+    },
+
+
+    4: {
+      subject: "A Possible Path Forward For Your Business",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      Based on your assessment, the direction is clear.
+      </p>
+
+      <p>
+      The goal is:
+      <strong>${goal}</strong>
+      </p>
+
+      <p>
+      And the solution is creating a system that removes the bottleneck.
+      </p>
+
+      <a href="${chatLink}">
+      See My Recommended Plan
+      </a>
+      `
+    },
+
+
+    5: {
+      subject: "What If Your System Worked Automatically?",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      Imagine having a process that consistently helps turn interested people into conversations.
+      </p>
+
+      <p>
+      That is the purpose of a properly designed funnel system.
+      </p>
+
+      <a href="${chatLink}">
+      Continue My Strategy Session
+      </a>
+      `
+    },
+
+
+    6: {
+      subject: "Is Solving This Still A Priority?",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      I wanted to check in.
+      </p>
+
+      <p>
+      Is improving:
+      <strong>${goal}</strong>
+      still a priority for you?
+      </p>
+
+      <a href="${chatLink}">
+      Yes, Show Me The Next Step
+      </a>
+      `
+    },
+
+
+    7: {
+      subject: "Should We Close Your Strategy File?",
+
+      html: `
+      <h2>Hi ${lead.name},</h2>
+
+      <p>
+      It's been a while since your assessment.
+      </p>
+
+      <p>
+      Before we close your strategy file, I wanted to ask:
+      </p>
+
+      <p>
+      Is achieving:
+      <strong>${goal}</strong>
+      still important?
+      </p>
+
+      <a href="${chatLink}">
+      I'm Still Interested
+      </a>
+      `
+    }
+
+  };
+
+
+  return templates[stage] || templates[0];
+}
 module.exports = async function handler(req, res) {
 
   try {
@@ -86,58 +348,13 @@ module.exports = async function handler(req, res) {
       const chatLink =
         `${req.headers.origin || 'https://ai-funnel-engine.vercel.app'}/chat?id=${lead.id}`;
 
-      const subject =
-        `Quick Follow-Up About Your Funnel Strategy`;
+      const emailContent = generateFollowupContent(
+  lead,
+  lead.followup_stage || 0
+);
 
-      const html = `
-      <div style="font-family:Arial,sans-serif;max-width:700px;margin:auto;padding:20px">
-
-        <h2>Hi ${lead.name},</h2>
-
-        <p>
-          A few days ago you completed the Funnel Assessment.
-        </p>
-
-        <p>
-          One thing that stood out was your goal:
-          <strong>${lead.goal || 'Grow your business'}</strong>
-        </p>
-
-        <p>
-          You also mentioned your biggest challenge is:
-          <strong>${lead.problem || 'Generating consistent results'}</strong>
-        </p>
-
-        <p>
-          Based on your diagnosis, the recommended solution was:
-        </p>
-
-        <p>
-          <strong>${lead.solution_name || 'A Better Funnel System'}</strong>
-        </p>
-
-        <p>
-          Most business owners never solve the real bottleneck because they stay focused on tactics instead of fixing the system behind the problem.
-        </p>
-
-        <div style="margin-top:30px;text-align:center;">
-          <a
-            href="${chatLink}"
-            style="
-              background:#0F766E;
-              color:white;
-              padding:15px 25px;
-              border-radius:8px;
-              text-decoration:none;
-              display:inline-block;
-              font-weight:bold;
-            ">
-            Continue My Strategy Session
-          </a>
-        </div>
-
-      </div>
-      `;
+const subject = emailContent.subject;
+const html = emailContent.html;
 
       await sendEmail(
         lead.email,
