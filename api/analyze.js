@@ -310,12 +310,12 @@ try {
       'Prefer': 'return=minimal'
     }
   }, {
-    followup_stage: 0,
-    followup_active: true,
-    last_email_sent_at: new Date().toISOString(),
+    follow_up_stage: 0,
+    follow_up_active: true,
+    last_email_sent: new Date().toISOString(),
 
     // First follow-up = 2 days after quiz
-    next_followup_at: new Date(
+    next_follow_up: new Date(
       Date.now() + (2 * 24 * 60 * 60 * 1000)
     ).toISOString()
   });
