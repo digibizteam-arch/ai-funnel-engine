@@ -177,7 +177,7 @@ if (savedLeadId) {
   try {
 
     const chatLink =
-      `${req.headers.origin || 'https://YOUR-VERCEL-DOMAIN.vercel.app'}/chat?id=${savedLeadId}`;
+      `${req.headers.origin || 'https://ai-funnel-engine.vercel.app'}/chat?id=${savedLeadId}`;
 
     const emailResult = await sendEmail(
       email,
