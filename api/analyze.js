@@ -295,7 +295,39 @@ if (savedLeadId) {
     );
 
     console.log('Diagnosis email sent:', emailResult);
+// Schedule follow-up sequence
+try {
+  const supabaseURL = new URL(process.env.SUPABASE_URL);
 
+  await postJSON({
+    hostname: supabaseURL.hostname,
+    path: `/rest/v1/leads?id=eq.${savedLeadId}`,
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': process.env.SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal'
+    }
+  }, {
+    followup_stage: 0,
+    followup_active: true,
+    last_email_sent_at: new Date().toISOString(),
+
+    // First follow-up = 2 days after quiz
+    next_followup_at: new Date(
+      Date.now() + (2 * 24 * 60 * 60 * 1000)
+    ).toISOString()
+  });
+
+  console.log('Follow-up sequence scheduled');
+
+} catch (followupError) {
+  console.error(
+    'Failed to schedule follow-up:',
+    followupError
+  );
+}
   } catch (emailError) {
     console.error('Resend email error:', emailError);
   }
