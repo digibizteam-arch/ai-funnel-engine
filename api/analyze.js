@@ -172,25 +172,7 @@ JSON FORMAT:
       // FIX: If Supabase returns an error array instead of the inserted row, log it clearly
       console.error('Supabase insert failed or returned no ID:', JSON.stringify(inserted));
     }
-    // ===== TEST EMAIL =====
-if (savedLeadId) {
-  try {
-    const emailResult = await sendEmail(
-      email,
-      'Test Email From Ascott Digital Biz',
-      `
-        <h2>Success!</h2>
-        <p>Hello ${name},</p>
-        <p>This is a test email from your funnel system.</p>
-        <p>If you received this email, your Resend integration is working correctly.</p>
-      `
-    );
 
-    console.log('Email sent successfully:', emailResult);
-  } catch (emailError) {
-    console.error('Resend email error:', emailError);
-  }
-}
   } catch (err) {
     console.error('Supabase save error:', err.message);
     // FIX: If the DB save fails, we need to know. We still return the AI data so the user isn't stuck, 
