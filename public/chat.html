@@ -173,11 +173,11 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const greeting = userName
         ? `Hey ${userName.split(' ')[0]}! 👋 I'm Maria's AI assistant. I've seen your quiz results and the funnel preview we built for you — and I have to say, there's a real opportunity here.`
-        : `Hey there! 👋 I'm Maria's AI assistant. I've looked at your quiz results and the funnel preview — and there's a real opportunity here.`;
+        : `Hey there! 👋 I'm Maria's AI assistant. I've looked at your quiz results and recommendations — and there's a real opportunity here.`;
       addBotMessage(greeting);
 
       setTimeout(() => {
-        addBotMessage("Before I share the details of how we can build this for you — can I ask: what stood out most from your funnel preview? What felt most relevant to your business?");
+        addBotMessage("Before I share the details of how we can build this for you — can I ask: what stood out most from your funnel preview or our diagnosis? What felt most relevant to your business?");
       }, 1200);
     }, 800);
   });
