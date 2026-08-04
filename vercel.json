@@ -15,6 +15,10 @@
     {
       "path": "/api/followup",
       "schedule": "0 2 * * *"
+    },
+    {
+  "path": "/api/reactivation",
+  "schedule": "0 3 * * *"
     }
   ]
 }
