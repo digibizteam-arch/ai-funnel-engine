@@ -65,7 +65,7 @@ async function sendEmail(to, subject, html) {
   }, {
 
     from:
-    'Angel Scott <angel@ascottdigitalbiz.com>',
+    'Angel Scott <angel.scott@ascottdigitalbiz.com>',
 
     to: [to],
 
