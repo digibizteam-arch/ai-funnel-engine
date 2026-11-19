@@ -23,13 +23,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .situation-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
 .situation-bullets li{padding-left:18px;position:relative;font-size:0.9rem;line-height:1.55}
 .situation-bullets li::before{content:'•';position:absolute;left:0;color:var(--clay);font-weight:bold}
-/* ROI box */
-.roi-box{background:linear-gradient(135deg,var(--bark),var(--bark-soft));border-radius:14px;padding:24px;color:var(--white);margin-bottom:16px}
-.roi-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:12px;color:var(--sand)}
-.roi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
-.roi-item{background:rgba(255,255,255,0.08);border-radius:10px;padding:14px;text-align:center}
-.roi-num{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--clay);font-weight:700}
-.roi-label{font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:4px}
 /* Package box */
 .package-box{background:var(--bark);border-radius:14px;padding:28px;color:var(--white);margin-bottom:16px}
 .package-name{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px}
@@ -90,7 +83,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   .signed-stamp { display: block !important; }
   /* Dark backgrounds */
   .package-box { background: #3D2B1F !important; color: white !important; }
-  .roi-box { background: #3D2B1F !important; color: white !important; }
   /* Hide browser header/footer URL */
   html { -webkit-print-color-adjust: exact; }
 }
@@ -175,7 +167,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .success-sub{font-size:0.95rem;color:var(--text-mid);line-height:1.65;margin-bottom:32px}
 .calendly-btn{display:inline-block;background:var(--clay);color:white;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;padding:16px 40px;border-radius:100px;text-decoration:none;transition:background 0.2s,transform 0.15s}
 .calendly-btn:hover{background:var(--clay-dark);transform:translateY(-2px)}
-@media(max-width:540px){.sig-grid{grid-template-columns:1fr}.roi-grid{grid-template-columns:1fr 1fr}.proposal-meta{gap:10px}}
+@media(max-width:540px){.sig-grid{grid-template-columns:1fr}.proposal-meta{gap:10px}}
 </style>
 </head>
 <body>
@@ -246,93 +238,22 @@ function getDisplayName() {
   return n;
 }
 
-// Determine if advisor/coach type for ROI section
-const ADVISOR_ROLES = ['advisor','coach','trainer','consultant','financial','insurance','sales professional'];
-const isAdvisor = ADVISOR_ROLES.some(r => (role||'').toLowerCase().includes(r));
-
-// Parse offer price for ROI calculation
-function parsePrice(p) {
-  if (!p) return 0;
-  const num = p.replace(/[^0-9.]/g,'');
-  return parseFloat(num) || 0;
-}
-const offerVal = parsePrice(price);
-
-// ── PACKAGES with real service descriptions ──
-const PACKAGES = {
-  full: {
-    name: 'Full System Package',
-    price: '₱25,000',
-    priceNote: 'One-time investment · Complete done-for-you system',
-    services: [
-      { name: 'Professional Landing Page', why: 'Psychology-driven design that speaks directly to your ideal client — attracting only qualified leads who already resonate with what you offer.' },
-      { name: 'Lead Generation Quiz & Diagnostic Funnel', why: 'Filters and qualifies your leads automatically — so only the right people move forward, saving you time on unqualified conversations.' },
-      { name: 'Personalized AI Result & Diagnosis Page', why: 'Delivers a custom diagnosis based on their answers — builds deep trust and perceived value before you ever speak to them.' },
-      { name: 'Funnel Strategy & User Journey Mapping', why: 'Maps the complete path from stranger to ready buyer — educating and preparing them so they arrive at your call already convinced.' },
-      { name: 'AI Sales Chatbot (trained on your offer)', why: 'Handles questions, presents your offer, and guides the conversation toward booking — even while you\'re offline.' },
-      { name: 'Booking & Calendly Integration', why: 'Seamless appointment setting built into the flow — leads book directly without back-and-forth messages.' },
-      { name: 'Lead Management & Conversion System (₱2,500/month)', why: 'Manage and convert your leads with a guided pipeline and ready-to-use follow-ups — so every opportunity is tracked and acted on.' },
-    ]
-  },
-  mid: {
-    name: 'Growth Package',
-    price: '₱15,000',
-    priceNote: 'One-time investment · Core system built for you',
-    services: [
-      { name: 'Professional Landing Page', why: 'Psychology-driven design that attracts only qualified leads who resonate with your offer.' },
-      { name: 'Lead Generation Quiz & Diagnostic Funnel', why: 'Filters and qualifies leads automatically — only serious prospects move forward.' },
-      { name: 'Personalized AI Result & Diagnosis Page', why: 'Builds trust and perceived value before you ever get on a call.' },
-      { name: 'AI Sales Chatbot (trained on your offer)', why: 'Presents your offer and guides leads toward booking — 24/7.' },
-      { name: 'Booking & Calendly Integration', why: 'Direct appointment setting built into the funnel — no friction.' },
-      { name: 'Lead Management & Conversion System (₱2,500/month)', why: 'Manage and convert your leads with a guided pipeline and ready-to-use follow-ups — so every opportunity is tracked and acted on.' },
-    ]
-  },
-  basic: {
-    name: 'Starter Package',
-    price: '₱9,997',
-    priceNote: 'One-time investment · Foundation to get you started',
-    services: [
-      { name: 'Professional Landing Page', why: 'Psychology-based design that attracts and filters your ideal client from the first click.' },
-      { name: 'Funnel Strategy & User Journey Mapping', why: 'A clear path from visitor to booked appointment — built around your specific offer.' },
-      { name: 'Booking & Calendly Integration', why: 'Seamless appointment setting so leads can book directly without extra steps.' },
-      { name: 'Lead Management & Conversion System (₱2,500/month)', why: 'Manage and convert your leads with a guided pipeline and ready-to-use follow-ups — so every opportunity is tracked and acted on.' },
-    ]
-  }
+// ── PACKAGE: single founder's offer ──
+// Keys full / mid / basic are kept so chat.js, admin.html and old proposal links keep working.
+const FOUNDER_PACKAGE = {
+  name: 'AI Marketing System for Financial Advisors',
+  price: '₱4,997',
+  priceNote: "Founder's offer · Limited slots · Regular price ₱9,997 · One-time investment",
+  services: [
+    { name: 'AI Short Film — Built Around Your Specialty', why: 'A psychology-based AI film telling a story your ideal clients relate to, personalized to your specialty. You post it on your own social media to attract the right people to your page.' },
+    { name: 'Personal Landing Page with Lead Capture', why: 'A simple profile page showing who you are and what you do best, with clear calls-to-action that collect names and emails from people who watched your film.' },
+    { name: 'Follow-up & Nurture Email Sequence', why: 'Automatic emails that follow up with every new lead and warm them toward a conversation — so no interested lead goes cold.' },
+    { name: 'AI Sales Chatbot (trained on your offer)', why: 'Answers questions, presents your offer, and guides interested leads toward the next step — even while you\'re offline.' },
+  ]
 };
+const PACKAGES = { full: FOUNDER_PACKAGE, mid: FOUNDER_PACKAGE, basic: FOUNDER_PACKAGE };
 
 const pkg = PACKAGES[packageKey] || PACKAGES.full;
-
-function buildROISection() {
-  if (!isAdvisor || !offerVal) return '';
-  const closedPerMonth = 2;
-  const revenueGain = offerVal * closedPerMonth;
-  const paybackDays = Math.ceil(25000 / (revenueGain / 30));
-  return `
-  <div class="section">
-    <div class="section-title">Why This Investment Makes Sense for You</div>
-    <div class="roi-box">
-      <div class="roi-title">Quick ROI Estimate</div>
-      <p style="font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:16px">
-        If this system helps you close just <strong style="color:var(--sand)">2 more qualified clients per month</strong> at your current offer price of <strong style="color:var(--sand)">${price}</strong>:
-      </p>
-      <div class="roi-grid">
-        <div class="roi-item">
-          <div class="roi-num">₱${revenueGain.toLocaleString()}</div>
-          <div class="roi-label">Added revenue per month</div>
-        </div>
-        <div class="roi-item">
-          <div class="roi-num">${paybackDays}d</div>
-          <div class="roi-label">Days to pay itself back</div>
-        </div>
-        <div class="roi-item">
-          <div class="roi-num">∞</div>
-          <div class="roi-label">Keeps working after that</div>
-        </div>
-      </div>
-    </div>
-    <p style="font-size:0.82rem;color:var(--text-mid);font-style:italic;text-align:center">*Illustrative estimate based on your offer price. Actual results depend on traffic and conversion.</p>
-  </div>`;
-}
 
 function buildProposal() {
   displayName = getDisplayName();
@@ -352,7 +273,7 @@ function buildProposal() {
   <div class="proposal-header">
     <div class="proposal-brand">Maria Angelica Scott — System Architect</div>
     <h1 class="proposal-title">${displayName ? `Proposal for ${displayName}` : 'Your Personalized Proposal'}</h1>
-    <p class="proposal-sub">A done-for-you funnel and automation system, built around your exact offer, client, and goal.</p>
+    <p class="proposal-sub">A done-for-you AI film, landing page, email sequence, and AI sales chatbot, built around your specialty and your ideal client.</p>
     <div class="proposal-meta">
       <span>📅 ${today}</span>
       ${email ? `<span>📧 ${email}</span>` : ''}
@@ -367,8 +288,6 @@ function buildProposal() {
       ${situationItems.map(i=>`<li>${i}</li>`).join('')}
     </ul>
   </div>` : ''}
-
-  ${buildROISection()}
 
   <div class="section">
     <div class="section-title">What's Included & Why It Matters</div>
@@ -391,9 +310,9 @@ function buildProposal() {
     <div class="section-title">Timeline & Delivery</div>
     <div class="timeline-steps">
       <div class="timeline-step"><div class="step-num">1</div><div><div class="step-title">Onboarding Call (Day 1)</div><div class="step-desc">30-minute call to align on all details — branding, offer, and target client. No prep needed.</div></div></div>
-      <div class="timeline-step"><div class="step-num">2</div><div><div class="step-title">Build Phase (Days 2–5)</div><div class="step-desc">Full system build. You'll receive a private preview link to review everything before launch.</div></div></div>
+      <div class="timeline-step"><div class="step-num">2</div><div><div class="step-title">Build Phase (Days 2–5)</div><div class="step-desc">We build your AI film, landing page, email sequence, and chatbot. You'll receive a private preview link to review everything before launch.</div></div></div>
       <div class="timeline-step"><div class="step-num">3</div><div><div class="step-title">Revisions (Day 6)</div><div class="step-desc">We adjust anything that doesn't feel right — copy, design, flow — until it's exactly you.</div></div></div>
-      <div class="timeline-step"><div class="step-num">4</div><div><div class="step-title">Launch (Day 7)</div><div class="step-desc">System goes live. Full walkthrough so you know exactly how to use and monitor everything.</div></div></div>
+      <div class="timeline-step"><div class="step-num">4</div><div><div class="step-title">Launch (Day 7)</div><div class="step-desc">Your page goes live and your film is delivered as a video file for you to post. Full walkthrough so you know exactly how everything works.</div></div></div>
     </div>
   </div>
 
@@ -404,6 +323,8 @@ function buildProposal() {
       <div class="term-item">Delivery within 7 business days from onboarding call.</div>
       <div class="term-item">2 rounds of revisions included. Additional revisions billed at ₱1,500/hr.</div>
       <div class="term-item">All files, credentials, and access transferred to client upon full payment.</div>
+      <div class="term-item">Founder's offer: ₱4,997 is limited to a small number of founding clients. The regular price is ₱9,997.</div>
+      <div class="term-item">Your AI film is delivered as a video file. You post it on your own social media accounts.</div>
       <div class="term-item">Prices are fixed. No discounts, installments, or payment plans apply.</div>
       <div class="term-item">This proposal is valid for 7 days from the date above.</div>
     </div>
