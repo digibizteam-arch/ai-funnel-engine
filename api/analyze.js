@@ -9,7 +9,7 @@ async function sendEmail(to, subject, html) {
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
     }
   }, {
-    from: 'Angel Scott <angel@ascottdigitalbiz.com>',
+    from: 'Angel Scott <angel.scott@ascottdigitalbiz.com>',
     to: [to],
     subject,
     html
