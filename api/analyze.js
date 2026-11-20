@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
   const resolvedResources = body.investment || body.resources || 'Not provided';
   const businessName = body.business_name || '';
 
-  const prompt = `You are an expert funnel strategist and conversion copywriter who specializes in deep psychological diagnosis. A potential client just completed a discovery questionnaire. Your job is to produce a highly personalized, empathetic funnel diagnosis. Use their exact words and situation throughout.
+  const prompt = `You are a content-attraction strategist who works with Filipino financial advisors (life insurance, health and critical illness, education, retirement and investment advisors). A potential client just completed a discovery questionnaire. Your job is to write a highly personalized, empathetic diagnosis of why their online posts are not attracting the right prospects, and to show how a short AI film plus one personal advisor profile link can help. Use their exact words and situation throughout.
 
 CLIENT ANSWERS:
 Name: ${name}
@@ -71,31 +71,62 @@ Readiness level: ${resolvedReadiness}
 Biggest obstacle: ${resolvedObstacle}
 Resources / Investment level: ${resolvedResources}
 
+WHO YOU ARE WRITING FOR:
+A Filipino financial advisor, often working under a company or agency, who usually starts with a warm market: family, friends, former classmates and officemates, church and community groups, and OFW families. If the role label above is clearly not finance-related, still use the same attraction lens but do not call them a financial advisor.
+
+HOW THEY USUALLY MARKET TODAY (mention only what fits their answers):
+- Posting on Facebook (feed, stories, occasional Facebook Live) using company templates, product posters, or general tips
+- Messenger and Viber messages, group chat posts, and "Hi po, kumusta?" follow-ups
+- Asking for referrals, joining networking events or seminars
+- Posting only when they have time, so content is irregular
+
+COMMON REAL STRUGGLES IN THE PHILIPPINE MARKET (use the ones that fit their answers, name them gently, never insult):
+- Their posts look like everyone else's, so nothing stands out in a crowded Facebook feed
+- They worry about sounding pushy or "hard sell", so they post little or stay vague
+- Their warm market is running thin and referrals are unpredictable
+- Prospects react or "seen" the message but never reply, or say "pag-iisipan ko muna", because trust is not built yet
+- Many Filipinos see insurance as a gastos or are wary of advisors, so a product pitch makes them pull back, while a story about their own family makes them listen
+- There is no single clear place to send people. Details are scattered across posts, chats and links, so they explain everything again in every conversation
+- Between clients, family and sometimes another job, they cannot post consistently
+
+WHAT THIS SERVICE CAN DO (describe it as support, never as a guaranteed result):
+- A short AI film with a relatable, psychology-based story about a real family worry, made around their specialty, to give a post a stronger hook and help the right viewer feel understood
+- A personal advisor profile page: one trustworthy link for every post, showing who they are, what they specialize in, who they help, and clear calls to action for interested prospects to reach out
+- A follow-up email sequence that keeps in touch with people who showed interest
+- An AI sales chatbot trained on their offer, so common questions get answered while they are busy
+- The same profile link can be reused on any post they make
+
+STRICT HONESTY RULES:
+- Never promise or imply any result: no guaranteed followers, reach, views, leads, booked calls, clients, sales or income, and never state numbers or percentages. Results depend on how they position themselves in their specialty, how consistently they share their story, and how they follow up.
+- Do not give financial, insurance or investment advice. Do not mention specific products, companies or regulators.
+- Do not use the word "funnel".
+- No stereotypes and no blame. The problem is the message and the system around it, not the person.
+
 OUTPUT RULES:
 - Use their name (${name}) naturally in bullet points
 - Reference their exact goal and challenge using their own words
-- Be specific — no generic statements
-- Tone: warm, direct, expert — like a trusted advisor
+- Be specific, no generic statements
+- Tone: warm, direct, expert, like a trusted advisor who understands the Philippine market. Write in clear English. A short, natural Filipino phrase is fine once or twice, never forced.
 - Respond ONLY with a valid raw JSON object. No markdown. No code fences. No explanation.
 - For buying_intent: score 8-10 with clear budget and urgency = "hot". Score 5-7 or budget unclear = "warm". Score 1-4 or no budget = "cold".
 
 JSON FORMAT:
 {
-  "page_title": "Your Personalized Funnel Diagnosis",
+  "page_title": "Your Personalized Prospect-Attraction Diagnosis",
   "situation_bullets": [
     "You're a [their role] who's currently [restate their challenge in their own words]",
     "Your top goal is to [restate their goal exactly]",
     "Ideally [their specific success outcome]",
     "The biggest friction point is [restate their obstacle]"
   ],
-  "diagnosis": "2-3 sentence paragraph on WHY they are stuck. Specific to their challenge. Use the word you. Reference the gap between where they are and where they want to be.",
-  "agitation_footnote": "One sentence on what this is costing them right now.",
-  "next_step": "2-3 sentences on the single most important action they should take RIGHT NOW. Specific to their situation. Address their obstacle naturally.",
+  "diagnosis": "3-4 sentences on WHY their posts are not turning into conversations. Specific to their challenge and what they have tried. Name 1-2 of the struggles above that fit them. Use the word you. Reference the gap between where they are and where they want to be.",
+  "agitation_footnote": "1-2 sentences on what this is costing them right now, such as good posts that get scrolled past and interested people who never reach out.",
+  "next_step": "2-3 sentences on the single most important action: a story-based hook that makes the right prospect stop and relate, with one personal link they can send everywhere. Specific to their situation. Address their obstacle naturally.",
   "next_step_footnote": "One short sentence reinforcing why this step matters most.",
-  "solution_name": "Short name for their ideal solution e.g. A Value-First Lead Qualification Funnel",
-  "solution_desc": "2 sentences on how this solution addresses their challenge and gets them to their goal. Reference their resources to show it fits.",
+  "solution_name": "Short name for their ideal solution e.g. An AI Film and Advisor Profile Prospect-Attraction System",
+  "solution_desc": "3 sentences on how the AI film and advisor profile page address their challenge and can be reused on any post. The last sentence plainly says the system gives their message a stronger hook and a clear place to send people, while results depend on their positioning and consistency.",
   "cta_headline": "Personalized CTA headline tied to their goal or outcome",
-  "cta_body": "2 sentences. First: what we will build for them. Second: speak to their obstacle to remove hesitation.",
+  "cta_body": "2 sentences. First: what we will build for them (AI short film, personal advisor profile page, follow-up emails and AI sales chatbot). Second: speak to their obstacle to remove hesitation, without promising results.",
   "buying_intent": "Use EXACTLY one of: hot, warm, cold. Rules — hot: score 8-10 AND has budget AND expresses urgency or strong desire to start now; warm: score 5-7 OR has budget but uncertain timing; cold: score 1-4 OR no budget OR just exploring with no urgency",
   "opportunity_score": 7
 }`;
@@ -114,7 +145,7 @@ JSON FORMAT:
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.75,
-      max_tokens: 900
+      max_tokens: 1300
     });
 
     if (openAIData.error) {
@@ -184,7 +215,7 @@ if (savedLeadId) {
 
     const emailResult = await sendEmail(
       email,
-      'Your Personalized Funnel Diagnosis Is Ready',
+      'Your Personalized Prospect-Attraction Diagnosis Is Ready',
       `
       <div style="font-family:Arial,sans-serif;max-width:700px;margin:auto;padding:20px;">
 
@@ -195,7 +226,7 @@ if (savedLeadId) {
         <p>Hi ${name},</p>
 
         <p>
-          Thank you for completing the Funnel Assessment.
+          Thank you for completing the Assessment.
           Based on your answers, here is your personalized diagnosis.
         </p>
 
@@ -290,7 +321,7 @@ if (savedLeadId) {
           "
         >
           Click the button above to learn more about your diagnosis,
-          ask questions, and explore the best strategy for your business.
+          ask questions, and explore the best way to attract more prospects online.
         </p>
 
       </div>
