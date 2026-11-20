@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trusted Advisor Match PH | Find Your Financial Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f3f5f7;
+    color: #1e293b;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tam-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 20px;
+  }
+  .tam-topbar-inner {
+    max-width: 1020px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .tam-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 16px;
+    color: #1b3654;
+    text-decoration: none;
+  }
+  .tam-brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: #244363;
+    display: inline-block;
+  }
+  .tam-trust-pill {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 5px 12px;
+    border-radius: 9999px;
+  }
+
+  /* QUIZ CONTAINER */
+  .tam-quiz-section {
+    max-width: 680px;
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+  .tam-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+  }
+  .tam-quiz-header {
+    background: linear-gradient(135deg, #1b3654 0%, #244363 100%);
+    color: #ffffff;
+    padding: 28px 28px 24px;
+  }
+  .tam-eyebrow {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.14);
+    color: #e0f2fe;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+  }
+  .tam-quiz-header h1 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #ffffff;
+  }
+  .tam-quiz-header p {
+    margin: 0;
+    font-size: 14px;
+    color: #cbd5e1;
+  }
+  .tam-quiz-body {
+    padding: 26px 28px 28px;
+  }
+  .tam-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .tam-progress-track {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .tam-progress-fill {
+    height: 100%;
+    width: 25%;
+    background: #244363;
+    border-radius: 9999px;
+    transition: width 0.25s ease;
+  }
+  .tam-step-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+  }
+  .tam-q-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .tam-q-sub {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    color: #64748b;
+  }
+  .tam-opt-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .tam-opt {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 15px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .tam-opt:hover {
+    border-color: #244363;
+    background: #f1f5f9;
+    transform: translateY(-1px);
+  }
+  .tam-opt.active {
+    border-color: #244363;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(36, 67, 99, 0.14);
+  }
+  .tam-opt-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .tam-opt-desc {
+    display: block;
+    font-size: 13px;
+    color: #475569;
+    margin-top: 3px;
+  }
+  .tam-opt-arrow {
+    color: #64748b;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .tam-quiz-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tam-back-btn {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tam-back-btn:hover { background: #f8fafc; }
+
+  /* MATCHING LOADER */
+  .tam-loader {
+    text-align: center;
+    padding: 56px 24px;
+  }
+  .tam-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3.5px solid #e2e8f0;
+    border-top-color: #244363;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: tamSpin 0.75s linear infinite;
+  }
+  @keyframes tamSpin { to { transform: rotate(360deg); } }
+
+  /* RESULTS DIRECTORY VIEW */
+  .tam-results-section {
+    max-width: 1020px;
+    margin: 28px auto 56px;
+    padding: 0 16px;
+  }
+  .tam-results-banner {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .tam-results-banner h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .tam-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tam-pill {
+    font-size: 12px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border: 1px solid #bfdbfe;
+    padding: 4px 11px;
+    border-radius: 9999px;
+  }
+  .tam-retake-btn {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #334155;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tam-retake-btn:hover { border-color: #244363; color: #1b3654; }
+
+  .tam-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  @media (min-width: 680px) {
+    .tam-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 980px) {
+    .tam-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .tam-adv-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 3px 14px rgba(15, 23, 42, 0.04);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+  }
+  .tam-adv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+  .tam-adv-card.is-recommended {
+    border: 1.5px solid #93c5fd;
+  }
+  .tam-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    min-height: 24px;
+  }
+  .tam-badge-rec {
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+  }
+  .tam-badge-ver {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+  }
+  .tam-adv-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .tam-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    background: #f1f5f9;
+    flex-shrink: 0;
+  }
+  .tam-adv-name {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+  }
+  .tam-adv-role {
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #64748b;
+  }
+  .tam-spec-tag {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #1b3654;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .tam-detail-block {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #334155;
+  }
+  .tam-detail-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    margin-bottom: 2px;
+  }
+  .tam-adv-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .tam-style-note {
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tam-cta-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #244363;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.15s ease;
+  }
+  .tam-cta-btn:hover { filter: brightness(0.92); }
+  .tam-hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="tam-topbar">
+  <div class="tam-topbar-inner">
+    <a href="#" id="tam-home-link" class="tam-brand">
+      <span class="tam-brand-dot"></span>
+      <span>Trusted Advisor Match PH</span>
+    </a>
+    <span class="tam-trust-pill">Verified Filipino Financial Advisors</span>
+  </div>
+</header>
+
+<!-- STEP-BY-STEP 4-QUESTION MATCHING QUIZ -->
+<main id="tam-quiz-view" class="tam-quiz-section">
+  <div class="tam-card">
+    <div class="tam-quiz-header">
+      <span class="tam-eyebrow">30-Second Guided Match</span>
+      <h1>Find the Right Financial Advisor for Your Situation</h1>
+      <p>Answer 4 quick questions—no calls, no spam, and zero obligation—so we can match you with advisors who specialize in your exact goals.</p>
+    </div>
+
+    <div class="tam-quiz-body" id="tam-quiz-content">
+      <div class="tam-progress-row">
+        <div class="tam-progress-track"><div id="tam-progress-fill" class="tam-progress-fill"></div></div>
+        <span id="tam-step-count" class="tam-step-count">Question 1 of 4</span>
+      </div>
+      <div id="tam-question-box"></div>
+      <div class="tam-quiz-footer">
+        <button type="button" id="tam-back-btn" class="tam-back-btn tam-hidden">&larr; Previous</button>
+        <span style="font-size:12px;color:#94a3b8;margin-left:auto;">Tap an option to continue</span>
+      </div>
+    </div>
+
+    <div class="tam-loader tam-hidden" id="tam-loader-box">
+      <div class="tam-spinner"></div>
+      <h3 style="margin:0 0 6px;font-size:17px;font-weight:700;color:#0f172a;">Matching you with specialized advisors...</h3>
+      <p style="margin:0;font-size:13.5px;color:#64748b;">Filtering by your financial priority, life role, and preferred consultation style.</p>
+    </div>
+  </div>
+</main>
+
+<!-- RECOMMENDED ADVISORS DIRECTORY VIEW -->
+<section id="tam-results-view" class="tam-results-section tam-hidden">
+  <div class="tam-results-banner">
+    <div>
+      <h2>Your Recommended Financial Advisors</h2>
+      <div id="tam-active-pills" class="tam-filter-pills"></div>
+    </div>
+    <button type="button" id="tam-retake-btn" class="tam-retake-btn">Change Answers</button>
+  </div>
+
+  <div id="tam-advisor-grid" class="tam-grid"></div>
+</section>
+
+<script>
+(function() {
+  // ── ADVISOR ROSTER ────────────────────────────────────────────────────────
+  // Internal `visibilityScore` orders cards cleanly without displaying numbers to prospects.
+  // Top 5 matching advisors receive the "Recommended" badge automatically.
+  const ADVISORS = [
+    {
+      slug: 'angela-santos',
+      fullName: 'Angela Santos',
+      roleTitle: 'Licensed Financial & Health Protection Advisor',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Angela%20Santos&role=Licensed%20Financial%20%26%20Health%20Protection%20Advisor',
+      specialtyLabel: 'Critical Illness & Family Income Shield',
+      whoIHelp: 'Breadwinners, young parents, and corporate employees whose company HMO is not enough for major illnesses.',
+      solutionOffered: 'Critical Illness Lump-Sum Plans, Family Income Replacement & Hospitalization Backup.',
+      specialties: ['critical-illness', 'family-protection'],
+      roles: ['breadwinner', 'young-pro', 'ofw'],
+      styles: ['chat', 'call', 'in-person'],
+      consultationNote: 'Available via Messenger / Viber or 15-min Zoom',
+      isVerified: true,
+      visibilityScore: 98
+    },
+    {
+      slug: 'marco-reyes',
+      fullName: 'Marco Reyes, RFP®',
+      roleTitle: 'Wealth, Business & Estate Planning Specialist',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Marco%20Reyes&role=Wealth%2C%20Business%20%26%20Estate%20Planning%20Specialist',
+      specialtyLabel: 'Business Continuity & 6% Estate Tax Shield',
+      whoIHelp: 'SME business owners, self-employed professionals, and families with real estate or bank assets to protect.',
+      solutionOffered: 'Estate Tax Liquidity Plans, Key-Person Protection & Peso/Dollar Wealth Growth.',
+      specialties: ['business-estate', 'wealth-retirement'],
+      roles: ['business-owner', 'high-net-worth'],
+      styles: ['call', 'in-person', 'chat'],
+      consultationNote: 'Available for Zoom Strategy Review or Metro Manila Coffee',
+      isVerified: true,
+      visibilityScore: 95
+    },
+    {
+      slug: 'clarissa-mendoza',
+      fullName: 'Clarissa Mendoza',
+      roleTitle: 'OFW & Global Filipino Family Advisor',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Clarissa%20Mendoza&role=OFW%20%26%20Global%20Filipino%20Family%20Advisor',
+      specialtyLabel: 'OFW Remittance Protection & College Funds',
+      whoIHelp: 'OFWs, seafarers, and global Filipinos building guaranteed college funds and retirement back home.',
+      solutionOffered: 'Guaranteed Education Plans, OFW Income Protection & Peso/USD Retirement Funds.',
+      specialties: ['family-protection', 'wealth-retirement', 'critical-illness'],
+      roles: ['ofw', 'breadwinner'],
+      styles: ['chat', 'call'],
+      consultationNote: 'Flexible timezone chat via WhatsApp / Viber / Zoom',
+      isVerified: true,
+      visibilityScore: 92
+    },
+    {
+      slug: 'rafael-villanueva',
+      fullName: 'Rafael Villanueva',
+      roleTitle: 'Senior Protection & Policy Review Advisor',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Rafael%20Villanueva&role=Senior%20Protection%20%26%20Policy%20Review%20Advisor',
+      specialtyLabel: 'Second-Opinion Policy Audit & Family Security',
+      whoIHelp: 'Individuals with existing policies who want an honest coverage check, plus growing families.',
+      solutionOffered: 'No-Pressure Policy Audit, Term/Whole Life Protection & Health Fund Top-Ups.',
+      specialties: ['family-protection', 'critical-illness', 'business-estate'],
+      roles: ['breadwinner', 'business-owner', 'high-net-worth', 'young-pro'],
+      styles: ['chat', 'call', 'in-person'],
+      consultationNote: 'Quick Messenger Q&A or 15-min Clarity Call',
+      isVerified: true,
+      visibilityScore: 89
+    },
+    {
+      slug: 'bianca-cruz',
+      fullName: 'Bianca Cruz',
+      roleTitle: 'Young Professional & Starter Wealth Advisor',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Bianca%20Cruz&role=Young%20Professional%20%26%20Starter%20Wealth%20Advisor',
+      specialtyLabel: 'Starter Health Shield & Automated Savings',
+      whoIHelp: 'First-time policy buyers, freelancers, and young professionals starting their financial foundation.',
+      solutionOffered: 'Budget-Friendly Health + Life Combos & Disciplined Long-Term Savings Plans.',
+      specialties: ['critical-illness', 'wealth-retirement', 'family-protection'],
+      roles: ['young-pro', 'breadwinner'],
+      styles: ['chat', 'call'],
+      consultationNote: 'Chat-first consultation via Messenger or Instagram',
+      isVerified: true,
+      visibilityScore: 86
+    },
+    {
+      slug: 'dennis-lim',
+      fullName: 'Dennis Lim',
+      roleTitle: 'Corporate & High-Net-Worth Asset Advisor',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: '/api/demo?name=Dennis%20Lim&role=Corporate%20%26%20High-Net-Worth%20Asset%20Advisor',
+      specialtyLabel: 'Asset Preservation & Legacy Transfer',
+      whoIHelp: 'Property owners, doctors, executives, and multi-generational family businesses.',
+      solutionOffered: 'BIR Estate Tax Funding, Corporate Keyman Plans & Dollar-Denominated Legacy Plans.',
+      specialties: ['business-estate', 'wealth-retirement'],
+      roles: ['high-net-worth', 'business-owner'],
+      styles: ['call', 'in-person'],
+      consultationNote: 'Private 1-on-1 Zoom or Executive Office Meeting',
+      isVerified: false,
+      visibilityScore: 80
+    }
+  ];
+
+  // ── 4 QUALIFYING QUESTIONS ────────────────────────────────────────────────
+  const QUIZ_STEPS = [
+    {
+      key: 'goal',
+      title: '1. What is your #1 financial priority right now?',
+      sub: 'Choose the main area you want to secure first.',
+      options: [
+        { value: 'critical-illness', label: 'Health & Critical Illness Safety Net', desc: 'Protect your savings from major hospital bills like cancer, heart disease, or stroke.' },
+        { value: 'family-protection', label: 'Family Income & Children’s Education', desc: 'Ensure household bills and school tuition continue no matter what happens.' },
+        { value: 'wealth-retirement', label: 'Wealth Growth & Retirement Fund', desc: 'Build long-term savings that outpace ordinary bank interest.' },
+        { value: 'business-estate', label: 'Business & Estate Preservation', desc: 'Protect your business and keep family properties safe from estate freeze & taxes.' }
+      ]
+    },
+    {
+      key: 'role',
+      title: '2. Which best describes your current role?',
+      sub: 'This matches you with advisors experienced in your exact life stage.',
+      options: [
+        { value: 'breadwinner', label: 'Parent / Family Breadwinner', desc: 'Supporting children, spouse, or parents who depend on your income.' },
+        { value: 'ofw', label: 'OFW / Global Filipino', desc: 'Working abroad to build security and a future for family in the Philippines.' },
+        { value: 'business-owner', label: 'Business Owner / Self-Employed', desc: 'Running a business or freelance practice with no company HMO or retirement.' },
+        { value: 'high-net-worth', label: 'Property / Asset Builder', desc: 'Looking to preserve existing properties, investments, and family legacy.' },
+        { value: 'young-pro', label: 'Young Professional / Single', desc: 'Starting early to lock in affordable health and savings protection.' }
+      ]
+    },
+    {
+      key: 'gap',
+      title: '3. What is your current setup today?',
+      sub: 'So your advisor knows where to start without repeating basics you already know.',
+      options: [
+        { value: 'none', label: 'No personal plan yet', desc: 'I want a clear, beginner-friendly explanation of where to start.' },
+        { value: 'hmo-only', label: 'Company HMO / SSS only', desc: 'I have work benefits, but I know they stop if I resign or get seriously ill.' },
+        { value: 'second-opinion', label: 'Have an existing policy—want a review', desc: 'I want to check if my current coverage is still enough for my family.' },
+        { value: 'ready-to-grow', label: 'Emergency fund ready—looking to expand', desc: 'I have basic savings and want smarter health, wealth, or estate options.' }
+      ]
+    },
+    {
+      key: 'style',
+      title: '4. How are you most comfortable starting?',
+      sub: 'Zero pressure—connect in the way that feels easiest for you.',
+      options: [
+        { value: 'chat', label: 'Quick Chat First (Messenger / Viber / WhatsApp)', desc: 'Ask questions via message first—no phone calls yet.' },
+        { value: 'call', label: '15-Minute Online Clarity Call (Zoom / Meet)', desc: 'Walk through visual numbers and options together online.' },
+        { value: 'in-person', label: 'In-Person Coffee / Office Meeting', desc: 'Prefer a face-to-face conversation at a convenient location.' }
+      ]
+    }
+  ];
+
+  const state = {
+    step: 0,
+    answers: {}
+  };
+
+  const quizView = document.getElementById('tam-quiz-view');
+  const quizContent = document.getElementById('tam-quiz-content');
+  const loaderBox = document.getElementById('tam-loader-box');
+  const resultsView = document.getElementById('tam-results-view');
+  const questionBox = document.getElementById('tam-question-box');
+  const progressFill = document.getElementById('tam-progress-fill');
+  const stepCount = document.getElementById('tam-step-count');
+  const backBtn = document.getElementById('tam-back-btn');
+
+  function renderQuizStep() {
+    const q = QUIZ_STEPS[state.step];
+    progressFill.style.width = `${((state.step + 1) / QUIZ_STEPS.length) * 100}%`;
+    stepCount.textContent = `Question ${state.step + 1} of ${QUIZ_STEPS.length}`;
+    backBtn.classList.toggle('tam-hidden', state.step === 0);
+
+    const selectedVal = state.answers[q.key];
+    let html = `<h2 class="tam-q-title">${q.title}</h2><p class="tam-q-sub">${q.sub}</p><div class="tam-opt-list">`;
+    q.options.forEach((opt) => {
+      const isSelected = selectedVal === opt.value;
+      html += `
+        <button type="button" class="tam-opt ${isSelected ? 'active' : ''}" data-val="${opt.value}" data-label="${opt.label}">
+          <div>
+            <span class="tam-opt-title">${opt.label}</span>
+            <span class="tam-opt-desc">${opt.desc}</span>
+          </div>
+          <span class="tam-opt-arrow">&rarr;</span>
+        </button>`;
+    });
+    html += `</div>`;
+    questionBox.innerHTML = html;
+
+    questionBox.querySelectorAll('.tam-opt').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.answers[q.key] = btn.getAttribute('data-val');
+        state.answers[q.key + '_label'] = btn.getAttribute('data-label');
+
+        if (state.step < QUIZ_STEPS.length - 1) {
+          state.step += 1;
+          renderQuizStep();
+        } else {
+          runMatchTransition();
+        }
+      });
+    });
+  }
+
+  function runMatchTransition() {
+    quizContent.classList.add('tam-hidden');
+    loaderBox.classList.remove('tam-hidden');
+
+    setTimeout(() => {
+      loaderBox.classList.add('tam-hidden');
+      quizContent.classList.remove('tam-hidden');
+      quizView.classList.add('tam-hidden');
+      renderDirectoryResults();
+      resultsView.classList.remove('tam-hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 550);
+  }
+
+  function renderDirectoryResults() {
+    const { goal, role, style, goal_label, role_label, style_label } = state.answers;
+
+    let matched = ADVISORS.filter((adv) => {
+      const goalOk = !goal || adv.specialties.includes(goal);
+      const roleOk = !role || adv.roles.includes(role);
+      return goalOk && roleOk;
+    });
+
+    if (matched.length < 3) {
+      const remaining = ADVISORS.filter((adv) => !matched.includes(adv) && (!goal || adv.specialties.includes(goal)));
+      matched = matched.concat(remaining);
+    }
+    if (matched.length === 0) {
+      matched = [...ADVISORS];
+    }
+
+    matched.sort((a, b) => {
+      const aStyleBonus = (style && a.styles.includes(style)) ? 10 : 0;
+      const bStyleBonus = (style && b.styles.includes(style)) ? 10 : 0;
+      return (b.visibilityScore + bStyleBonus) - (a.visibilityScore + aStyleBonus);
+    });
+
+    const pills = [goal_label, role_label, style_label].filter(Boolean);
+    document.getElementById('tam-active-pills').innerHTML = pills
+      .map((p) => `<span class="tam-pill">${p}</span>`)
+      .join('');
+
+    const grid = document.getElementById('tam-advisor-grid');
+    grid.innerHTML = matched.map((adv, index) => {
+      const isTop5 = index < 5;
+      const separator = adv.liveProfileUrl.includes('?') ? '&' : '?';
+      const targetHref = `${adv.liveProfileUrl}${separator}advisor=${encodeURIComponent(adv.slug)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
+
+      return `
+        <article class="tam-adv-card ${isTop5 ? 'is-recommended' : ''}">
+          <div>
+            <div class="tam-badges-row">
+              ${isTop5 ? '<span class="tam-badge-rec">Recommended</span>' : ''}
+              ${adv.isVerified ? '<span class="tam-badge-ver">&#10003; Verified</span>' : ''}
+            </div>
+
+            <div class="tam-adv-head">
+              <img class="tam-avatar" src="${adv.photoUrl}" alt="${adv.fullName}" onerror="this.src='/advisors/default.jpg'">
+              <div>
+                <h3 class="tam-adv-name">${adv.fullName}</h3>
+                <p class="tam-adv-role">${adv.roleTitle}</p>
+              </div>
+            </div>
+
+            <div class="tam-spec-tag">${adv.specialtyLabel}</div>
+
+            <div class="tam-detail-block">
+              <span class="tam-detail-label">Who I Help</span>
+              <span>${adv.whoIHelp}</span>
+            </div>
+
+            <div class="tam-detail-block">
+              <span class="tam-detail-label">Solution Offered</span>
+              <span>${adv.solutionOffered}</span>
+            </div>
+          </div>
+
+          <div class="tam-adv-footer">
+            <div class="tam-style-note">&#128172; ${adv.consultationNote}</div>
+            <a href="${targetHref}" class="tam-cta-btn">View Full Profile &amp; Connect &rarr;</a>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  backBtn.addEventListener('click', () => {
+    if (state.step > 0) {
+      state.step -= 1;
+      renderQuizStep();
+    }
+  });
+
+  function resetToQuiz(e) {
+    if (e) e.preventDefault();
+    state.step = 0;
+    resultsView.classList.add('tam-hidden');
+    quizView.classList.remove('tam-hidden');
+    renderQuizStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('tam-retake-btn').addEventListener('click', resetToQuiz);
+  document.getElementById('tam-home-link').addEventListener('click', resetToQuiz);
+
+  renderQuizStep();
+})();
+</script>
+</body>
+</html>
