@@ -411,6 +411,88 @@
   }
   .tam-cta-btn:hover { filter: brightness(0.92); }
   .tam-hidden { display: none !important; }
+
+  /* ADVISOR PROFILE POPUP MODAL */
+  .tam-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 1000;
+  }
+  .tam-modal-card {
+    background: #ffffff;
+    border-radius: 24px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.24);
+  }
+  .tam-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tam-modal-divider {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .tam-modal-cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .tam-modal-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .tam-modal-link:hover {
+    border-color: #244363;
+    background: #eff6ff;
+    color: #1b3654;
+  }
+  .tam-modal-calc-btn {
+    grid-column: 1 / -1;
+    background: #244363;
+    color: #ffffff;
+    border: none;
+    padding: 13px 16px;
+    font-size: 14px;
+  }
+  .tam-modal-calc-btn:hover {
+    background: #1b3654;
+    color: #ffffff;
+  }
+  @media (max-width: 500px) {
+    .tam-modal-cta-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -467,18 +549,32 @@
   <div id="tam-advisor-grid" class="tam-grid"></div>
 </section>
 
+<!-- ADVISOR PROFILE POPUP MODAL (Used when DashNex liveProfileUrl is not set yet) -->
+<div id="tam-profile-modal" class="tam-modal-backdrop tam-hidden" role="dialog" aria-modal="true">
+  <div class="tam-modal-card">
+    <button type="button" id="tam-modal-close" class="tam-modal-close" aria-label="Close">&times;</button>
+    <div id="tam-modal-body"></div>
+  </div>
+</div>
+
 <script>
 (function() {
   // ── ADVISOR ROSTER ────────────────────────────────────────────────────────
-  // Internal `visibilityScore` orders cards cleanly without displaying numbers to prospects.
-  // Top 5 matching advisors receive the "Recommended" badge automatically.
+  // Leave `liveProfileUrl: ''` to open the built-in popup modal (with Viber,
+  // WhatsApp, Messenger & Safety Net Calculator). Once an advisor's DashNex page
+  // is live, paste their URL into `liveProfileUrl` (e.g. 'https://your-dashnex.com/angela-santos')
+  // and clicking their button will automatically redirect there instead!
   const ADVISORS = [
     {
       slug: 'angela-santos',
       fullName: 'Angela Santos',
       roleTitle: 'Licensed Financial & Health Protection Advisor',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Angela%20Santos&role=Licensed%20Financial%20%26%20Health%20Protection%20Advisor',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000001',
+      whatsappUrl: 'https://wa.me/639170000001',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'Critical Illness & Family Income Shield',
       whoIHelp: 'Breadwinners, young parents, and corporate employees whose company HMO is not enough for major illnesses.',
       solutionOffered: 'Critical Illness Lump-Sum Plans, Family Income Replacement & Hospitalization Backup.',
@@ -494,7 +590,11 @@
       fullName: 'Marco Reyes, RFP®',
       roleTitle: 'Wealth, Business & Estate Planning Specialist',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Marco%20Reyes&role=Wealth%2C%20Business%20%26%20Estate%20Planning%20Specialist',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000002',
+      whatsappUrl: 'https://wa.me/639170000002',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'Business Continuity & 6% Estate Tax Shield',
       whoIHelp: 'SME business owners, self-employed professionals, and families with real estate or bank assets to protect.',
       solutionOffered: 'Estate Tax Liquidity Plans, Key-Person Protection & Peso/Dollar Wealth Growth.',
@@ -510,7 +610,11 @@
       fullName: 'Clarissa Mendoza',
       roleTitle: 'OFW & Global Filipino Family Advisor',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Clarissa%20Mendoza&role=OFW%20%26%20Global%20Filipino%20Family%20Advisor',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000003',
+      whatsappUrl: 'https://wa.me/639170000003',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'OFW Remittance Protection & College Funds',
       whoIHelp: 'OFWs, seafarers, and global Filipinos building guaranteed college funds and retirement back home.',
       solutionOffered: 'Guaranteed Education Plans, OFW Income Protection & Peso/USD Retirement Funds.',
@@ -526,7 +630,11 @@
       fullName: 'Rafael Villanueva',
       roleTitle: 'Senior Protection & Policy Review Advisor',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Rafael%20Villanueva&role=Senior%20Protection%20%26%20Policy%20Review%20Advisor',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000004',
+      whatsappUrl: 'https://wa.me/639170000004',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'Second-Opinion Policy Audit & Family Security',
       whoIHelp: 'Individuals with existing policies who want an honest coverage check, plus growing families.',
       solutionOffered: 'No-Pressure Policy Audit, Term/Whole Life Protection & Health Fund Top-Ups.',
@@ -542,7 +650,11 @@
       fullName: 'Bianca Cruz',
       roleTitle: 'Young Professional & Starter Wealth Advisor',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Bianca%20Cruz&role=Young%20Professional%20%26%20Starter%20Wealth%20Advisor',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000005',
+      whatsappUrl: 'https://wa.me/639170000005',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'Starter Health Shield & Automated Savings',
       whoIHelp: 'First-time policy buyers, freelancers, and young professionals starting their financial foundation.',
       solutionOffered: 'Budget-Friendly Health + Life Combos & Disciplined Long-Term Savings Plans.',
@@ -558,7 +670,11 @@
       fullName: 'Dennis Lim',
       roleTitle: 'Corporate & High-Net-Worth Asset Advisor',
       photoUrl: '/advisors/default.jpg',
-      liveProfileUrl: '/api/demo?name=Dennis%20Lim&role=Corporate%20%26%20High-Net-Worth%20Asset%20Advisor',
+      liveProfileUrl: '',
+      viberUrl: 'viber://chat?number=%2B639170000006',
+      whatsappUrl: 'https://wa.me/639170000006',
+      messengerUrl: 'https://m.me/',
+      bookingUrl: 'https://calendly.com/',
       specialtyLabel: 'Asset Preservation & Legacy Transfer',
       whoIHelp: 'Property owners, doctors, executives, and multi-generational family businesses.',
       solutionOffered: 'BIR Estate Tax Funding, Corporate Keyman Plans & Dollar-Denominated Legacy Plans.',
@@ -632,6 +748,9 @@
   const progressFill = document.getElementById('tam-progress-fill');
   const stepCount = document.getElementById('tam-step-count');
   const backBtn = document.getElementById('tam-back-btn');
+  const modal = document.getElementById('tam-profile-modal');
+  const modalBody = document.getElementById('tam-modal-body');
+  const modalClose = document.getElementById('tam-modal-close');
 
   function renderQuizStep() {
     const q = QUIZ_STEPS[state.step];
@@ -684,6 +803,58 @@
     }, 550);
   }
 
+  function hasLiveDashNexUrl(adv) {
+    const url = (adv.liveProfileUrl || '').trim();
+    return /^https?:\/\//i.test(url);
+  }
+
+  function openAdvisorModal(adv, isTop5) {
+    const { goal, role } = state.answers;
+    const calcHref = `/calculator.html?advisor=${encodeURIComponent(adv.slug)}&advisor_name=${encodeURIComponent(adv.fullName)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
+    const firstName = adv.fullName.split(' ')[0];
+
+    modalBody.innerHTML = `
+      <div class="tam-badges-row">
+        ${isTop5 ? '<span class="tam-badge-rec">Recommended</span>' : ''}
+        ${adv.isVerified ? '<span class="tam-badge-ver">&#10003; Verified</span>' : ''}
+      </div>
+
+      <div class="tam-adv-head">
+        <img class="tam-avatar" src="${adv.photoUrl}" alt="${adv.fullName}" onerror="this.src='/advisors/default.jpg'">
+        <div>
+          <h3 class="tam-adv-name">${adv.fullName}</h3>
+          <p class="tam-adv-role">${adv.roleTitle}</p>
+        </div>
+      </div>
+
+      <div class="tam-spec-tag">${adv.specialtyLabel}</div>
+
+      <div class="tam-detail-block">
+        <span class="tam-detail-label">Who I Help</span>
+        <span>${adv.whoIHelp}</span>
+      </div>
+
+      <div class="tam-detail-block">
+        <span class="tam-detail-label">Solution Offered</span>
+        <span>${adv.solutionOffered}</span>
+      </div>
+
+      <div class="tam-style-note" style="margin-top:12px;">&#128172; ${adv.consultationNote}</div>
+
+      <div class="tam-modal-divider">
+        <span class="tam-detail-label" style="margin-bottom:8px;">Connect Directly With ${firstName}</span>
+        <div class="tam-modal-cta-grid">
+          <a href="${calcHref}" class="tam-modal-link tam-modal-calc-btn">&#128202; Run 30-Sec Safety Net Check With ${firstName} &rarr;</a>
+          <a href="${adv.viberUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128172; Viber</a>
+          <a href="${adv.whatsappUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128241; WhatsApp</a>
+          <a href="${adv.messengerUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#9993;&#65039; Messenger</a>
+          <a href="${adv.bookingUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128197; Book 15-Min Call</a>
+        </div>
+      </div>
+    `;
+    modal.classList.remove('tam-hidden');
+  }
+
   function renderDirectoryResults() {
     const { goal, role, style, goal_label, role_label, style_label } = state.answers;
 
@@ -715,8 +886,6 @@
     const grid = document.getElementById('tam-advisor-grid');
     grid.innerHTML = matched.map((adv, index) => {
       const isTop5 = index < 5;
-      const separator = adv.liveProfileUrl.includes('?') ? '&' : '?';
-      const targetHref = `${adv.liveProfileUrl}${separator}advisor=${encodeURIComponent(adv.slug)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
 
       return `
         <article class="tam-adv-card ${isTop5 ? 'is-recommended' : ''}">
@@ -749,11 +918,27 @@
 
           <div class="tam-adv-footer">
             <div class="tam-style-note">&#128172; ${adv.consultationNote}</div>
-            <a href="${targetHref}" class="tam-cta-btn">View Full Profile &amp; Connect &rarr;</a>
+            <button type="button" class="tam-cta-btn" data-slug="${adv.slug}" data-top5="${isTop5 ? '1' : '0'}">View Full Profile &amp; Connect &rarr;</button>
           </div>
         </article>
       `;
     }).join('');
+
+    grid.querySelectorAll('.tam-cta-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const slug = btn.getAttribute('data-slug');
+        const isTop5 = btn.getAttribute('data-top5') === '1';
+        const adv = ADVISORS.find((a) => a.slug === slug);
+        if (!adv) return;
+
+        if (hasLiveDashNexUrl(adv)) {
+          const separator = adv.liveProfileUrl.includes('?') ? '&' : '?';
+          window.location.href = `${adv.liveProfileUrl}${separator}advisor=${encodeURIComponent(adv.slug)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
+        } else {
+          openAdvisorModal(adv, isTop5);
+        }
+      });
+    });
   }
 
   backBtn.addEventListener('click', () => {
@@ -774,6 +959,8 @@
 
   document.getElementById('tam-retake-btn').addEventListener('click', resetToQuiz);
   document.getElementById('tam-home-link').addEventListener('click', resetToQuiz);
+  modalClose.addEventListener('click', () => modal.classList.add('tam-hidden'));
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('tam-hidden'); });
 
   renderQuizStep();
 })();
