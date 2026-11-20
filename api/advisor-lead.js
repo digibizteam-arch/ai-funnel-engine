@@ -107,86 +107,79 @@ async function getAdvisorProfile(slug, body) {
   return fallback;
 }
 
-function buildEmail1HTML(prospectName, calc, advisor) {
+// Clean, personal-style HTML & Plain Text (optimized for Gmail Primary tab)
+function buildPrimaryEmailContent(prospectName, calc, advisor) {
   const runwayText = `${Number(calc.runway_months || 0).toFixed(1)} months`;
   const gapText = formatPHP(calc.protection_gap);
   const totalTargetText = formatPHP(calc.total_needed);
   const monthlyBurnText = formatPHP(calc.monthly_expenses);
   const liquidCashText = formatPHP(calc.liquid_savings);
 
-  return `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1e293b;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f8;padding:24px 12px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background-color:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
-          <tr>
-            <td style="background-color:#1e3a5f;padding:24px 28px;color:#ffffff;">
-              <p style="margin:0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#93c5fd;font-weight:700;">Your Family Safety Net Breakdown</p>
-              <h1 style="margin:8px 0 0;font-size:21px;line-height:1.35;font-weight:700;color:#ffffff;">Hi ${esc(prospectName)}, here is your 30-second Safety Net result</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:26px 28px;">
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155;">
-                Maraming salamat sa pag-check ng iyong <strong>Family Safety Net</strong>. Base sa mga nilagay mong detalye, ito ang magiging sitwasyon ng pamilya mo kung biglang huminto ang kita bukas dahil sa sakit o aksidente:
-              </p>
+<body style="margin:0;padding:16px;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#1f2937;">
+  <div style="max-width:580px;">
+    <p style="margin:0 0 16px;">Hi ${esc(prospectName)},</p>
 
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:20px;">
-                <tr>
-                  <td style="padding:16px 18px;border-bottom:1px solid #e2e8f0;">
-                    <span style="display:block;font-size:12px;color:#64748b;font-weight:600;">CURRENT CASH RUNWAY (Kung gaano katagal tatagal ang cash mo)</span>
-                    <span style="display:block;font-size:24px;font-weight:800;color:#b91c1c;margin-top:4px;">${esc(runwayText)}</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:16px 18px;border-bottom:1px solid #e2e8f0;">
-                    <span style="display:block;font-size:12px;color:#64748b;font-weight:600;">ESTIMATED PROTECTION GAP (Kulang na backup fund)</span>
-                    <span style="display:block;font-size:22px;font-weight:800;color:#0f172a;margin-top:4px;">${esc(gapText)}</span>
-                    <span style="display:block;font-size:12px;color:#64748b;margin-top:4px;">Total target safety net: ${esc(totalTargetText)} (${esc(calc.milestone_label || 'Family Protection')})</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:12px 18px;font-size:13px;color:#475569;">
-                    Monthly Family Bills: <strong>${esc(monthlyBurnText)}</strong> &nbsp;|&nbsp; Ready Emergency Cash: <strong>${esc(liquidCashText)}</strong>
-                  </td>
-                </tr>
-              </table>
+    <p style="margin:0 0 16px;">Thanks for checking your Family Safety Net earlier. Here is a copy of your calculation so you have it saved:</p>
 
-              <h2 style="margin:0 0 10px;font-size:16px;font-weight:700;color:#0f172a;">3 Practical Options You Can Do Today (Nang Hindi Nabibigatan sa Budget):</h2>
-              <ol style="margin:0 0 22px;padding-left:20px;font-size:14px;line-height:1.65;color:#334155;">
-                <li style="margin-bottom:8px;"><strong>Separate Your Health Fund from Your Savings:</strong> Kahit may company HMO ka, hanggang ₱100k–₱250k lang ito at nawawala kapag hindi ka na nakapagtrabaho. Maglaan ng hiwalay na Critical Illness shield para hindi maubos ang ipon ng pamilya.</li>
-                <li style="margin-bottom:8px;"><strong>Lock In Income Replacement While Healthy:</strong> Mas mura nang malaki ang pag-set up ng family safety net habang bata at malakas pa—para tuloy ang monthly bills at tuition ng mga bata kahit anong mangyari.</li>
-                <li><strong>Protect Hard-Earned Assets from Freeze &amp; Forced Sale:</strong> Siguraduhing may tax-free cash backup ang pamilya para hindi kailangang ibenta nang palugi ang lupa, bahay, o sasakyan pambayad sa utang o BIR estate tax.</li>
-              </ol>
+    <p style="margin:0 0 16px;padding-left:14px;border-left:3px solid #cbd5e1;">
+      <strong>Current Cash Runway:</strong> ${esc(runwayText)}<br>
+      <strong>Estimated Protection Gap:</strong> ${esc(gapText)} (Target: ${esc(totalTargetText)} — ${esc(calc.milestone_label || 'Family Protection')})<br>
+      <strong>Monthly Family Bills:</strong> ${esc(monthlyBurnText)} | <strong>Ready Cash:</strong> ${esc(liquidCashText)}
+    </p>
 
-              <div style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px;margin-bottom:22px;">
-                <p style="margin:0 0 12px;font-size:14px;line-height:1.55;color:#1e3a8a;">
-                  <strong>Gusto mo bang makita kung magkano lang ang pinaka-abot-kayang option para ma-close ang ${esc(gapText)} gap mo?</strong><br>
-                  Puwede tayong mag-usap nang 15 minutes—walang pilitan, pure clarity at computation lang base sa budget mo.
-                </p>
-                <a href="${esc(advisor.booking_url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#1e3a5f;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 20px;border-radius:10px;margin-right:8px;margin-bottom:6px;">Book a Free 15-Min Clarity Chat &rarr;</a>
-                <a href="${esc(advisor.messenger_url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#ffffff;color:#1e3a5f;border:1px solid #93c5fd;text-decoration:none;font-weight:600;font-size:14px;padding:11px 18px;border-radius:10px;margin-bottom:6px;">Message on Messenger</a>
-              </div>
+    <p style="margin:0 0 10px;"><strong>3 practical steps you can take today (nang hindi nabibigatan sa budget):</strong></p>
 
-              <p style="margin:0;font-size:14px;line-height:1.6;color:#334155;">
-                Para sa proteksyon ng pamilya mo,<br>
-                <strong>${esc(advisor.full_name)}</strong><br>
-                <span style="font-size:12px;color:#64748b;">${esc(advisor.role_title)}</span>
-              </p>
-              <p style="margin:14px 0 0;font-size:12px;color:#64748b;">
-                <em>Tip: Puwede kang mag-reply directly sa email na ito kung may tanong ka—diretso ito sa inbox ni ${esc(advisor.full_name)}.</em>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+    <p style="margin:0 0 12px;"><strong>1. Separate your Health Fund from your savings.</strong><br>
+    Company HMOs usually cap out at ₱100k–₱250k and stop the moment you resign or can no longer work. Setting aside a dedicated Critical Illness shield keeps hospital bills from draining your family's cash.</p>
+
+    <p style="margin:0 0 12px;"><strong>2. Lock in income replacement while you're healthy.</strong><br>
+    Setting up a safety net is significantly more affordable while you're young and healthy—ensuring monthly bills and tuition continue even if your income stops.</p>
+
+    <p style="margin:0 0 18px;"><strong>3. Protect hard-earned assets from freeze and forced sale.</strong><br>
+    Under Philippine law, bank accounts and land titles freeze upon passing until the 6% BIR estate tax is paid. A tax-free cash backup prevents your family from selling properties at a loss.</p>
+
+    <p style="margin:0 0 16px;">If you'd like to see the most budget-friendly way to close your ${esc(gapText)} gap, just hit <strong>Reply</strong> to this email with your age—or pick a quick 15-minute slot here:<br>
+    <a href="${esc(advisor.booking_url)}" style="color:#1d4ed8;text-decoration:underline;">${esc(advisor.booking_url)}</a></p>
+
+    <p style="margin:20px 0 0;">
+      Best,<br>
+      <strong>${esc(advisor.full_name)}</strong><br>
+      <span style="font-size:13px;color:#6b7280;">${esc(advisor.role_title)}</span>
+    </p>
+  </div>
 </body>
 </html>`;
+
+  const text = `Hi ${prospectName},
+
+Thanks for checking your Family Safety Net earlier. Here is a copy of your calculation so you have it saved:
+
+- Current Cash Runway: ${runwayText}
+- Estimated Protection Gap: ${gapText} (Target: ${totalTargetText} - ${calc.milestone_label || 'Family Protection'})
+- Monthly Family Bills: ${monthlyBurnText} | Ready Cash: ${liquidCashText}
+
+3 practical steps you can take today (nang hindi nabibigatan sa budget):
+
+1. Separate your Health Fund from your savings.
+Company HMOs usually cap out at ₱100k–₱250k and stop the moment you resign or can no longer work. Setting aside a dedicated Critical Illness shield keeps hospital bills from draining your family's cash.
+
+2. Lock in income replacement while you're healthy.
+Setting up a safety net is significantly more affordable while you're young and healthy—ensuring monthly bills and tuition continue even if your income stops.
+
+3. Protect hard-earned assets from freeze and forced sale.
+Under Philippine law, bank accounts and land titles freeze upon passing until the 6% BIR estate tax is paid. A tax-free cash backup prevents your family from selling properties at a loss.
+
+If you'd like to see the most budget-friendly way to close your ${gapText} gap, just hit Reply to this email with your age—or pick a quick 15-minute slot here:
+${advisor.booking_url}
+
+Best,
+${advisor.full_name}
+${advisor.role_title}`;
+
+  return { html, text };
 }
 
 module.exports = async function handler(req, res) {
@@ -271,15 +264,18 @@ module.exports = async function handler(req, res) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  const fromAddress = process.env.RESEND_ADVISOR_FROM || process.env.RESEND_FROM || 'Trusted Advisor Match <notifications@ascottdigitalbiz.com>';
+  const fromAddress = process.env.RESEND_ADVISOR_FROM || process.env.RESEND_FROM || 'advisor@ascottdigitalbiz.com';
+  const cleanFromEmail = fromAddress.replace(/^.*<|>$/g, '').trim();
 
   if (resendKey) {
     try {
+      const { html, text } = buildPrimaryEmailContent(prospectName, calc, advisor);
       const emailPayload = {
-        from: `${advisor.full_name} via Ascott Digital Biz <${fromAddress.replace(/^.*<|>$/g, '')}>`,
+        from: `${advisor.full_name} <${cleanFromEmail}>`,
         to: [prospectEmail],
-        subject: `${prospectName}, your Family Safety Net Result (${Number(calc.runway_months).toFixed(1)} Months Runway)`,
-        html: buildEmail1HTML(prospectName, calc, advisor)
+        subject: `${prospectName}, your Family Safety Net numbers (${Number(calc.runway_months).toFixed(1)} months)`,
+        html,
+        text
       };
       if (advisor.reply_to_email) {
         emailPayload.reply_to = advisor.reply_to_email;
