@@ -1,362 +1,457 @@
+'use strict';
+
 const https = require('https');
 
-// ── VIBE COLOR PALETTES ──
-const VIBES = {
- 'bold-premium': { bg:'#0D0D0D', bg2:'#1A1A1A', bg3:'#111111', text:'#FFFFFF', textMid:'rgba(255,255,255,0.65)', accent:'#C9A84C', accentDark:'#A07830', btnText:'#0D0D0D', border:'rgba(201,168,76,0.25)', cardBg:'#1E1E1E', navBg:'rgba(13,13,13,0.95)' },
- 'warm-trustworthy': { bg:'#1B2B4B', bg2:'#243761', bg3:'#1A2740', text:'#FFFFFF', textMid:'rgba(255,255,255,0.65)', accent:'#E8C87A', accentDark:'#C4A055', btnText:'#1B2B4B', border:'rgba(232,200,122,0.25)', cardBg:'#1F3258', navBg:'rgba(27,43,75,0.95)' },
- 'modern-edgy': { bg:'#0A0A0A', bg2:'#111111', bg3:'#080808', text:'#FFFFFF', textMid:'rgba(255,255,255,0.6)', accent:'#00E5FF', accentDark:'#00B8CC', btnText:'#0A0A0A', border:'rgba(0,229,255,0.2)', cardBg:'#161616', navBg:'rgba(10,10,10,0.95)' },
- 'fresh-approachable': { bg:'#FFFFFF', bg2:'#F0FAF5', bg3:'#E8F5EE', text:'#1A1A1A', textMid:'#5A7A6A', accent:'#2D6A4F', accentDark:'#1E4D38', btnText:'#FFFFFF', border:'rgba(45,106,79,0.2)', cardBg:'#FFFFFF', navBg:'rgba(255,255,255,0.95)' },
- 'bold-energetic': { bg:'#1A1A2E', bg2:'#16213E', bg3:'#0F3460', text:'#FFFFFF', textMid:'rgba(255,255,255,0.65)', accent:'#FF6B35', accentDark:'#CC5520', btnText:'#FFFFFF', border:'rgba(255,107,53,0.25)', cardBg:'#1E2440', navBg:'rgba(26,26,46,0.95)' },
- 'clean-creative': { bg:'#1E1E2E', bg2:'#252538', bg3:'#1A1A2A', text:'#FFFFFF', textMid:'rgba(255,255,255,0.6)', accent:'#6C5CE7', accentDark:'#5048C4', btnText:'#FFFFFF', border:'rgba(108,92,231,0.25)', cardBg:'#262638', navBg:'rgba(30,30,46,0.95)' },
- 'corporate-authority': { bg:'#1E3A5F', bg2:'#24476E', bg3:'#1A3255', text:'#FFFFFF', textMid:'rgba(255,255,255,0.65)', accent:'#A8C0D6', accentDark:'#7A9AB8', btnText:'#1E3A5F', border:'rgba(168,192,214,0.25)', cardBg:'#243F6A', navBg:'rgba(30,58,95,0.95)' },
- 'elegant-feminine': { bg:'#FDF6F0', bg2:'#FEF0E8', bg3:'#FCE8DC', text:'#2D1B1B', textMid:'#8B5E5E', accent:'#C4847A', accentDark:'#A0605A', btnText:'#FFFFFF', border:'rgba(196,132,122,0.25)', cardBg:'#FFFFFF', navBg:'rgba(253,246,240,0.95)' },
-};
+// ── ADVISOR PROFILE PAGE GENERATOR ──────────────────────────────────────────
+// Same contract as before: POST /api/demo -> saves HTML in leads.demo_html
+// -> returns { demo_url, lead_id }. public/demo.html, admin and chat keep working.
+// The page is a light, professional advisor profile (no film or video).
+// The "vibe" choice only tints the accent colour, the page stays light.
 
-// ── ROLE DETECTION ──
-function detectRole(role) {
- const r = (role || '').toLowerCase();
- if (r.includes('coach') || r.includes('trainer')) return 'coach';
- if (r.includes('financial') || r.includes('advisor') || r.includes('insurance') || r.includes('wealth')) return 'advisor';
- if (r.includes('agency') || r.includes('freelancer') || r.includes('marketing')) return 'agency';
- if (r.includes('local') || r.includes('clinic') || r.includes('salon') || r.includes('restaurant') || r.includes('trades')) return 'local';
- if (r.includes('sales professional') || r.includes('real estate') || r.includes('saas') || r.includes('b2b')) return 'sales';
- if (r.includes('online seller') || r.includes('ecommerce') || r.includes('digital product') || r.includes('dropshipping')) return 'seller';
- if (r.includes('consultant') || r.includes('legal') || r.includes('hr') || r.includes('strategy') || r.includes('startup')) return 'consultant';
- return 'default';
+// ── PROFILE PHOTO ──
+// To change the photo on every new page, replace the file public/advisors/default.jpg
+// (same file name, any photo, a portrait about 800x1000 works best).
+// To use a different photo for one advisor, send photo_url (a full https link),
+// or edit the <img src> in the copied page HTML.
+const DEFAULT_PHOTO_PATH = '/advisors/default.jpg';
+
+// ── VIBE ACCENTS (the existing palette choices, kept as subtle options) ──
+const VIBE_ACCENTS = {
+  'bold-premium':        { accent: '#C9A84C', dark: '#A07830' },
+  'warm-trustworthy':    { accent: '#E8C87A', dark: '#C4A055' },
+  'modern-edgy':         { accent: '#00E5FF', dark: '#00B8CC' },
+  'fresh-approachable':  { accent: '#2D6A4F', dark: '#1E4D38' },
+  'bold-energetic':      { accent: '#FF6B35', dark: '#CC5520' },
+  'clean-creative':      { accent: '#6C5CE7', dark: '#5048C4' },
+  'corporate-authority': { accent: '#A8C0D6', dark: '#7A9AB8' },
+  'elegant-feminine':    { accent: '#C4847A', dark: '#A0605A' }
+};
+const DEFAULT_ACCENT = { accent: '#b8956a', dark: '#96744e' };
+
+// Compiled utility CSS for the profile card (generated once with the Tailwind CLI, so
+// pages need no external CSS library and still work when copied out of the admin).
+const PAGE_CSS = String.raw`*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-2{margin-bottom:.5rem}.mb-2\.5{margin-bottom:.625rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-2\.5{margin-top:.625rem}.mt-5{margin-top:1.25rem}.block{display:block}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-24{height:6rem}.min-h-screen{min-height:100vh}.w-24{width:6rem}.w-full{width:100%}.max-w-\[440px\]{max-width:440px}.shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:.5rem}.gap-4{gap:1rem}.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208/var(--tw-border-opacity,1))}.border-emerald-200\/60{border-color:rgba(167,243,208,.6)}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.border-slate-200\/80{border-color:rgba(226,232,240,.8)}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229/var(--tw-bg-opacity,1))}.bg-emerald-100\/80{background-color:rgba(209,250,229,.8)}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.bg-slate-50\/90{background-color:rgba(248,250,252,.9)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.object-cover{-o-object-fit:cover;object-fit:cover}.object-top{-o-object-position:top;object-position:top}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0{padding-top:0;padding-bottom:0}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-4{padding-top:1rem}.pb-4,.py-4{padding-bottom:1rem}.pr-3{padding-right:.75rem}.text-center{text-align:center}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[11px\]{font-size:11px}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-normal{line-height:1.5}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:.05em}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87/var(--tw-text-opacity,1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70/var(--tw-text-opacity,1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}@media (min-width:640px){.sm\:h-28{height:7rem}.sm\:w-28{width:7rem}.sm\:p-6{padding:1.5rem}.sm\:p-8{padding:2rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-\[22px\]{font-size:22px}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}}@media (min-width:768px){.md\:col-span-5{grid-column:span 5/span 5}.md\:col-span-7{grid-column:span 7/span 7}.md\:mb-0{margin-bottom:0}.md\:mb-5{margin-bottom:1.25rem}.md\:mb-8{margin-bottom:2rem}.md\:h-64{height:16rem}.md\:w-full{width:100%}.md\:max-w-\[880px\]{max-width:880px}.md\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.md\:flex-col{flex-direction:column}.md\:items-start{align-items:flex-start}.md\:gap-0{gap:0}.md\:gap-8{gap:2rem}.md\:p-10{padding:2.5rem}.md\:text-6xl{font-size:3.75rem;line-height:1}}`;
+
+// ── COLOUR HELPERS (keep text readable whatever vibe is chosen) ──
+function hexToRgb(hex) {
+  const h = String(hex).replace('#', '');
+  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+}
+function rgbToHex(rgb) {
+  return '#' + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+}
+function luminance(hex) {
+  const [r, g, b] = hexToRgb(hex).map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a, b) {
+  const la = luminance(a);
+  const lb = luminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+// Darken a colour until it has at least `min` contrast against `against`.
+function readable(hex, against, min) {
+  let rgb = hexToRgb(hex);
+  let out = rgbToHex(rgb);
+  for (let i = 0; i < 40 && contrast(out, against) < min; i++) {
+    rgb = rgb.map((v) => v * 0.93);
+    out = rgbToHex(rgb);
+  }
+  return out;
+}
+function getTheme(vibe) {
+  // No vibe chosen (or the old default) keeps the approved navy button.
+  if (!vibe || vibe === 'bold-premium') return { accent: '#244363', text: '#244363', button: '#244363' };
+  const pick = VIBE_ACCENTS[vibe] || DEFAULT_ACCENT;
+  return {
+    accent: pick.accent,                          // decorative (top line, soft tints)
+    text: readable(pick.dark, '#ffffff', 4.5),    // small coloured text on white
+    button: readable(pick.dark, '#ffffff', 4.5)   // button fill under white text
+  };
 }
 
-// ── ROLE-BASED CONTENT PROMPT ──
-function buildContentPrompt(roleType, data) {
- const { name, role, offer, price, client, pain, transform, goal, problem } = data;
- const frameworks = {
- coach: `You are writing for a COACH or TRAINER. Framework: Authority + Transformation. Psychology: Speak to identity shift. The reader wants to BECOME someone. Use "you deserve", "you were meant for", "it's not your fault". Lead with the gap between who they are and who they could be. Make them feel understood first, then inspired. Headline formula: "[Pain they feel] — [Promise of who they become]" Testimonials must include: specific transformation result + emotional before/after.`,
- advisor: `You are writing for a FINANCIAL ADVISOR or INSURANCE AGENT. Framework: Trust + Protection. Psychology: Speak to fear of loss, family security, and missed opportunity. Use calm authority. Never hype. Lead with what's at risk if they don't act. Use words like "protect", "secure", "peace of mind", "your family deserves". Headline formula: "[What they risk losing] — [How you protect it]" Testimonials must include: specific financial result + family/security angle.`,
- agency: `You are writing for an AGENCY or FREELANCER. Framework: Results + Speed. Psychology: Speak to ROI and done-for-you appeal. Clients are tired and busy. They want speed and certainty. Use numbers, timelines, before/after metrics. Lead with the cost of NOT having a system. Headline formula: "[Time wasted / money lost] — [Specific result in X days]" Testimonials must include: specific metric improvement + time saved.`,
- local: `You are writing for a LOCAL BUSINESS OWNER. Framework: Community + Social Proof. Psychology: Local trust is everything. Use neighborhood language. People buy from people they know. Emphasize "your area", "clients like you", "trusted by [type of client] in [region]". Make it feel familiar and personal. Headline formula: "[Local frustration] — [Local solution with trust signal]" Testimonials must include: local context + word-of-mouth feel.`,
- sales: `You are writing for a SALES PROFESSIONAL. Framework: Pipeline + Income. Psychology: Speak to their income ceiling and pipeline anxiety. They track numbers. Use pipeline language: "qualified leads", "closing rate", "monthly target". Make it feel like a system upgrade, not a marketing tool. Headline formula: "[Pipeline problem] — [Income/conversion outcome]" Testimonials must include: pipeline metric + income improvement.`,
- seller: `You are writing for an ONLINE SELLER. Framework: Desire + Aspiration. Psychology: Speak to lifestyle and freedom. Readers want to escape the grind. Use aspirational language: "wake up to orders", "work from anywhere", "your store works while you sleep". Lead with the dream, then the path. Headline formula: "[Current hustle struggle] — [Freedom/lifestyle outcome]" Testimonials must include: income result + lifestyle freedom element.`,
- consultant: `You are writing for a CONSULTANT or STRATEGIC ADVISOR. Framework: Credibility + Process. Psychology: Speak to expertise and structured thinking. Clients want someone who has done this before and has a system. Use process language: "proven framework", "step-by-step", "based on X cases". Lead with authority, then clarity. Headline formula: "[Complexity/confusion they face] — [Your structured solution]" Testimonials must include: business outcome + clarity/confidence gained.`,
- default: `You are writing for a BUSINESS OWNER. Framework: Problem-Solution-Result. Psychology: Speak to frustration with the current situation and desire for a clear path forward. Use empathetic, direct language. Lead with their specific pain, then paint the outcome. Headline formula: "[Specific pain] — [Specific outcome]" Testimonials must include: specific result + emotional relief.`
- };
+// ── SMALL UTILITIES ──
+function requestJSON(options, body, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (response) => {
+      let raw = '';
+      response.on('data', (chunk) => { raw += chunk; });
+      response.on('end', () => {
+        let parsed = {};
+        if (raw.trim()) {
+          try { parsed = JSON.parse(raw); }
+          catch (_) { return reject(new Error(`Invalid JSON response (${response.statusCode}): ${raw.slice(0, 200)}`)); }
+        }
+        if (response.statusCode >= 400) {
+          const msg = (parsed && (parsed.message || (parsed.error && parsed.error.message) || parsed.error)) || `Request failed (${response.statusCode})`;
+          return reject(new Error(typeof msg === 'string' ? msg : JSON.stringify(msg)));
+        }
+        resolve(parsed);
+      });
+    });
+    req.on('error', reject);
+    if (timeoutMs) req.setTimeout(timeoutMs, () => req.destroy(new Error('Request timed out')));
+    if (body !== undefined) req.write(JSON.stringify(body));
+    req.end();
+  });
+}
 
- return `You are an expert conversion copywriter. Generate ONLY a JSON object with funnel copy. No markdown, no explanation, raw JSON only.
-ROLE FRAMEWORK: ${frameworks[roleType]}
-CONTEXT:
-Name: ${name || 'The Expert'}
-Role: ${role}
-Offer: ${offer}
-Price: ${price || 'Contact for pricing'}
-Ideal client: ${client}
-Pain solved: ${pain}
-Transformation: ${transform}
-Their goal: ${goal || ''}
-Their problem: ${problem || ''}
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-Generate this EXACT JSON — all fields required:
+function safeURL(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  try {
+    const parsed = new URL(candidate);
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function safeEmail(value) {
+  const candidate = String(value || '').trim();
+  return /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(candidate) ? candidate : '';
+}
+
+function clean(value, fallback = '') {
+  const text = String(value == null ? '' : value).trim();
+  return text || fallback;
+}
+
+function toList(value) {
+  if (Array.isArray(value)) return value.map((i) => String(i).trim()).filter(Boolean).slice(0, 6);
+  return String(value || '').split(/[,;\n]/).map((i) => i.trim()).filter(Boolean).slice(0, 6);
+}
+
+// ── READ THE REQUEST ──
+// Old funnel fields still work, so index.html and the admin Regenerate button keep working:
+//   offer -> specialty, client -> who they help, pain -> challenges those clients face,
+//   transform -> outcome clients want.
+// A client's pain is NOT used as the advisor's personal story. Story only comes from
+// an explicit story/bio field.
+function getAdvisorData(body) {
+  const p = body.advisor_profile && typeof body.advisor_profile === 'object' ? body.advisor_profile : body;
+  return {
+    leadId: clean(body.lead_id),
+    name: clean(p.advisor_name || p.name || body.name, 'Your Financial Advisor'),
+    title: clean(p.professional_title || p.title || p.role || body.role, 'Financial Advisor'),
+    company: clean(p.company_name || p.company || p.business_name),
+    specialization: clean(p.specialization || p.expertise || p.offer || p.offer_name, 'Financial Planning and Protection'),
+    audience: clean(p.ideal_clients || p.audience || p.client || p.ideal_client),
+    challenge: clean(p.client_challenge || p.pain || p.offer_pain),
+    outcome: clean(p.client_outcome || p.transform || p.offer_transform),
+    story: clean(p.personal_story || p.story || p.about || p.bio),
+    approach: clean(p.advisory_approach || p.approach),
+    services: toList(p.services || p.services_offered || p.key_services),
+    credentials: toList(p.credentials || p.qualifications || p.awards),
+    photo: safeURL(p.photo_url || p.profile_photo || p.photo),
+    messenger: safeURL(p.messenger_url || p.messenger),
+    viber: safeURL(p.viber_url || p.viber),
+    whatsapp: safeURL(p.whatsapp_url || p.whatsapp),
+    website: safeURL(p.website_url || p.website),
+    email: safeEmail(p.contact_email || p.email || body.email)
+  };
+}
+
+// ── AI COPY ──
+// Writes the words for each slot of the profile card. Taglish by default (natural
+// Filipino-English mix, like the approved sample), or plain English if language is "english".
+function buildCopyPrompt(a, english) {
+  const style = english
+    ? 'Write in clear, warm, natural English.'
+    : 'Write in natural Taglish (a warm Filipino and English mix, the way a friendly Filipino advisor talks). Keep terms like "Health Fund", "OFW", "breadwinner" in English.';
+  return `You are a careful personal-brand copywriter for Filipino Financial Advisors. ${style}
+
+ADVISOR FACTS (use only these facts):
+Name: ${a.name}
+Professional title: ${a.title}
+Company: ${a.company || 'Not supplied'}
+Specialty: ${a.specialization}
+Who they help: ${a.audience || 'Not supplied'}
+Challenges those clients face: ${a.challenge || 'Not supplied'}
+Outcome those clients want: ${a.outcome || 'Not supplied'}
+Advisor's personal story/background: ${a.story || 'Not supplied'}
+Advisory approach: ${a.approach || 'Not supplied'}
+
+STRICT RULES:
+- Never invent licenses, certifications, awards, years of experience, client numbers, statistics, percentages, testimonials, company affiliations, guarantees, returns, or financial outcomes.
+- No fake social proof. Do not promise wealth or guaranteed results.
+- Challenges and outcomes describe the advisor's CLIENTS, never the advisor's own experience.
+- If no personal story was supplied, do not invent one. Speak from the advisor's helping role only.
+- Warm, approachable, never pushy and never fear-mongering. Name the real-life worry gently, then offer a conversation.
+- Do not give individualized financial advice.
+- Keep every field short and concrete.
+- Return ONLY valid JSON with exactly these keys:
 {
- "hero_eyebrow": "Short attention-grabbing label above headline (5-7 words, role-specific)",
- "hero_headline": "Emotionally charged headline using the role framework formula (max 14 words)",
- "hero_subheadline": "2 sentences expanding the transformation promise. Specific. No fluff.",
- "hero_cta": "Action button text (4-6 words, role-specific action verb)",
- "hero_trust": "3 short trust signals separated by · e.g. 500+ Clients Helped · 5-Star Results · No Lock-in Contracts",
- "pain_eyebrow": "DOES THIS SOUND FAMILIAR?",
- "pain_headline": "Empathetic section heading mirroring their daily frustration (10-14 words)",
- "pain_intro": "1 sentence that makes them feel deeply understood. Use 'you'.",
- "pain_bullets": [
- {"emoji": "😩", "bold": "Short painful truth (4-6 words)", "detail": "One specific elaboration sentence"},
- {"emoji": "😤", "bold": "Short painful truth (4-6 words)", "detail": "One specific elaboration sentence"},
- {"emoji": "🔄", "bold": "Short painful truth (4-6 words)", "detail": "One specific elaboration sentence"},
- {"emoji": "💸", "bold": "Short painful truth (4-6 words)", "detail": "One specific elaboration sentence"}
- ],
- "pain_closer": "Empathy statement — 1 powerful sentence. Not your fault. You just need the right system.",
- "gap_left_title": "WHERE YOU ARE NOW",
- "gap_right_title": "WHERE YOU COULD BE",
- "gap_left": ["Specific painful current state 1", "Specific painful current state 2", "Specific painful current state 3"],
- "gap_right": ["Specific dream outcome 1 with number or detail", "Specific dream outcome 2 with number or detail", "Specific dream outcome 3 with number or detail"],
- "gap_bridge": "One powerful bridge sentence. The only difference is a system built around you.",
- "stats": [
- {"number": "X+", "label": "Role-relevant stat e.g. Clients Transformed"},
- {"number": "X%", "label": "Role-relevant stat e.g. Average Conversion Lift"},
- {"number": "Xd", "label": "Role-relevant stat e.g. Average Time to First Result"}
- ],
- "offer_eyebrow": "INTRODUCING",
- "offer_headline": "Compelling offer name — better than raw text, role-specific (6-10 words)",
- "offer_sub": "1 sentence: what it is, who it is for, what outcome it delivers.",
- "offer_benefits": [
- {"icon": "✓", "title": "Benefit title (transformation-focused)", "desc": "One sentence outcome, not feature"},
- {"icon": "✓", "title": "Benefit title (transformation-focused)", "desc": "One sentence outcome, not feature"},
- {"icon": "✓", "title": "Benefit title (transformation-focused)", "desc": "One sentence outcome, not feature"},
- {"icon": "✓", "title": "Benefit title (transformation-focused)", "desc": "One sentence outcome, not feature"}
- ],
- "offer_price_display": "Price formatted nicely e.g. Starting at ₱15,000",
- "offer_price_context": "Short value framing — what it's worth vs what it costs",
- "offer_cta": "Button text specific to role e.g. Start Building My System →",
- "process_title": "How It Works",
- "process_steps": [
- {"num": "01", "title": "Step title", "desc": "One sentence what happens in this step"},
- {"num": "02", "title": "Step title", "desc": "One sentence what happens in this step"},
- {"num": "03", "title": "Step title", "desc": "One sentence what happens in this step"}
- ],
- "about_eyebrow": "YOUR GUIDE",
- "about_name": "${name || 'Your Expert'}",
- "about_role_title": "Compelling title based on role: ${role} and offer: ${offer}",
- "about_bio": "3 warm, authoritative sentences in first person. Specific to their niche. Reference client type: ${client}. End with mission statement.",
- "about_credentials": [
- "Specific credential or achievement for this niche",
- "Specific credential or achievement for this niche",
- "Specific credential or achievement for this niche"
- ],
- "testimonials": [
- {"quote": "Specific result with number + emotional transformation. Role-relevant. Reference: ${transform}", "name": "First name L.", "role": "Their specific job title or situation", "result": "Key metric result e.g. 3x leads in 30 days", "initial": "A"},
- {"quote": "Specific result with number + before/after moment. Different angle from first.", "name": "First name L.", "role": "Their specific job title or situation", "result": "Key metric result", "initial": "B"},
- {"quote": "Specific result focusing on time saved or ease. Emotional closer.", "name": "First name L.", "role": "Their specific job title or situation", "result": "Key metric result", "initial": "C"}
- ],
- "faq": [
- {"q": "Most common objection as a question — role-specific", "a": "Warm, specific answer that reframes the concern (2-3 sentences)"},
- {"q": "Second most common objection — role-specific", "a": "Warm, specific answer (2-3 sentences)"},
- {"q": "Pricing or timeline question — role-specific", "a": "Warm, specific answer (2-3 sentences)"}
- ],
- "final_headline": "Urgency-driven closing headline tied to transformation (10-14 words)",
- "final_sub": "2 sentences. First: what they get. Second: directly address their main obstacle.",
- "final_cta": "Let's Talk →",
- "footer_tagline": "Short brand tagline specific to their niche"
+  "top_label": "small label at the top, maximum 5 words",
+  "specialty_label": "the specialty as a short label, maximum 4 words",
+  "tagline": "one line saying who the advisor helps, maximum 10 words",
+  "headline": "one empathetic headline about the client's real-life worry, maximum 22 words",
+  "problem": "2 sentences describing the client's situation and worry, no statistics",
+  "lead_in": "a short line like 'Here is how I can help', maximum 6 words",
+  "help": "2 sentences on how the advisor helps, using the specialty and the outcome clients want",
+  "highlight": "an exact 2 to 5 word phrase copied from the help text to emphasise",
+  "audience_label": "short line introducing the audience tags, maximum 8 words",
+  "audience_tags": ["3 short tags, maximum 4 words each, who this conversation is for"],
+  "cta_text": "button text inviting a conversation, maximum 8 words",
+  "cta_sub": "one short reassuring line under the button, maximum 8 words"
 }`;
 }
 
-function postJSON(options, body) {
- return new Promise((resolve, reject) => {
- const req = https.request(options, (res) => {
- let data = '';
- res.on('data', chunk => data += chunk);
- res.on('end', () => {
- try { resolve(JSON.parse(data)); } catch(e) { reject(new Error('Parse fail: ' + data.slice(0,300))); }
- });
- });
- req.on('error', reject);
- req.write(JSON.stringify(body));
- req.end();
- });
+function fallbackCopy(a) {
+  return {
+    top_label: 'Your Financial Partner',
+    specialty_label: a.specialization.length <= 40 ? a.specialization : 'Financial Planning',
+    tagline: a.audience ? `For ${a.audience}`.slice(0, 80) : 'For individuals and families planning ahead',
+    headline: 'Your family’s future deserves a clear plan.',
+    problem: a.challenge
+      ? `Many people I speak with are dealing with this: ${a.challenge}. It is not easy to know where to start.`
+      : 'Life is busy, and financial decisions are easy to put off. It is not easy to know where to start.',
+    lead_in: 'This is where I can help.',
+    help: a.outcome
+      ? `I help you work toward ${a.outcome}. We take it step by step, at a pace that feels comfortable.`
+      : 'I listen first, then help you understand the options that may fit your situation. We take it step by step.',
+    highlight: '',
+    audience_label: 'This conversation is for:',
+    audience_tags: a.audience ? [a.audience.slice(0, 40)] : ['Individuals', 'Families'],
+    cta_text: 'Let’s talk about your plan',
+    cta_sub: 'A short, no-pressure conversation.'
+  };
 }
 
-function buildHTML(c, roleType, colors, chatUrl, name, showAbout) {
- const col = colors;
- const initials = (name||'MA').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
- 
- const aboutSection = showAbout ? `
- <section style="padding:80px 0;background:${col.bg2}">
- <div style="max-width:1060px;margin:0 auto;padding:0 24px">
- <div style="text-align:center;margin-bottom:52px">
- <div style="display:inline-block;background:${col.accent}18;border:1px solid ${col.accent}44;color:${col.accent};font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:16px">${c.about_eyebrow||'YOUR GUIDE'}</div>
- </div>
- <div style="display:flex;align-items:center;gap:56px;flex-wrap:wrap;justify-content:center">
- <div style="flex-shrink:0;text-align:center">
- <div style="width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,${col.accent},${col.accentDark});display:flex;align-items:center;justify-content:center;font-size:3.2rem;font-weight:700;color:${col.btnText};margin:0 auto 20px;border:4px solid ${col.accent}33;box-shadow:0 0 40px ${col.accent}22">${initials}</div>
- <div style="font-weight:700;font-size:1.2rem;color:${col.text};margin-bottom:4px">${c.about_name}</div>
- <div style="font-size:0.85rem;color:${col.accent};margin-bottom:16px">${c.about_role_title||''}</div>
- </div>
- <div style="flex:1;min-width:280px;max-width:560px">
- <p style="font-size:1.05rem;color:${col.textMid};line-height:1.85;margin-bottom:28px">${c.about_bio||''}</p>
- <div style="display:flex;flex-direction:column;gap:12px">
- ${(c.about_credentials||[]).map(cr=>`<div style="display:flex;align-items:flex-start;gap:12px"><div style="width:22px;height:22px;border-radius:50%;background:${col.accent};color:${col.btnText};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">✓</div><span style="color:${col.text};font-size:0.93rem;line-height:1.55">${cr}</span></div>`).join('')}
- </div>
- </div>
- </div>
- </div>
- </section>` : '';
- 
- return `<!DOCTYPE html>
+async function generateCopy(a, english) {
+  const fb = fallbackCopy(a);
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return fb;
+  try {
+    const result = await requestJSON({
+      hostname: 'api.openai.com',
+      path: '/v1/chat/completions',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` }
+    }, {
+      model: 'gpt-4o-mini',
+      temperature: 0.7,
+      max_tokens: 900,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: 'You are an expert personal-brand copywriter. Follow the instructions exactly and return valid JSON only.' },
+        { role: 'user', content: buildCopyPrompt(a, english) }
+      ]
+    }, 25000);
+    const content = result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content;
+    if (!content) return fb;
+    const ai = JSON.parse(content);
+    const out = {};
+    // Keep only expected keys, as plain, length-limited text.
+    Object.keys(fb).forEach((k) => {
+      if (k === 'audience_tags') {
+        const tags = Array.isArray(ai.audience_tags) ? ai.audience_tags.filter((x) => typeof x === 'string' && x.trim()).map((x) => x.trim().slice(0, 40)).slice(0, 3) : [];
+        out[k] = tags.length ? tags : fb[k];
+      } else {
+        const v = typeof ai[k] === 'string' ? ai[k].trim() : '';
+        out[k] = v ? v.slice(0, 500) : fb[k];
+      }
+    });
+    return out;
+  } catch (error) {
+    console.error('AI copy generation failed:', error.message);
+    return fb;
+  }
+}
+
+// ── PAGE ──
+// One-card advisor profile. Styles are inlined (no external CSS library), so the
+// page also works when the HTML is copied out of the admin for a client's own page.
+// Parts marked DEMO-ONLY can be deleted from a client's final page.
+function buildHTML(a, copy, vibe) {
+  const t = getTheme(vibe);
+  const fb = fallbackCopy(a);
+  const c = (key) => clean(copy[key], fb[key]);
+  const initials = a.name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]).join('').toUpperCase() || 'FA';
+
+  // Bold the highlight phrase inside the help text (both pieces are escaped first).
+  let help = esc(c('help'));
+  const hl = esc(clean(copy.highlight));
+  if (hl && help.includes(hl)) help = help.replace(hl, `<strong>${hl}</strong>`);
+
+  const tags = (Array.isArray(copy.audience_tags) && copy.audience_tags.length ? copy.audience_tags : fb.audience_tags)
+    .map((x) => `<span class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">${esc(x)}</span>`).join('');
+
+  const photoClass = 'w-24 h-24 sm:w-28 sm:h-28 md:w-full md:h-64 rounded-2xl bg-slate-100 shrink-0 border border-slate-100 md:mb-5';
+  const photo = a.photo
+    ? `<img src="${esc(a.photo)}" alt="${esc(a.name)}" class="${photoClass} object-cover object-top" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="${photoClass} items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" style="display:none">${esc(initials)}</div>`
+    : `<div class="${photoClass} flex items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" role="img" aria-label="${esc(a.name)}">${esc(initials)}</div>`;
+
+  // CTA goes to the first contact method supplied, else the advisor's email.
+  const cta = a.messenger || a.whatsapp || a.viber || a.website
+    ? { href: a.messenger || a.whatsapp || a.viber || a.website, external: true }
+    : (a.email ? { href: `mailto:${a.email}`, external: false } : null);
+  const ctaMarkup = cta
+    ? `<a href="${esc(cta.href)}"${cta.external ? ' target="_blank" rel="noopener noreferrer"' : ''} class="cta-btn block w-full text-white text-center rounded-2xl py-4 px-5 shadow-sm"><span class="block text-sm sm:text-base font-semibold">${esc(c('cta_text'))} &rarr;</span><span class="block text-xs text-slate-300 mt-1">${esc(c('cta_sub'))}</span></a>`
+    : '';
+
+  const roleLine = [a.title, a.company].filter(Boolean).map(esc).join(' · ');
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"/>
- <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
- <title>${c.hero_headline||'Your Funnel'}</title>
- <link rel="preconnect" href="https://fonts.googleapis.com"/>
- <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
- <style>
- *{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth} body{font-family:'DM Sans',sans-serif;background:${col.bg};color:${col.text};line-height:1.6;overflow-x:hidden;padding-bottom:80px} a{color:inherit;text-decoration:none} .container{max-width:1060px;margin:0 auto;padding:0 24px} .btn-primary{display:inline-block;background:${col.accent};color:${col.btnText};font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:17px 40px;border-radius:100px;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;letter-spacing:0.01em} .btn-primary:hover{background:${col.accentDark};transform:translateY(-2px);box-shadow:0 12px 32px ${col.accent}44} .eyebrow{display:inline-block;background:${col.accent}18;border:1px solid ${col.accent}44;color:${col.accent};font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:20px} .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,2.8rem);line-height:1.2;margin-bottom:14px} @media(max-width:640px){ .container{padding:0 16px} section{padding:56px 0!important} .grid-2{grid-template-columns:1fr!important} .grid-3{grid-template-columns:1fr!important} .grid-4{grid-template-columns:1fr 1fr!important} .hero-btns{flex-direction:column;align-items:center} }
- /* UNMISSABLE FLOATING CTA IN GENERATED HTML */
- .floating-cta-generated{position:fixed;bottom:0;left:0;right:0;background:${col.navBg};backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid ${col.border};padding:14px 24px;z-index:9999;display:flex;align-items:center;justify-content:center;box-shadow:0 -10px 40px rgba(0,0,0,0.3)} .floating-cta-btn{background:${col.accent};color:${col.btnText};font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:18px 36px;border-radius:100px;text-decoration:none;display:inline-block;text-align:center;width:100%;max-width:500px;box-shadow:0 8px 24px ${col.accent}66;transition:transform 0.2s} .floating-cta-btn:hover{transform:translateY(-2px)}
- </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="${esc(c('tagline'))}">
+<title>${esc(a.name)} | ${esc(a.title)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>${PAGE_CSS}
+:root{--button:${t.button}}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background-color:#f3f5f7}
+.cta-btn{background-color:var(--button);transition:filter .2s,transform .1s}
+.cta-btn:hover{filter:brightness(.86)}.cta-btn:active{transform:scale(.99)}
+:focus-visible{outline:3px solid var(--button);outline-offset:3px}
+</style>
 </head>
-<body>
- <!-- NAV -->
- <nav style="position:sticky;top:0;z-index:1000;background:${col.navBg};backdrop-filter:blur(14px);border-bottom:1px solid ${col.border};padding:14px 0">
- <div class="container" style="display:flex;align-items:center;justify-content:space-between">
- <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:${col.text}">${name||'Expert'}</div>
- <a href="${chatUrl}" class="btn-primary" style="padding:10px 24px;font-size:0.85rem">Let's Talk →</a>
- </div>
- </nav>
-
- <!-- HERO -->
- <section style="padding:110px 0 90px;background:${col.bg};position:relative;overflow:hidden">
- <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 65% 0%,${col.accent}15 0%,transparent 65%);pointer-events:none"></div>
- <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,${col.accent}44,transparent)"></div>
- <div class="container" style="text-align:center;position:relative">
- <div class="eyebrow">${c.hero_eyebrow||'✦ '+offer}</div>
- <h1 style="font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5.5vw,4rem);line-height:1.08;max-width:860px;margin:0 auto 22px;color:${col.text}">${c.hero_headline||''}</h1>
- <p style="font-size:1.12rem;color:${col.textMid};max-width:580px;margin:0 auto 44px;line-height:1.72">${c.hero_subheadline||''}</p>
- <div class="hero-btns" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
- <a href="${chatUrl}" class="btn-primary">${c.hero_cta||'Get Started →'}</a>
- <a href="#offer" style="display:inline-flex;align-items:center;gap:8px;color:${col.textMid};font-size:0.92rem;padding:17px 24px;border-radius:100px;border:1.5px solid ${col.border};transition:all 0.2s" onmouseover="this.style.borderColor='${col.accent}'" onmouseout="this.style.borderColor='${col.border}'">See How It Works ↓</a>
- </div>
- <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap">
- ${(c.hero_trust||'Proven Framework · Real Results · No Lock-in').split('·').map((t,i,arr)=>`<span style="font-size:0.8rem;color:${col.textMid};opacity:0.7;padding:0 16px;${i<arr.length-1?'border-right:1px solid '+col.border:''}">${t.trim()}</span>`).join('')}
- </div>
- </div>
- </section>
-
- <!-- PAIN AMPLIFIER -->
- <section style="padding:80px 0;background:${col.bg2}">
- <div class="container">
- <div style="text-align:center;margin-bottom:52px">
- <div class="eyebrow">${c.pain_eyebrow||'DOES THIS SOUND FAMILIAR?'}</div>
- <h2 class="section-title" style="max-width:640px;margin:0 auto 14px">${c.pain_headline||''}</h2>
- <p style="color:${col.textMid};font-size:1rem;max-width:500px;margin:0 auto">${c.pain_intro||''}</p>
- </div>
- <div class="grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:44px">
- ${(c.pain_bullets||[]).map(b=>`<div style="background:${col.cardBg};border:1px solid ${col.border};border-top:3px solid ${col.accent};border-radius:14px;padding:24px 20px"><div style="font-size:2rem;margin-bottom:14px">${b.emoji}</div><div style="font-weight:700;font-size:0.95rem;color:${col.text};margin-bottom:8px;line-height:1.3">${b.bold}</div><div style="font-size:0.83rem;color:${col.textMid};line-height:1.6">${b.detail}</div></div>`).join('')}
- </div>
- <div style="text-align:center">
- <div style="display:inline-block;background:${col.accent}12;border:1px solid ${col.accent}33;border-radius:14px;padding:20px 36px;font-size:1.02rem;font-style:italic;color:${col.text};max-width:620px">"${c.pain_closer||''}"</div>
- </div>
- </div>
- </section>
-
- <!-- THE GAP -->
- <section style="padding:80px 0;background:${col.bg3}">
- <div class="container">
- <div style="text-align:center;margin-bottom:48px"><div class="eyebrow">THE TURNING POINT</div><h2 class="section-title">Two paths. One decision.</h2></div>
- <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:20px;overflow:hidden;border:1px solid ${col.border}">
- <div style="padding:40px 32px;background:${col.cardBg}"><div style="font-size:0.72rem;font-weight:700;letter-spacing:0.15em;color:${col.textMid};margin-bottom:24px;text-transform:uppercase">${c.gap_left_title||'WHERE YOU ARE NOW'}</div><div style="display:flex;flex-direction:column;gap:16px">${(c.gap_left||[]).map(b=>`<div style="display:flex;align-items:flex-start;gap:12px"><span style="color:#ef4444;flex-shrink:0;font-weight:700;margin-top:1px;font-size:1rem">✗</span><span style="color:${col.textMid};font-size:0.92rem;line-height:1.55">${b}</span></div>`).join('')}</div></div>
- <div style="padding:40px 32px;background:${col.accent}12;border-left:3px solid ${col.accent}"><div style="font-size:0.72rem;font-weight:700;letter-spacing:0.15em;color:${col.accent};margin-bottom:24px;text-transform:uppercase">${c.gap_right_title||'WHERE YOU COULD BE'}</div><div style="display:flex;flex-direction:column;gap:16px">${(c.gap_right||[]).map(b=>`<div style="display:flex;align-items:flex-start;gap:12px"><span style="color:${col.accent};flex-shrink:0;font-weight:700;margin-top:1px;font-size:1rem">✓</span><span style="color:${col.text};font-size:0.92rem;line-height:1.55;font-weight:500">${b}</span></div>`).join('')}</div></div>
- </div>
- <div style="text-align:center;margin-top:32px"><p style="font-size:1.05rem;color:${col.textMid};font-style:italic">${c.gap_bridge||''}</p></div>
- </div>
- </section>
-
- <!-- STATS BAR -->
- <section style="padding:56px 0;background:${col.accent};overflow:hidden">
- <div class="container">
- <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center">
- ${(c.stats||[]).map((s,i,arr)=>`<div style="padding:24px;${i<arr.length-1?'border-right:1px solid '+col.btnText+'33':''}"><div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:${col.btnText};line-height:1">${s.number}</div><div style="font-size:0.82rem;color:${col.btnText};opacity:0.75;margin-top:8px;font-weight:500">${s.label}</div></div>`).join('')}
- </div>
- </div>
- </section>
-
- <!-- OFFER -->
- <section id="offer" style="padding:90px 0;background:${col.bg2}">
- <div class="container">
- <div style="text-align:center;margin-bottom:52px"><div class="eyebrow">${c.offer_eyebrow||'INTRODUCING'}</div><h2 class="section-title" style="max-width:720px;margin:0 auto 14px">${c.offer_headline||''}</h2><p style="color:${col.textMid};font-size:1rem;max-width:540px;margin:0 auto">${c.offer_sub||''}</p></div>
- <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:44px">
- ${(c.offer_benefits||[]).map(b=>`<div style="background:${col.cardBg};border:1px solid ${col.border};border-radius:16px;padding:26px;display:flex;align-items:flex-start;gap:16px;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"><div style="width:38px;height:38px;border-radius:50%;background:${col.accent};color:${col.btnText};display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0">${b.icon}</div><div><div style="font-weight:700;font-size:0.97rem;color:${col.text};margin-bottom:6px">${b.title}</div><div style="font-size:0.85rem;color:${col.textMid};line-height:1.6">${b.desc}</div></div></div>`).join('')}
- </div>
- <div style="background:linear-gradient(135deg,${col.accent},${col.accentDark});border-radius:20px;padding:48px;text-align:center;max-width:520px;margin:0 auto;box-shadow:0 20px 60px ${col.accent}33"><div style="font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${col.btnText};opacity:0.8;margin-bottom:12px">Investment</div><div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;color:${col.btnText};margin-bottom:8px;line-height:1">${c.offer_price_display||'Contact for Pricing'}</div><div style="font-size:0.88rem;color:${col.btnText};opacity:0.72;margin-bottom:32px;line-height:1.5">${c.offer_price_context||''}</div><a href="${chatUrl}" style="display:inline-block;background:${col.btnText};color:${col.accent};font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;padding:16px 40px;border-radius:100px;text-decoration:none;transition:all 0.2s" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${c.offer_cta||'Get Started →'}</a></div>
- </div>
- </section>
-
- <!-- HOW IT WORKS -->
- <section style="padding:80px 0;background:${col.bg}">
- <div class="container">
- <div style="text-align:center;margin-bottom:52px"><div class="eyebrow">THE PROCESS</div><h2 class="section-title">${c.process_title||'How It Works'}</h2></div>
- <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative">
- ${(c.process_steps||[]).map((s,i,arr)=>`<div style="text-align:center;padding:32px 24px;position:relative"><div style="width:56px;height:56px;border-radius:50%;background:${col.accent};color:${col.btnText};display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;margin:0 auto 20px">${s.num}</div><div style="font-weight:700;font-size:1rem;color:${col.text};margin-bottom:10px">${s.title}</div><div style="font-size:0.85rem;color:${col.textMid};line-height:1.65">${s.desc}</div></div>`).join('')}
- </div>
- </div>
- </section>
-
- ${aboutSection}
-
- <!-- TESTIMONIALS -->
- <section style="padding:80px 0;background:${col.bg2}">
- <div class="container">
- <div style="text-align:center;margin-bottom:52px"><div class="eyebrow">WHAT CLIENTS ARE SAYING</div><h2 class="section-title">Real results from real people</h2></div>
- <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
- ${(c.testimonials||[]).map(t=>`<div style="background:${col.cardBg};border:1px solid ${col.border};border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:18px"><div style="color:${col.accent};font-size:1rem;letter-spacing:2px">★★★★★</div><p style="font-size:0.9rem;color:${col.textMid};line-height:1.75;flex:1;font-style:italic">"${t.quote}"</p><div style="background:${col.accent}15;border-radius:8px;padding:8px 12px;font-size:0.78rem;font-weight:600;color:${col.accent}">${t.result}</div><div style="display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid ${col.border}"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,${col.accent},${col.accentDark});display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:${col.btnText};flex-shrink:0">${t.initial||t.name.charAt(0)}</div><div><div style="font-weight:600;font-size:0.88rem;color:${col.text}">${t.name}</div><div style="font-size:0.75rem;color:${col.textMid}">${t.role}</div></div></div></div>`).join('')}
- </div>
- </div>
- </section>
-
- <!-- FAQ -->
- <section style="padding:80px 0;background:${col.bg}">
- <div class="container" style="max-width:720px">
- <div style="text-align:center;margin-bottom:48px"><div class="eyebrow">COMMON QUESTIONS</div><h2 class="section-title">Got questions? We've got answers.</h2></div>
- <div style="display:flex;flex-direction:column;gap:14px">
- ${(c.faq||[]).map(f=>`<div style="background:${col.cardBg};border:1px solid ${col.border};border-radius:14px;padding:24px 28px"><div style="font-weight:700;font-size:0.97rem;color:${col.text};margin-bottom:10px">Q: ${f.q}</div><div style="font-size:0.88rem;color:${col.textMid};line-height:1.7">${f.a}</div></div>`).join('')}
- </div>
- </div>
- </section>
-
- <!-- FINAL CTA -->
- <section style="padding:90px 0 120px;background:${col.accent};position:relative;overflow:hidden">
- <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.1) 0%,transparent 70%);pointer-events:none"></div>
- <div class="container" style="text-align:center;position:relative">
- <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);color:${col.btnText};max-width:680px;margin:0 auto 18px;line-height:1.15">${c.final_headline||''}</h2>
- <p style="font-size:1.02rem;color:${col.btnText};opacity:0.78;max-width:520px;margin:0 auto 40px;line-height:1.72">${c.final_sub||''}</p>
- <a href="${chatUrl}" style="display:inline-block;background:${col.btnText};color:${col.accent};font-family:'DM Sans',sans-serif;font-size:1.05rem;font-weight:700;padding:19px 48px;border-radius:100px;text-decoration:none;transition:all 0.2s;box-shadow:0 8px 32px rgba(0,0,0,0.2)" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${c.final_cta||"Let's Talk →"}</a>
- <p style="margin-top:18px;font-size:0.78rem;color:${col.btnText};opacity:0.55">This is a conversation, not a sales pitch. No pressure, ever.</p>
- </div>
- </section>
-
- <!-- FOOTER -->
- <footer style="padding:36px 0;background:${col.bg3};border-top:1px solid ${col.border}">
- <div class="container" style="text-align:center">
- <div style="font-family:'Playfair Display',serif;font-size:1rem;color:${col.text};margin-bottom:6px">Maria Angelica Scott — System Architect</div>
- <div style="font-size:0.8rem;color:${col.textMid};margin-bottom:16px">${c.footer_tagline||'Helping businesses build systems that attract, convert, and close — on autopilot.'}</div>
- <div style="font-size:0.7rem;color:${col.textMid};opacity:0.45">© ${new Date().getFullYear()} · This is a personalized demo funnel generated based on your quiz answers.</div>
- </div>
- </footer>
-
- 
-
-</body>
-</html>`;
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
+<main class="w-full max-w-[440px] md:max-w-[880px] bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-8 md:p-10">
+  <div class="flex items-center justify-between mb-6 md:mb-8 pb-4 border-b border-slate-100">
+    <span class="text-[11px] font-semibold tracking-wider text-slate-500 uppercase pr-3">${esc(c('top_label'))}</span>
+    <!-- DEMO-ONLY: delete this badge on a client's final page -->
+    <span class="shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60">Demo profile</span>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-12 md:gap-8 items-start">
+    <div class="md:col-span-5 flex md:flex-col items-center md:items-start gap-4 md:gap-0 mb-6 md:mb-0">
+      ${photo}
+      <div class="flex flex-col items-start">
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">${esc(a.name)}</h1>
+        <p class="text-sm text-slate-500 mt-0.5">${roleLine}</p>
+        <span class="mt-2.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100/80 text-emerald-800">${esc(c('specialty_label'))}</span>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2.5 font-medium">${esc(c('tagline'))}</p>
+      </div>
+    </div>
+    <div class="md:col-span-7 flex flex-col justify-between">
+      <section class="bg-slate-50/90 rounded-2xl p-5 sm:p-6 border border-slate-100 mb-6">
+        <h2 class="text-xl sm:text-[22px] font-bold text-slate-800 leading-snug mb-3">${esc(c('headline'))}</h2>
+        <p class="text-sm text-slate-600 leading-relaxed mb-4">${esc(c('problem'))}</p>
+        <p class="text-sm font-semibold text-slate-800 mb-2">${esc(c('lead_in'))}</p>
+        <p class="text-sm text-slate-600 leading-relaxed">${help}</p>
+      </section>
+      <section class="mb-6">
+        <p class="text-xs sm:text-sm font-semibold text-slate-700 mb-2.5">${esc(c('audience_label'))}</p>
+        <div class="flex flex-wrap gap-2">${tags}</div>
+      </section>
+      ${ctaMarkup}
+      <footer class="mt-5 text-center">
+        <p class="text-[11px] text-slate-500 leading-normal">General information only. This page is not financial advice.</p>
+        <!-- DEMO-ONLY: delete this line on a client's final page -->
+        <p class="text-[11px] text-slate-500 leading-normal mt-1">This is a demonstration profile. Advisor information and credentials are sample content.</p>
+      </footer>
+    </div>
+  </div>
+</main>
+</body></html>`;
 }
 
+// ── SAVE (same Supabase approach as before: anon key, same columns) ──
+async function saveToSupabase(body, a, html) {
+  const supabaseURL = new URL(process.env.SUPABASE_URL);
+  const key = process.env.SUPABASE_ANON_KEY;
+  const headers = { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` };
+  const now = new Date().toISOString();
+  const fields = {
+    offer_name: body.offer || a.specialization,
+    offer_price: body.price || null,
+    ideal_client: body.client || null,
+    offer_pain: body.pain || null,
+    offer_transform: body.transform || null,
+    design_vibe: body.vibe || null,
+    demo_html: html,
+    demo_generated_at: now
+  };
+
+  if (a.leadId) {
+    await requestJSON({
+      hostname: supabaseURL.hostname,
+      path: `/rest/v1/leads?id=eq.${encodeURIComponent(a.leadId)}`,
+      method: 'PATCH',
+      headers: { ...headers, 'Prefer': 'return=minimal' }
+    }, fields, 20000);
+    return a.leadId;
+  }
+
+  const inserted = await requestJSON({
+    hostname: supabaseURL.hostname,
+    path: '/rest/v1/leads',
+    method: 'POST',
+    headers: { ...headers, 'Prefer': 'return=representation' }
+  }, {
+    name: body.name,
+    email: body.email,
+    role: body.role || 'Not provided',
+    goal: body.goal || 'Not provided',
+    problem: body.problem || 'Not provided',
+    ...fields,
+    created_at: now
+  }, 20000);
+  return Array.isArray(inserted) && inserted[0] && inserted[0].id ? inserted[0].id : null;
+}
+
+// ── HANDLER ──
 module.exports = async function handler(req, res) {
- res.setHeader('Access-Control-Allow-Origin', '*');
- res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
- res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
- if (req.method === 'OPTIONS') return res.status(200).end();
- if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
- const { lead_id, name, email, role, goal, problem, offer, price, client, pain, transform, vibe } = req.body;
- if (!offer || !client || !pain || !transform) return res.status(400).json({ error: 'Missing required fields' });
+  let body;
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+  } catch (_) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
 
- const colors = VIBES[vibe] || VIBES['bold-premium'];
- const roleType = detectRole(role);
- const COACH_ROLES = ['coach','advisor','consultant','sales'];
- const showAbout = COACH_ROLES.includes(roleType);
- const chatUrl = `/chat?name=${encodeURIComponent(name||'')}&email=${encodeURIComponent(email||'')}${lead_id?'&id='+lead_id:''}`;
+  if (!clean(body.offer)) return res.status(400).json({ error: 'Missing required fields' });
 
- // ── Step 1: Get role-specific AI content ──
- let content;
- try {
- const prompt = buildContentPrompt(roleType, { name, role, offer, price, client, pain, transform, goal, problem });
- const aiRes = await postJSON({ hostname: 'api.openai.com', path: '/v1/chat/completions', method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` } }, { model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], temperature: 0.8, max_tokens: 2500 });
- if (aiRes.error) return res.status(500).json({ error: 'OpenAI: ' + aiRes.error.message });
- const raw = aiRes.choices?.[0]?.message?.content?.trim().replace(/^```json\n?/,'').replace(/^```\n?/,'').replace(/```$/,'').trim();
- content = JSON.parse(raw);
- } catch(err) {
- console.error('AI content error:', err.message);
- return res.status(500).json({ error: 'Content generation failed: ' + err.message });
- }
+  const advisor = getAdvisorData(body);
 
- // ── Step 2: Build HTML from template ──
- const htmlContent = buildHTML(content, roleType, colors, chatUrl, name, showAbout);
+  // Pages are shown from a temporary blob address, so the photo needs a full web address.
+  // Use APP_URL if set, else this site's own host (checked to be a plain host name).
+  if (!advisor.photo) {
+    const hdrs = req.headers || {};
+    const host = String(hdrs['x-forwarded-host'] || hdrs.host || '').split(',')[0].trim();
+    const base = (process.env.APP_URL || (/^[a-z0-9.-]+(:\d+)?$/i.test(host) ? `https://${host}` : '')).replace(/\/+$/, '');
+    if (base) advisor.photo = base + DEFAULT_PHOTO_PATH;
+  }
 
- // ── Step 3: Save to Supabase (Your existing exact logic, untouched) ──
- let savedLeadId = lead_id;
- try {
- const supabaseURL = new URL(process.env.SUPABASE_URL);
- if (lead_id) {
- await postJSON({ hostname: supabaseURL.hostname, path: `/rest/v1/leads?id=eq.${lead_id}`, method: 'PATCH', headers: { 'Content-Type':'application/json','apikey':process.env.SUPABASE_ANON_KEY,'Authorization':`Bearer ${process.env.SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' } }, { offer_name:offer, offer_price:price||null, ideal_client:client, offer_pain:pain, offer_transform:transform, design_vibe:vibe||null, demo_html:htmlContent, demo_generated_at:new Date().toISOString() });
- } else {
- const inserted = await postJSON({ hostname: supabaseURL.hostname, path: '/rest/v1/leads', method: 'POST', headers: { 'Content-Type':'application/json','apikey':process.env.SUPABASE_ANON_KEY,'Authorization':`Bearer ${process.env.SUPABASE_ANON_KEY}`,'Prefer':'return=representation' } }, { name, email, role: role || 'Not provided', goal: goal || 'Not provided', problem: problem || 'Not provided', offer_name:offer, offer_price:price||null, ideal_client:client, offer_pain:pain, offer_transform:transform, design_vibe:vibe||null, demo_html:htmlContent, demo_generated_at:new Date().toISOString(), created_at:new Date().toISOString() });
- if (Array.isArray(inserted) && inserted[0]?.id) savedLeadId = inserted[0].id;
- }
- } catch(err) {
- console.error('Supabase error:', err.message);
- }
+  let html;
+  try {
+    const copy = await generateCopy(advisor, String(body.language || '').toLowerCase() === 'english');
+    html = buildHTML(advisor, copy, body.vibe);
+  } catch (err) {
+    console.error('Profile page build error:', err.message);
+    return res.status(500).json({ error: 'Content generation failed: ' + err.message });
+  }
 
- return res.status(200).json({ demo_url: `/demo?id=${savedLeadId||'preview'}`, lead_id: savedLeadId });
+  let savedLeadId;
+  try {
+    savedLeadId = await saveToSupabase(body, advisor, html);
+  } catch (err) {
+    console.error('Supabase error:', err.message);
+    return res.status(500).json({ error: 'Could not save the page: ' + err.message });
+  }
+
+  return res.status(200).json({
+    success: true,
+    demo_url: `/demo?id=${encodeURIComponent(savedLeadId || 'preview')}`,
+    lead_id: savedLeadId
+  });
 };
