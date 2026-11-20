@@ -113,7 +113,7 @@ function safeURL(value) {
   if (!candidate) return '';
   try {
     const parsed = new URL(candidate);
-    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+    return ['http:', 'https:', 'viber:'].includes(parsed.protocol) ? parsed.href : '';
   } catch (_) {
     return '';
   }
@@ -293,13 +293,25 @@ function buildHTML(a, copy, vibe) {
   const photoSrc = a.photo || DEFAULT_PHOTO_PATH;
   const photo = `<img src="${esc(photoSrc)}" alt="${esc(a.name)}" class="${photoClass} object-cover object-top" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="${photoClass} items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" style="display:none">${esc(initials)}</div>`;
 
-  // CTA goes to the first contact method supplied, else the advisor's email.
-  const cta = a.messenger || a.whatsapp || a.viber || a.website
-    ? { href: a.messenger || a.whatsapp || a.viber || a.website, external: true }
-    : (a.email ? { href: `mailto:${a.email}`, external: false } : null);
-  const ctaMarkup = cta
-    ? `<a href="${esc(cta.href)}"${cta.external ? ' target="_blank" rel="noopener noreferrer"' : ''} class="cta-btn block w-full text-white text-center rounded-2xl py-4 px-5 shadow-sm"><span class="block text-sm sm:text-base font-semibold">${esc(c('cta_text'))} &rarr;</span><span class="block text-xs text-slate-300 mt-1">${esc(c('cta_sub'))}</span></a>`
-    : '';
+  // Primary CTA button (defaults to Messenger if none supplied) + secondary contact pills
+  // Inline styles are included so buttons stay fully visible inside Dashnex Page Builder.
+  const primaryHref = a.messenger || a.whatsapp || a.viber || a.website || (a.email ? `mailto:${a.email}` : 'https://m.me/');
+  const primaryExternal = !primaryHref.startsWith('mailto:');
+  const primaryBtnStyle = `background-color:${t.button};color:#ffffff;display:block;width:100%;text-align:center;text-decoration:none;border-radius:1rem;padding:1rem 1.25rem;`;
+  const pillStyle = `display:inline-flex;align-items:center;justify-content:center;padding:0.45rem 0.9rem;border-radius:9999px;font-size:12px;font-weight:600;background-color:#f1f5f9;color:#334155;border:1px solid #cbd5e1;text-decoration:none;`;
+
+  const contactLinks = [
+    { label: 'Messenger', href: a.messenger || 'https://m.me/', external: true },
+    { label: 'WhatsApp', href: a.whatsapp || 'https://wa.me/', external: true },
+    { label: 'Viber', href: a.viber || 'https://www.viber.com/', external: true },
+    { label: 'Email', href: a.email ? `mailto:${a.email}` : 'mailto:advisor@example.com', external: false }
+  ];
+  const pillsMarkup = contactLinks.map((item) =>
+    `<a href="${esc(item.href)}"${item.external ? ' target="_blank" rel="noopener noreferrer"' : ''} style="${pillStyle}" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">${esc(item.label)}</a>`
+  ).join('');
+
+  const ctaMarkup = `<a href="${esc(primaryHref)}"${primaryExternal ? ' target="_blank" rel="noopener noreferrer"' : ''} style="${primaryBtnStyle}" class="cta-btn block w-full text-white text-center rounded-2xl py-4 px-5 shadow-sm"><span style="display:block;color:#ffffff;font-weight:600;" class="block text-sm sm:text-base font-semibold">${esc(c('cta_text'))} &rarr;</span><span style="display:block;color:#e2e8f0;margin-top:0.25rem;" class="block text-xs text-slate-300 mt-1">${esc(c('cta_sub'))}</span></a>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem;margin-top:0.875rem;" class="flex flex-wrap justify-center gap-2 mt-3.5">${pillsMarkup}</div>`;
 
   const roleLine = [a.title, a.company].filter(Boolean).map(esc).join(' · ');
 
