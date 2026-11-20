@@ -1,15 +1,19 @@
 {
   "rewrites": [
-    { "source": "/api/analyze",  "destination": "/api/analyze.js" },
-    { "source": "/api/demo",     "destination": "/api/demo.js" },
-    { "source": "/api/config",   "destination": "/api/config.js" },
-    { "source": "/api/chat",     "destination": "/api/chat.js" },
-    { "source": "/api/strategy", "destination": "/api/strategy.js" },
-    { "source": "/demo",         "destination": "/demo.html" },
-    { "source": "/chat",         "destination": "/chat.html" },
-    { "source": "/admin",        "destination": "/admin.html" },
-    { "source": "/proposal",     "destination": "/proposal.html" },
-    { "source": "/api/delete", "destination": "/api/delete-lead.js" }
+    { "source": "/api/analyze",              "destination": "/api/analyze.js" },
+    { "source": "/api/demo",                 "destination": "/api/demo.js" },
+    { "source": "/api/config",               "destination": "/api/config.js" },
+    { "source": "/api/chat",                 "destination": "/api/chat.js" },
+    { "source": "/api/strategy",             "destination": "/api/strategy.js" },
+    { "source": "/api/advisor-lead",         "destination": "/api/advisor-lead.js" },
+    { "source": "/api/advisor-nurture-cron", "destination": "/api/advisor-nurture-cron.js" },
+    { "source": "/demo",                     "destination": "/demo.html" },
+    { "source": "/chat",                     "destination": "/chat.html" },
+    { "source": "/admin",                    "destination": "/admin.html" },
+    { "source": "/proposal",                 "destination": "/proposal.html" },
+    { "source": "/directory",                "destination": "/directory.html" },
+    { "source": "/calculator",               "destination": "/calculator.html" },
+    { "source": "/api/delete",               "destination": "/api/delete-lead.js" }
   ],
   "crons": [
     {
@@ -17,9 +21,8 @@
       "schedule": "0 2 * * *"
     },
     {
-  "path": "/api/reactivation",
-  "schedule": "0 3 * * *"
+      "path": "/api/reactivation",
+      "schedule": "0 3 * * *"
     }
   ]
 }
-
