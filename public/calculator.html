@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30-Second Family Safety Net Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #f3f5f7;
+    color: #1e293b;
+    line-height: 1.5;
+  }
+  .sn-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+  }
+  .sn-hero {
+    background: linear-gradient(135deg, #1b3654 0%, #244363 100%);
+    color: #ffffff;
+    padding: 28px 24px;
+  }
+  .sn-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.14);
+    color: #e0f2fe;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+  }
+  .sn-hero h1 {
+    margin: 0 0 10px;
+    font-size: 21px;
+    line-height: 1.32;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  .sn-hero p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #cbd5e1;
+  }
+  .sn-body { padding: 24px; }
+  .sn-progress-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .sn-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .sn-progress-fill {
+    height: 100%;
+    width: 20%;
+    background: #244363;
+    border-radius: 9999px;
+    transition: width 0.25s ease;
+  }
+  .sn-step-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+  }
+  .sn-q-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.35;
+  }
+  .sn-q-sub {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    color: #64748b;
+  }
+  .sn-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 540px) {
+    .sn-options.two-col { grid-template-columns: 1fr 1fr; }
+    .sn-hero { padding: 32px 32px; }
+    .sn-hero h1 { font-size: 24px; }
+    .sn-body { padding: 30px 32px; }
+  }
+  .sn-opt-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .sn-opt-btn:hover {
+    border-color: #244363;
+    background: #f1f5f9;
+  }
+  .sn-opt-btn.selected {
+    border-color: #244363;
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(36, 67, 99, 0.15);
+  }
+  .sn-opt-main {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .sn-opt-desc {
+    display: block;
+    font-size: 12.5px;
+    color: #475569;
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .sn-custom-row {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sn-custom-row input {
+    flex: 1;
+    padding: 11px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .sn-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .sn-btn-back {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .sn-btn-next {
+    background: #244363;
+    border: none;
+    color: #ffffff;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .sn-btn-next:hover { filter: brightness(0.92); }
+  .sn-hidden { display: none !important; }
+
+  /* Results & Reality Check */
+  .sn-result-box {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .sn-result-box.healthy {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+  }
+  .sn-kpis {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  @media (min-width: 500px) {
+    .sn-kpis { grid-template-columns: 1fr 1fr; }
+  }
+  .sn-kpi {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .sn-kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+  }
+  .sn-kpi-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: #b91c1c;
+    margin-top: 2px;
+  }
+  .sn-result-box.healthy .sn-kpi-val { color: #047857; }
+  .sn-kpi-val.navy { color: #0f172a; }
+  .sn-kpi-note {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 4px;
+  }
+
+  .sn-realities-title {
+    margin: 22px 0 12px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .sn-reality-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #244363;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .sn-reality-card h4 {
+    margin: 0 0 6px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .sn-reality-card p {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.55;
+  }
+  .sn-reality-card p:last-child { margin-bottom: 0; }
+
+  /* Email Gate */
+  .sn-gate {
+    background: #eff6ff;
+    border: 1.5px solid #93c5fd;
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-top: 22px;
+  }
+  .sn-gate h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e3a8a;
+  }
+  .sn-gate p {
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    color: #1e40af;
+    line-height: 1.5;
+  }
+  .sn-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 500px) {
+    .sn-form-grid { grid-template-columns: 1fr 1.3fr; }
+  }
+  .sn-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    font-size: 14px;
+    background: #ffffff;
+    font-family: inherit;
+  }
+  .sn-submit {
+    width: 100%;
+    margin-top: 10px;
+    background: #244363;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .sn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+  .sn-status {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .sn-disclaimer {
+    margin: 18px 0 0;
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="sn-wrap">
+  <div class="sn-hero">
+    <span class="sn-badge">30-Second Family Safety Net Check</span>
+    <h1>If your income stopped tomorrow, how many months before your family runs out of cash—and has to start selling what you worked hard to build?</h1>
+    <p>See how long your current savings would actually last, spot the hidden cash drains that catch most Filipino families off guard, and get the simple steps you can take today to protect your family.</p>
+  </div>
+
+  <div class="sn-body">
+    <!-- QUIZ VIEW -->
+    <div id="sn-quiz-view">
+      <div class="sn-progress-wrap">
+        <div class="sn-progress-bar"><div id="sn-progress-fill" class="sn-progress-fill"></div></div>
+        <span id="sn-step-label" class="sn-step-label">Step 1 of 5</span>
+      </div>
+
+      <div id="sn-question-container"></div>
+
+      <div class="sn-nav">
+        <button type="button" id="sn-back-btn" class="sn-btn-back sn-hidden">&larr; Back</button>
+        <button type="button" id="sn-next-btn" class="sn-btn-next">Continue &rarr;</button>
+      </div>
+    </div>
+
+    <!-- RESULT & EMAIL GATE VIEW -->
+    <div id="sn-result-view" class="sn-hidden">
+      <div id="sn-result-box" class="sn-result-box">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#7f1d1d;">Your Reality Check Summary</span>
+        <div class="sn-kpis">
+          <div class="sn-kpi">
+            <div class="sn-kpi-label">Current Cash Runway</div>
+            <div id="res-runway" class="sn-kpi-val">0.0 Months</div>
+            <div id="res-runway-note" class="sn-kpi-note">Before ready cash runs out</div>
+          </div>
+          <div class="sn-kpi">
+            <div class="sn-kpi-label">Estimated Protection Gap</div>
+            <div id="res-gap" class="sn-kpi-val navy">₱0</div>
+            <div id="res-gap-note" class="sn-kpi-note">Total backup needed for your milestone</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sn-realities-title">What Actually Happens in Real Life (Philippine Reality Check)</h3>
+      <div id="sn-realities-list"></div>
+
+      <!-- OPTIONAL EMAIL CAPTURE FOR FULL REPORT & 3 PRACTICAL OPTIONS -->
+      <div class="sn-gate" id="sn-gate-box">
+        <h3>Where should we send your full Safety Net Breakdown &amp; 3 Practical Options to Close This Gap Today?</h3>
+        <p>Makikita mo rito ang eksaktong computation mo plus 3 simple steps kung paano mo mapoprotektahan ang pamilya at naipundar mo nang hindi nabibigatan sa budget.</p>
+        <form id="sn-lead-form">
+          <div class="sn-form-grid">
+            <input type="text" id="sn-fname" class="sn-input" placeholder="Your First Name" required>
+            <input type="email" id="sn-email" class="sn-input" placeholder="Your Best Email Address" required>
+          </div>
+          <button type="submit" id="sn-submit-btn" class="sn-submit">Send My Full Safety Net Plan &rarr;</button>
+          <div id="sn-form-status" class="sn-status"></div>
+        </form>
+      </div>
+
+      <div style="text-align:center;margin-top:14px;">
+        <button type="button" id="sn-restart-btn" style="background:none;border:none;color:#64748b;font-size:12.5px;text-decoration:underline;cursor:pointer;">Recalculate with different numbers</button>
+      </div>
+    </div>
+
+    <p class="sn-disclaimer">Educational estimate only based on your inputs and typical Philippine cost ranges. Not individualized financial advice.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const advisorContext = {
+    advisor_slug: params.get('advisor') || params.get('advisor_slug') || 'featured-advisor',
+    advisor_name: params.get('advisor_name') || '',
+    advisor_title: params.get('advisor_title') || '',
+    advisor_email: params.get('advisor_email') || '',
+    advisor_messenger: params.get('advisor_messenger') || '',
+    advisor_booking: params.get('advisor_booking') || '',
+    directory_goal: params.get('goal') || ''
+  };
+
+  const API_ENDPOINT = (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost')
+    ? '/api/advisor-lead'
+    : 'https://ai-funnel-engine.vercel.app/api/advisor-lead';
+
+  const QUESTIONS = [
+    {
+      key: 'monthly_expenses',
+      title: 'Magkano ang kailangan ng pamilya mo bawat buwan para tuloy ang normal na buhay?',
+      sub: 'Isama ang kuryente, tubig, grocery, rent o hulog sa bahay, internet, at regular na padala sa magulang.',
+      twoCol: true,
+      allowCustom: true,
+      customPlaceholder: 'Or type exact monthly amount (e.g. 45000)',
+      options: [
+        { label: '₱30,000 / month', desc: 'Essential household bills & daily needs', value: 30000 },
+        { label: '₱60,000 / month', desc: 'Growing family bills, utilities & support', value: 60000 },
+        { label: '₱120,000 / month', desc: 'Full household expenses, car/home amortization', value: 120000 },
+        { label: '₱250,000+ / month', desc: 'Multi-household support or business lifestyle', value: 250000 }
+      ]
+    },
+    {
+      key: 'liquid_savings',
+      title: 'Kung magkaroon ng emergency bukas, magkano ang cash mo na madaling makuha agad?',
+      sub: 'Cash sa banko o e-wallet lang—huwag isama ang lupa, sasakyan, o gamit na kailangan pang ibenta.',
+      twoCol: true,
+      allowCustom: true,
+      customPlaceholder: 'Or type exact ready cash (e.g. 80000)',
+      options: [
+        { label: 'Below ₱50,000', desc: 'Halos saktong pang-araw-araw pa lang', value: 25000 },
+        { label: '₱150,000', desc: 'May konting naitabi para sa biglaang gastos', value: 150000 },
+        { label: '₱500,000', desc: 'May solid emergency buffer sa banko', value: 500000 },
+        { label: '₱1,500,000+', desc: 'May malaking liquid cash reserve', value: 1500000 }
+      ]
+    },
+    {
+      key: 'education_fund',
+      title: 'May mga anak o kapatid ka bang pinag-aaral ngayon—o malapit nang mag-college?',
+      sub: 'Para makita natin kung kaya pa ring ituloy ang pag-aaral nila kahit matigil ang sahod o kita.',
+      twoCol: false,
+      allowCustom: false,
+      options: [
+        { label: 'Wala / Hindi applicable', desc: 'Walang dependents na nag-aaral sa ngayon', value: 0 },
+        { label: '1 Child (~₱500,000 college fund)', desc: 'Sapat para sa 4-year college degree sa private university', value: 500000 },
+        { label: '2+ Children (~₱1,500,000+ college fund)', desc: 'Para hindi mapilitang huminto o lumipat ng school ang mga bata', value: 1500000 }
+      ]
+    },
+    {
+      key: 'debts_assets',
+      title: 'Magkano ang total ng mga binabayaran mong utang o mga naipundar na ayaw mong mabenta nang palugi?',
+      sub: 'Sasakyan, bahay, business loan, o lupang puwedeng ma-freeze o mabenta nang mura kapag nagipit.',
+      twoCol: true,
+      allowCustom: true,
+      customPlaceholder: 'Or type estimated loans/assets value',
+      options: [
+        { label: '₱0 / Wala pa', desc: 'Walang binabayarang loan o property sa ngayon', value: 0 },
+        { label: '₱500,000', desc: 'Car loan, personal loan, o maliit na puhunan', value: 500000 },
+        { label: '₱2,500,000', desc: 'Home mortgage, lupa, o active business credit', value: 2500000 },
+        { label: '₱10,000,000+', desc: 'Multiple properties, negosyo, at family estate', value: 10000000 }
+      ]
+    },
+    {
+      key: 'protection_years',
+      title: 'Kung biglang huminto ang kita mo bukas, kaninong buhay o pangarap ang pinaka-maapektuhan—at ano ang kailangan mong saluhin?',
+      sub: 'Piliin ang pinaka-malapit sa sitwasyon mo ngayon para makuha natin ang tamang haba ng proteksyon.',
+      twoCol: false,
+      allowCustom: false,
+      options: [
+        {
+          label: 'Sarili ko muna & mga magulang (3-Year Safety Net)',
+          desc: 'Single o nagsisimula pa lang—kailangan ng 3 taong backup para hindi maging pabigat sa magulang kung magkasakit o ma-aksidente.',
+          value: 3,
+          milestone: 'Self & Parents Recovery Shield (3 Years)'
+        },
+        {
+          label: 'Pamilya habang nakakabawi o nagpapalit ng kabuhayan (5-Year Shield)',
+          desc: 'May asawa o dependents—kailangan ng pamilya ng 5 taon para makapag-adjust nang hindi nabebenta ang bahay, lupa, o sasakyan.',
+          value: 5,
+          milestone: 'Family Transition Shield (5 Years)'
+        },
+        {
+          label: 'Mga anak na nag-aaral pa hanggang makatapos ng college (10-Year Plan)',
+          desc: 'Breadwinner o OFW—gusto kong siguraduhin na tuloy ang baon, tuition, at buhay ng mga bata hanggang makatapos sila.',
+          value: 10,
+          milestone: 'Children & Breadwinner Income Shield (10 Years)'
+        },
+        {
+          label: 'Negosyo, tauhan, at mga naipundar na ari-arian (15-Year Legacy)',
+          desc: 'Business owner o property builder—gusto kong maprotektahan ang negosyo sa utang at may pambayad sa estate tax nang hindi ma-freeze ang pamana.',
+          value: 15,
+          milestone: 'Business & Estate Preservation (15 Years)'
+        }
+      ]
+    }
+  ];
+
+  const state = {
+    step: 0,
+    answers: {
+      monthly_expenses: 60000,
+      liquid_savings: 150000,
+      education_fund: 500000,
+      debts_assets: 500000,
+      protection_years: 5,
+      milestone_label: 'Family Transition Shield (5 Years)'
+    },
+    computed: null
+  };
+
+  const qContainer = document.getElementById('sn-question-container');
+  const progressFill = document.getElementById('sn-progress-fill');
+  const stepLabel = document.getElementById('sn-step-label');
+  const backBtn = document.getElementById('sn-back-btn');
+  const nextBtn = document.getElementById('sn-next-btn');
+
+  function formatPHP(n) {
+    return '₱' + Math.max(0, Math.round(n)).toLocaleString('en-PH');
+  }
+
+  function renderStep() {
+    const q = QUESTIONS[state.step];
+    progressFill.style.width = `${((state.step + 1) / QUESTIONS.length) * 100}%`;
+    stepLabel.textContent = `Step ${state.step + 1} of ${QUESTIONS.length}`;
+    backBtn.classList.toggle('sn-hidden', state.step === 0);
+    nextBtn.textContent = state.step === QUESTIONS.length - 1 ? 'See My Safety Net Result →' : 'Continue →';
+
+    const currentVal = state.answers[q.key];
+    let html = `<h2 class="sn-q-title">${q.title}</h2><p class="sn-q-sub">${q.sub}</p>`;
+    html += `<div class="sn-options ${q.twoCol ? 'two-col' : ''}">`;
+    q.options.forEach((opt, idx) => {
+      const isSel = currentVal === opt.value;
+      html += `
+        <button type="button" class="sn-opt-btn ${isSel ? 'selected' : ''}" data-idx="${idx}">
+          <span class="sn-opt-main">${opt.label}</span>
+          <span class="sn-opt-desc">${opt.desc}</span>
+        </button>`;
+    });
+    html += `</div>`;
+
+    if (q.allowCustom) {
+      html += `
+        <div class="sn-custom-row">
+          <input type="number" id="sn-custom-input" min="0" step="1000" placeholder="${q.customPlaceholder}" value="">
+        </div>`;
+    }
+
+    qContainer.innerHTML = html;
+
+    qContainer.querySelectorAll('.sn-opt-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-idx'));
+        const chosen = q.options[idx];
+        state.answers[q.key] = chosen.value;
+        if (chosen.milestone) state.answers.milestone_label = chosen.milestone;
+        qContainer.querySelectorAll('.sn-opt-btn').forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        const customInput = document.getElementById('sn-custom-input');
+        if (customInput) customInput.value = '';
+      });
+    });
+
+    const customInput = document.getElementById('sn-custom-input');
+    if (customInput) {
+      customInput.addEventListener('input', () => {
+        const val = Number(customInput.value);
+        if (!Number.isNaN(val) && val >= 0) {
+          state.answers[q.key] = val;
+          qContainer.querySelectorAll('.sn-opt-btn').forEach((b) => b.classList.remove('selected'));
+        }
+      });
+    }
+  }
+
+  function showResults() {
+    const a = state.answers;
+    const runwayMonths = a.monthly_expenses > 0 ? (a.liquid_savings / a.monthly_expenses) : 0;
+    const incomeTarget = a.monthly_expenses * 12 * a.protection_years;
+    const totalNeeded = incomeTarget + a.education_fund + a.debts_assets;
+    const gap = Math.max(0, totalNeeded - a.liquid_savings);
+
+    state.computed = {
+      ...a,
+      runway_months: Number(runwayMonths.toFixed(1)),
+      total_needed: totalNeeded,
+      protection_gap: gap
+    };
+
+    const resBox = document.getElementById('sn-result-box');
+    resBox.classList.toggle('healthy', runwayMonths >= 12 && gap === 0);
+
+    document.getElementById('res-runway').textContent = `${runwayMonths.toFixed(1)} Months`;
+    document.getElementById('res-runway-note').textContent = runwayMonths < 6
+      ? 'Critical: Less than 6 months of family breathing room'
+      : 'Before ready cash runs out if income stops tomorrow';
+
+    document.getElementById('res-gap').textContent = formatPHP(gap);
+    document.getElementById('res-gap-note').textContent = `Total target: ${formatPHP(totalNeeded)} (${a.milestone_label})`;
+
+    const realities = [
+      {
+        title: 'Reality #1: Kapag Tumama ang Malubhang Sakit (Why Company HMO Isn’t Enough)',
+        body: 'Karamihan ng company HMO ay hanggang ₱100,000–₱250,000 lang—at <strong>nawawala agad kapag nag-resign ka o hindi na nakabalik sa trabaho</strong>. Sa private hospitals sa Pilipinas, ang heart bypass surgery ay umaabot ng <strong>₱1.2M hanggang ₱1.4M</strong>, at ang cancer treatment ay nasa <strong>₱800,000 hanggang ₱2.5M+</strong>—bukod pa ang 1–2 taon na walang sahod habang nagpapagaling.'
+      }
+    ];
+
+    if (a.education_fund > 0 || a.protection_years === 10) {
+      realities.push({
+        title: 'Reality #2: Ang Tuition ng mga Bata (Schooling Continuity)',
+        body: 'Sa private universities sa Pilipinas, ang 4-year college course ay nasa <strong>₱90,000 hanggang ₱160,000 bawat taon</strong> sa tuition pa lang (at ₱180k–₱280k+ sa top universities). Kapag biglang nawala ang kita ng nagpapaaral, madalas napipilitang lumipat ng school o huminto sa pag-aaral ang mga bata.'
+      });
+    }
+
+    if (a.debts_assets >= 2500000 || a.protection_years === 15) {
+      realities.push({
+        title: 'Reality #3: Naka-Freeze ang Bank Account at Lupa (The 6% BIR Rule)',
+        body: 'Sa ilalim ng TRAIN Law, <strong>kapag pumanaw ang may-ari ng bank account, lupa, o sasakyan, automatic na naka-freeze ito</strong>. Hindi puwedeng mag-withdraw o maglipat ng titulo hangga’t hindi nababayaran sa BIR ang <strong>6% Estate Tax</strong> sa loob ng 1 taon (+25% penalty kapag na-late). Ang life insurance ay hindi nafi-freeze at tax-free.'
+      });
+    } else {
+      realities.push({
+        title: 'Reality #3: Utang at Naipundar na Sasakyan o Bahay',
+        body: 'Hindi humihinto ang monthly amortization sa banko kahit na-ospital ang breadwinner. Kung walang nakahandang backup fund, ang pinaghirapang bahay, lupa, o sasakyan ang unang nabebenta nang palugi para lang makaraos.'
+      });
+    }
+
+    document.getElementById('sn-realities-list').innerHTML = realities.map((r) => `
+      <div class="sn-reality-card">
+        <h4>${r.title}</h4>
+        <p>${r.body}</p>
+      </div>
+    `).join('');
+
+    document.getElementById('sn-quiz-view').classList.add('sn-hidden');
+    document.getElementById('sn-result-view').classList.remove('sn-hidden');
+  }
+
+  backBtn.addEventListener('click', () => {
+    if (state.step > 0) {
+      state.step -= 1;
+      renderStep();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (state.step < QUESTIONS.length - 1) {
+      state.step += 1;
+      renderStep();
+    } else {
+      showResults();
+    }
+  });
+
+  document.getElementById('sn-restart-btn').addEventListener('click', () => {
+    state.step = 0;
+    document.getElementById('sn-result-view').classList.add('sn-hidden');
+    document.getElementById('sn-quiz-view').classList.remove('sn-hidden');
+    renderStep();
+  });
+
+  document.getElementById('sn-lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fname = document.getElementById('sn-fname').value.trim();
+    const email = document.getElementById('sn-email').value.trim();
+    const btn = document.getElementById('sn-submit-btn');
+    const status = document.getElementById('sn-form-status');
+
+    if (!fname || !email) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending your Safety Net Plan...';
+    status.textContent = '';
+
+    try {
+      const resp = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prospect_name: fname,
+          prospect_email: email,
+          ...advisorContext,
+          ...state.computed
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Could not send email');
+
+      status.style.color = '#047857';
+      status.textContent = 'Sent! Check your inbox (and Spam/Promotions tab) for your full Safety Net Breakdown.';
+      btn.textContent = 'Plan Sent ✓';
+    } catch (err) {
+      status.style.color = '#b91c1c';
+      status.textContent = err.message || 'Something went wrong. Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Send My Full Safety Net Plan →';
+    }
+  });
+
+  renderStep();
+})();
+</script>
+</body>
+</html>
