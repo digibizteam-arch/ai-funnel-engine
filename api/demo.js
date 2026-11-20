@@ -290,9 +290,8 @@ function buildHTML(a, copy, vibe) {
     .map((x) => `<span class="px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">${esc(x)}</span>`).join('');
 
   const photoClass = 'w-24 h-24 sm:w-28 sm:h-28 md:w-full md:h-64 rounded-2xl bg-slate-100 shrink-0 border border-slate-100 md:mb-5';
-  const photo = a.photo
-    ? `<img src="${esc(a.photo)}" alt="${esc(a.name)}" class="${photoClass} object-cover object-top" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="${photoClass} items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" style="display:none">${esc(initials)}</div>`
-    : `<div class="${photoClass} flex items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" role="img" aria-label="${esc(a.name)}">${esc(initials)}</div>`;
+  const photoSrc = a.photo || DEFAULT_PHOTO_PATH;
+  const photo = `<img src="${esc(photoSrc)}" alt="${esc(a.name)}" class="${photoClass} object-cover object-top" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="${photoClass} items-center justify-center text-4xl md:text-6xl font-bold text-slate-400" style="display:none">${esc(initials)}</div>`;
 
   // CTA goes to the first contact method supplied, else the advisor's email.
   const cta = a.messenger || a.whatsapp || a.viber || a.website
@@ -429,7 +428,7 @@ module.exports = async function handler(req, res) {
     const hdrs = req.headers || {};
     const host = String(hdrs['x-forwarded-host'] || hdrs.host || '').split(',')[0].trim();
     const base = (process.env.APP_URL || (/^[a-z0-9.-]+(:\d+)?$/i.test(host) ? `https://${host}` : '')).replace(/\/+$/, '');
-    if (base) advisor.photo = base + DEFAULT_PHOTO_PATH;
+    advisor.photo = base ? `${base}${DEFAULT_PHOTO_PATH}` : DEFAULT_PHOTO_PATH;
   }
 
   let html;
