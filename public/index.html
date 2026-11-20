@@ -329,7 +329,6 @@
       <div class="diag-card"><div class="diag-card-title">What's Happening in Your Funnel</div><div class="diag-highlight" id="result-diagnosis"></div><p class="diag-footnote" id="result-agitation"></p></div>
       <div class="diag-card"><div class="diag-card-title">Your Next Step</div><div class="diag-highlight" id="result-nextstep"></div><p class="diag-footnote" id="result-nextstep-footer"></p></div>
       <div class="diag-card"><div class="diag-card-title">Your Ideal Solution</div><div class="solution-box"><div class="solution-name" id="result-solution-name"></div><div class="solution-desc" id="result-solution-desc"></div></div></div>
-      <div class="cta-block"><h3 id="cta-title">Ready to See Real Results?</h3><p id="cta-body">We'll build your complete funnel and automation system — done for you, in days.</p><a href="#" class="btn-book" id="book-btn">Book a Free Strategy Call →</a><p class="cta-fine">No credit card. No sales pitch. Just clarity.</p></div>
     </div>
 
     <!-- ═══ BRIDGE SECTION ═══ -->
@@ -371,21 +370,6 @@
           <label class="bridge-label">What transformation do you promise?</label>
           <p class="bridge-hint">What does their life look like AFTER working with you?</p>
           <input class="q-input" id="b-transform" type="text" placeholder='e.g. "They wake up to booked appointments and predictable income every month"' style="margin-bottom:0" />
-        </div>
-
-        <div class="bridge-field">
-          <label class="bridge-label">Pick your funnel's design vibe</label>
-          <p class="bridge-hint">Choose the look and feel that best represents your brand</p>
-          <div class="vibe-grid">
-            <button class="vibe-btn" onclick="selectVibe(this,'bold-premium')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#0D0D0D,#C9A84C)"></span><span class="vibe-name">🌟 Bold & Premium</span><span class="vibe-desc">Dark + gold. Commands attention.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'warm-trustworthy')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1B2B4B,#E8C87A)"></span><span class="vibe-name">🤝 Warm & Trustworthy</span><span class="vibe-desc">Navy + warm gold. Safe and credible.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'modern-edgy')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#0A0A0A,#00E5FF)"></span><span class="vibe-name">⚡ Modern & Edgy</span><span class="vibe-desc">Dark + electric. Sharp and disruptive.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'fresh-approachable')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#2D6A4F,#F9FFFC)"></span><span class="vibe-name">🌿 Fresh & Approachable</span><span class="vibe-desc">Green + white. Friendly and clean.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'bold-energetic')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1A1A2E,#FF6B35)"></span><span class="vibe-name">🔥 Bold & Energetic</span><span class="vibe-desc">Dark + orange. High-conversion energy.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'clean-creative')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1E1E2E,#6C5CE7)"></span><span class="vibe-name">💜 Clean & Creative</span><span class="vibe-desc">Charcoal + purple. Artistic and bold.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'corporate-authority')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#1E3A5F,#A8C0D6)"></span><span class="vibe-name">💙 Corporate & Authoritative</span><span class="vibe-desc">Deep blue + silver. Executive feel.</span></button>
-            <button class="vibe-btn" onclick="selectVibe(this,'elegant-feminine')"><span class="vibe-swatch" style="background:linear-gradient(135deg,#C4847A,#FDF6F0)"></span><span class="vibe-name">🌸 Elegant & Feminine</span><span class="vibe-desc">Blush + gold. Refined personal brand.</span></button>
-          </div>
         </div>
 
         <!-- ── GENERATE BUTTON + LOADING STATE ── -->
@@ -533,8 +517,6 @@
       document.getElementById('result-nextstep-footer').textContent= data.next_step_footnote || '';
       document.getElementById('result-solution-name').textContent  = data.solution_name || '';
       document.getElementById('result-solution-desc').textContent  = data.solution_desc || '';
-      document.getElementById('cta-title').textContent             = data.cta_headline || 'Ready to See Real Results?';
-      document.getElementById('cta-body').textContent              = data.cta_body || "We'll build your complete funnel — done for you, in days.";
 
       if (data.lead_id) window._leadId = data.lead_id;
       document.getElementById('bridge-section').style.display = 'block';
@@ -550,7 +532,6 @@
     '🧠 Analyzing your quiz answers...',
     '🎯 Identifying your ideal client\'s deepest pain points...',
     '✍️ Writing psychology-driven copy for your offer...',
-    '🎨 Applying your chosen design vibe...',
     '⚡ Building your funnel sections...',
     '🔗 Almost ready — opening your preview...'
   ];
@@ -645,11 +626,6 @@
     }
   }
 
-  function selectVibe(el, vibe) {
-    document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    window._selectedVibe = vibe;
-  }
 </script>
 </body>
 </html>
