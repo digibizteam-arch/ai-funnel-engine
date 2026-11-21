@@ -646,7 +646,12 @@ async function copyFunnelCode() {
       btn.textContent = '📋 Copy Funnel Code';
       return;
     }
-    await navigator.clipboard.writeText(html);
+    // An uploaded advisor photo is stored inside the page as very long inline image text.
+    // Swap it for a normal https link to the sample photo so it can be replaced easily
+    // in a page builder such as DashNex. The live demo page keeps the advisor's own photo.
+    const samplePhoto = window.location.origin + '/advisors/default.jpg';
+    const codeToCopy = html.replace(/(<img src=")data:image\/jpeg;base64,[A-Za-z0-9+\/]+={0,2}(")/, '$1' + samplePhoto + '$2');
+    await navigator.clipboard.writeText(codeToCopy);
     btn.textContent = '✅ Copied!';
     toast('Funnel code copied — ready to deploy');
     setTimeout(() => { btn.textContent = '📋 Copy Funnel Code'; }, 3000);
