@@ -113,6 +113,27 @@ function safeURL(value) {
   }
 }
 
+// Uploaded profile photos arrive from the quiz page as a small, square JPEG data URL.
+// Only that exact shape is accepted: base64 characters only, a size cap, and real JPEG bytes.
+const MAX_PHOTO_CHARS = 350000;
+function safePhoto(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  if (candidate.startsWith('data:')) {
+    if (candidate.length > MAX_PHOTO_CHARS) return '';
+    const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/]+={0,2})$/.exec(candidate);
+    if (!m) return '';
+    try {
+      const bytes = Buffer.from(m[1], 'base64');
+      const isJpeg = bytes.length > 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+      return isJpeg ? candidate : '';
+    } catch (_) {
+      return '';
+    }
+  }
+  return safeURL(candidate);
+}
+
 function safeEmail(value) {
   const candidate = String(value || '').trim();
   return /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(candidate) ? candidate : '';
@@ -170,7 +191,7 @@ function getAdvisorData(body) {
   const data = {
     leadId: clean(body.lead_id),
     name: clean(p.advisor_name || p.name || body.name, 'Your Financial Advisor'),
-    title: clean(p.professional_title || p.title || p.role || body.role, 'Financial Advisor'),
+    title: clean(p.professional_title || p.title, 'Financial Advisor'),
     company: clean(p.company_name || p.company || p.business_name),
     specialization: clean(p.specialization || p.expertise || p.offer || p.offer_name, 'Financial Planning and Protection'),
     audience: clean(p.ideal_clients || p.audience || p.client || p.ideal_client),
@@ -180,7 +201,7 @@ function getAdvisorData(body) {
     approach: clean(p.advisory_approach || p.approach),
     services: toList(p.services || p.services_offered || p.key_services),
     credentials: toList(p.credentials || p.qualifications || p.awards),
-    photo: safeURL(p.photo_url || p.profile_photo || p.photo),
+    photo: safePhoto(p.photo_url || p.profile_photo || p.photo),
     messenger: safeURL(p.messenger_url || p.messenger),
     viber: safeURL(p.viber_url || p.viber),
     whatsapp: safeURL(p.whatsapp_url || p.whatsapp),
@@ -422,8 +443,72 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 </body></html>`;
 }
 
+// ── SAVED PROFILE EXTRAS (kept inside the existing leads.full_analysis JSON; no new columns) ──
+const PROFILE_KEYS = ['advisor_name', 'professional_title', 'company_name', 'personal_story', 'messenger_url'];
+const PROFILE_INPUT_KEYS = PROFILE_KEYS.concat(['photo_url']);
+const PHOTO_IN_HTML = /<img src="(data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2})"/;
+
+function hasProfileInput(body) {
+  return PROFILE_INPUT_KEYS.some((k) => Object.prototype.hasOwnProperty.call(body, k));
+}
+
+async function loadSavedLead(leadId) {
+  try {
+    const supabaseURL = new URL(process.env.SUPABASE_URL);
+    const key = process.env.SUPABASE_ANON_KEY;
+    const rows = await requestJSON({
+      hostname: supabaseURL.hostname,
+      path: `/rest/v1/leads?id=eq.${encodeURIComponent(leadId)}&select=full_analysis,demo_html`,
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` }
+    }, undefined, 10000);
+    return Array.isArray(rows) && rows[0] ? rows[0] : null;
+  } catch (error) {
+    console.error('Could not load saved lead:', error.message);
+    return null;
+  }
+}
+
+function parseAnalysis(raw) {
+  if (!raw) return { value: null, asString: true };
+  if (typeof raw === 'object') return { value: raw, asString: false };
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? { value: parsed, asString: true } : { value: null, asString: true };
+  } catch (_) {
+    return { value: null, asString: true };
+  }
+}
+
+// Admin "Regenerate" only sends the core fields. Bring back the advisor's saved extras and photo.
+function restoreSavedProfile(body, saved) {
+  if (!saved) return body;
+  const merged = { ...body };
+  const { value } = parseAnalysis(saved.full_analysis);
+  const extras = value && value.advisor_profile && typeof value.advisor_profile === 'object' ? value.advisor_profile : {};
+  PROFILE_KEYS.forEach((k) => { if (extras[k]) merged[k] = extras[k]; });
+  const photoMatch = typeof saved.demo_html === 'string' ? PHOTO_IN_HTML.exec(saved.demo_html) : null;
+  if (photoMatch) merged.photo_url = photoMatch[1];
+  return merged;
+}
+
+// Build the updated full_analysis text with advisor_profile added. Every existing key is preserved.
+function mergeProfileIntoAnalysis(saved, a) {
+  if (!saved) return undefined;
+  const parsed = parseAnalysis(saved.full_analysis);
+  if (!parsed.value) return undefined;
+  const profile = {};
+  if (a.name && a.name !== 'Your Financial Advisor') profile.advisor_name = a.name;
+  if (a.title && a.title !== 'Financial Advisor') profile.professional_title = a.title;
+  if (a.company) profile.company_name = a.company;
+  if (a.story) profile.personal_story = a.story;
+  if (a.messenger) profile.messenger_url = a.messenger;
+  const next = { ...parsed.value, advisor_profile: profile };
+  return parsed.asString ? JSON.stringify(next) : next;
+}
+
 // ── SAVE (existing Supabase leads process preserved) ──
-async function saveToSupabase(body, a, html) {
+async function saveToSupabase(body, a, html, fullAnalysis) {
   const supabaseURL = new URL(process.env.SUPABASE_URL);
   const key = process.env.SUPABASE_ANON_KEY;
   const headers = { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` };
@@ -439,6 +524,7 @@ async function saveToSupabase(body, a, html) {
     demo_html: html,
     demo_generated_at: now
   };
+  if (a.leadId && fullAnalysis !== undefined) fields.full_analysis = fullAnalysis;
 
   if (a.leadId) {
     await requestJSON({
@@ -486,6 +572,11 @@ module.exports = async function handler(req, res) {
 
   if (!clean(body.offer)) return res.status(400).json({ error: 'Missing required fields' });
 
+  // Existing lead: reload saved extras when this is a Regenerate, and keep the saved diagnosis to update.
+  const leadIdForSave = clean(body.lead_id);
+  const savedLead = leadIdForSave ? await loadSavedLead(leadIdForSave) : null;
+  if (savedLead && !hasProfileInput(body)) body = restoreSavedProfile(body, savedLead);
+
   const advisor = getAdvisorData(body);
 
   // Ensure the default profile photo has an absolute URL when possible.
@@ -507,7 +598,7 @@ module.exports = async function handler(req, res) {
 
   let savedLeadId;
   try {
-    savedLeadId = await saveToSupabase(body, advisor, html);
+    savedLeadId = await saveToSupabase(body, advisor, html, mergeProfileIntoAnalysis(savedLead, advisor));
   } catch (err) {
     console.error('Supabase error:', err.message);
     return res.status(500).json({ error: 'Could not save the page: ' + err.message });
