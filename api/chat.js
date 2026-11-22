@@ -16,6 +16,54 @@ function postJSON(options, body) {
 // Sample video of the Financial Advisor Directory and the strategy. The link lives here, not in the AI's hands.
 const SAMPLE_VIDEO_URL = 'https://www.facebook.com/share/v/1Mzd8d8ngJ/';
 
+// ── OWNER ALERT: short email to you when a prospect sends their first chat message ──
+function escHtml(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function notifyOwnerChat(info) {
+  if (!process.env.RESEND_API_KEY) return;
+  const ownerEmail = process.env.OWNER_EMAIL || 'angel.scott@ascottdigitalbiz.com';
+  const safeName = String(info.name || 'A prospect').replace(/[\r\n]+/g, ' ').slice(0, 80);
+  const intent = String(info.buying_intent || '').toLowerCase();
+  const intentLabel = intent === 'hot' ? '🔥 HOT' : intent === 'warm' ? '🟡 Warm' : intent === 'cold' ? '🔵 Cold' : '';
+  const scoreLine = [intentLabel, info.opportunity_score ? `Opportunity score ${info.opportunity_score}/10` : ''].filter(Boolean).join(' · ');
+  const firstMessage = String(info.first_message || '').slice(0, 500);
+  const row = (label, value) => `<tr><td style="padding:6px 10px;color:#6b7280;vertical-align:top;white-space:nowrap">${escHtml(label)}</td><td style="padding:6px 10px;color:#111827">${escHtml(value || 'Not provided')}</td></tr>`;
+  const html = `
+  <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;padding:20px;color:#111827">
+    <h2 style="margin:0 0 4px">Chat started: ${escHtml(safeName)}</h2>
+    ${scoreLine ? `<p style="margin:0 0 16px;color:#6b7280">${escHtml(scoreLine)}</p>` : '<div style="height:12px"></div>'}
+    <div style="background:#ECFDF5;border:1px solid #10B981;border-radius:8px;padding:12px 14px;font-size:14px;margin-bottom:16px">
+      <strong>Their first message:</strong><br>${escHtml(firstMessage)}
+    </div>
+    <table style="border-collapse:collapse;width:100%;font-size:14px;background:#f9fafb;border-radius:8px">
+      ${row('Email', info.email)}
+      ${row('Specialty', info.role)}
+      ${row('Their offer', info.offer_name)}
+      ${row('Recommended solution', info.solution_name)}
+    </table>
+    <p style="margin:20px 0 6px;font-size:14px"><strong>Stage:</strong> Quiz completed, demo generated, chat started.</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280">They are talking to your AI assistant right now. Check their answers in admin and follow up personally.</p>
+    ${info.adminUrl ? `<a href="${escHtml(info.adminUrl)}" style="background:#0F766E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Open admin</a>` : ''}
+  </div>`;
+  const payload = {
+    from: 'Angel Scott <angel.scott@ascottdigitalbiz.com>',
+    to: [ownerEmail],
+    subject: `Chat started: ${safeName}`,
+    html
+  };
+  if (/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(String(info.email || ''))) payload.reply_to = info.email;
+  return postJSON({
+    hostname: 'api.resend.com',
+    path: '/emails',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` }
+  }, payload);
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -254,6 +302,29 @@ TONE: Warm, confident, direct. Like someone who has been an advisor and understa
     if (reply && reply.includes('[SAMPLE_LINK]')) {
       const sampleHtml = `<a href="${SAMPLE_VIDEO_URL}" target="_blank" rel="noopener noreferrer">▶ Watch the sample</a>`;
       reply = reply.replace('[SAMPLE_LINK]', sampleHtml).split('[SAMPLE_LINK]').join('');
+    }
+
+    // Owner alert on the prospect's first message only. Never blocks the reply.
+    try {
+      const userMsgs = messages.filter(m => m && m.role === 'user');
+      if (lead_id && userMsgs.length === 1) {
+        const hdrs = req.headers || {};
+        const host = String(hdrs['x-forwarded-host'] || hdrs.host || '').split(',')[0].trim();
+        const base = (process.env.APP_URL || (/^[a-z0-9.-]+(:\d+)?$/i.test(host) ? `https://${host}` : 'https://ai-funnel-engine.vercel.app')).replace(/\/+$/, '');
+        await notifyOwnerChat({
+          name: leadName,
+          email: email || '',
+          first_message: userMsgs[0].content,
+          role: leadData && leadData.role,
+          offer_name: leadData && leadData.offer_name,
+          solution_name: leadData && leadData.solution_name,
+          buying_intent: leadData && leadData.buying_intent,
+          opportunity_score: leadData && leadData.opportunity_score,
+          adminUrl: `${base}/admin`
+        });
+      }
+    } catch (ownerAlertError) {
+      console.error('Owner chat alert failed:', ownerAlertError.message);
     }
 
     return res.status(200).json({ reply, proposal_package: proposalPackage });
