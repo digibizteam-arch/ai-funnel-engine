@@ -458,7 +458,7 @@ async function loadSavedLead(leadId) {
     const key = process.env.SUPABASE_ANON_KEY;
     const rows = await requestJSON({
       hostname: supabaseURL.hostname,
-      path: `/rest/v1/leads?id=eq.${encodeURIComponent(leadId)}&select=full_analysis,demo_html`,
+      path: `/rest/v1/leads?id=eq.${encodeURIComponent(leadId)}&select=full_analysis,demo_html,demo_generated_at,name,email,buying_intent,opportunity_score`,
       method: 'GET',
       headers: { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` }
     }, undefined, 10000);
@@ -554,6 +554,52 @@ async function saveToSupabase(body, a, html, fullAnalysis) {
   return Array.isArray(inserted) && inserted[0] && inserted[0].id ? inserted[0].id : null;
 }
 
+// ── OWNER ALERT: short email to you when a prospect generates their demo for the first time ──
+async function notifyOwnerDemo(info) {
+  if (!process.env.RESEND_API_KEY) return;
+  const ownerEmail = process.env.OWNER_EMAIL || 'angel.scott@ascottdigitalbiz.com';
+  const row = (label, value) => `<tr><td style="padding:6px 10px;color:#6b7280;vertical-align:top;white-space:nowrap">${esc(label)}</td><td style="padding:6px 10px;color:#111827">${esc(value || 'Not provided')}</td></tr>`;
+  const safeSubjectName = String(info.name || 'New prospect').replace(/[\r\n]+/g, ' ').slice(0, 80);
+  const intent = String(info.buying_intent || '').toLowerCase();
+  const intentLabel = intent === 'hot' ? '🔥 HOT' : intent === 'warm' ? '🟡 Warm' : intent === 'cold' ? '🔵 Cold' : '';
+  const scoreLine = [intentLabel, info.opportunity_score ? `Opportunity score ${info.opportunity_score}/10` : ''].filter(Boolean).join(' · ');
+  const html = `
+  <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;padding:20px;color:#111827">
+    <h2 style="margin:0 0 4px">Demo generated: ${esc(safeSubjectName)}</h2>
+    ${scoreLine ? `<p style="margin:0 0 16px;color:#6b7280">${esc(scoreLine)}</p>` : '<div style="height:12px"></div>'}
+    <table style="border-collapse:collapse;width:100%;font-size:14px;background:#f9fafb;border-radius:8px">
+      ${row('Email', info.email)}
+      ${row('Profile name', info.advisor_name)}
+      ${row('Title', info.title)}
+      ${row('Company', info.company)}
+      ${row('Their offer', info.offer)}
+      ${row('Ideal client', info.client)}
+      ${row('Problem they solve', info.pain)}
+      ${row('Transformation', info.transform)}
+      ${row('Messenger link', info.messenger)}
+      ${row('Own photo uploaded', info.photoUploaded ? 'Yes' : 'No (default photo used)')}
+    </table>
+    <p style="margin:20px 0 6px;font-size:14px"><strong>Stage:</strong> Quiz completed, demo generated. Chat not started yet.</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280">They have seen their profile page. Check their answers in admin and follow up personally.</p>
+    ${info.demoUrl ? `<a href="${esc(info.demoUrl)}" style="background:#0F766E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;margin-right:8px">Open demo</a>` : ''}
+    ${info.adminUrl ? `<a href="${esc(info.adminUrl)}" style="background:#111827;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Open admin</a>` : ''}
+    ${info.saved ? '' : '<p style="margin-top:16px;color:#b91c1c;font-size:13px">Heads up: this demo could not be linked to a saved lead.</p>'}
+  </div>`;
+  const payload = {
+    from: 'Angel Scott <angel.scott@ascottdigitalbiz.com>',
+    to: [ownerEmail],
+    subject: `Demo generated: ${safeSubjectName}`,
+    html
+  };
+  if (/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(String(info.email || ''))) payload.reply_to = info.email;
+  return requestJSON({
+    hostname: 'api.resend.com',
+    path: '/emails',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` }
+  }, payload, 15000);
+}
+
 // ── HANDLER ──
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -602,6 +648,36 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error('Supabase error:', err.message);
     return res.status(500).json({ error: 'Could not save the page: ' + err.message });
+  }
+
+  // Owner alert: first demo only (skipped when a demo already existed, e.g. admin Regenerate). Never blocks the response.
+  try {
+    const alreadyHadDemo = !!(savedLead && (savedLead.demo_generated_at || savedLead.demo_html));
+    if (!alreadyHadDemo) {
+      const hdrs = req.headers || {};
+      const host = String(hdrs['x-forwarded-host'] || hdrs.host || '').split(',')[0].trim();
+      const base = (process.env.APP_URL || (/^[a-z0-9.-]+(:\d+)?$/i.test(host) ? `https://${host}` : 'https://ai-funnel-engine.vercel.app')).replace(/\/+$/, '');
+      await notifyOwnerDemo({
+        name: body.name || (savedLead && savedLead.name),
+        email: body.email || (savedLead && savedLead.email),
+        buying_intent: savedLead && savedLead.buying_intent,
+        opportunity_score: savedLead && savedLead.opportunity_score,
+        advisor_name: advisor.name,
+        title: advisor.title,
+        company: advisor.company,
+        offer: body.offer,
+        client: body.client || advisor.audience,
+        pain: body.pain || advisor.challenge,
+        transform: body.transform || advisor.outcome,
+        messenger: advisor.messenger,
+        photoUploaded: !!(advisor.photo && /^data:image\//.test(advisor.photo)),
+        demoUrl: savedLeadId ? `${base}/demo?id=${encodeURIComponent(savedLeadId)}` : '',
+        adminUrl: `${base}/admin`,
+        saved: !!savedLeadId
+      });
+    }
+  } catch (ownerAlertError) {
+    console.error('Owner demo alert failed:', ownerAlertError.message);
   }
 
   return res.status(200).json({
