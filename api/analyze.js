@@ -15,6 +15,59 @@ async function sendEmail(to, subject, html) {
     html
   });
 }
+// ── OWNER ALERT: a short email to you whenever a new quiz is completed ──
+function escHtml(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function notifyOwnerNewLead(lead) {
+  if (!process.env.RESEND_API_KEY) return;
+  const ownerEmail = process.env.OWNER_EMAIL || 'angel.scott@ascottdigitalbiz.com';
+  const safeName = String(lead.name || '').replace(/[\r\n]+/g, ' ').slice(0, 80);
+  const intent = String(lead.buying_intent || 'unknown').toLowerCase();
+  const intentLabel = intent === 'hot' ? '🔥 HOT' : intent === 'warm' ? '🟡 Warm' : intent === 'cold' ? '🔵 Cold' : intent;
+  const row = (label, value) => `<tr><td style="padding:6px 10px;color:#6b7280;vertical-align:top;white-space:nowrap">${escHtml(label)}</td><td style="padding:6px 10px;color:#111827">${escHtml(value || 'Not provided')}</td></tr>`;
+  const adminLink = lead.adminUrl;
+  const html = `
+  <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;padding:20px;color:#111827">
+    <h2 style="margin:0 0 4px">New quiz lead: ${escHtml(safeName)}</h2>
+    <p style="margin:0 0 16px;color:#6b7280">${escHtml(intentLabel)} &middot; Opportunity score ${escHtml(lead.opportunity_score)}/10</p>
+    <table style="border-collapse:collapse;width:100%;font-size:14px;background:#f9fafb;border-radius:8px">
+      ${row('Email', lead.email)}
+      ${row('Agency / company', lead.business_name)}
+      ${row('Specialty', lead.role)}
+      ${row('Biggest problem', lead.problem)}
+      ${row('Wants their online presence to', lead.goal)}
+      ${row('A good month online', lead.success)}
+      ${row('Has tried', lead.tried)}
+      ${row('Readiness', lead.readiness)}
+      ${row('Obstacle', lead.obstacle)}
+      ${row('Investment range', lead.investment)}
+      ${row('Recommended solution', lead.solution_name)}
+    </table>
+    ${lead.diagnosis ? `<p style="margin:16px 0 0;font-size:14px"><strong>Diagnosis:</strong> ${escHtml(lead.diagnosis)}</p>` : ''}
+    <p style="margin:20px 0 6px;font-size:14px"><strong>Stage:</strong> Quiz completed. No demo or chat yet.</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280">Open the lead in admin to review everything, then follow up personally. You can also reply to this email to write to them directly.</p>
+    ${adminLink ? `<a href="${escHtml(adminLink)}" style="background:#0F766E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Open admin</a>` : ''}
+    ${lead.saved ? '' : '<p style="margin-top:16px;color:#b91c1c;font-size:13px">Heads up: this lead could not be saved to the database. Their details are in this email only.</p>'}
+  </div>`;
+  const payload = {
+    from: 'Angel Scott <angel.scott@ascottdigitalbiz.com>',
+    to: [ownerEmail],
+    subject: `New quiz lead: ${safeName} (${intent}, ${lead.opportunity_score}/10)`,
+    html
+  };
+  if (/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(String(lead.email || ''))) payload.reply_to = lead.email;
+  return postJSON({
+    hostname: 'api.resend.com',
+    path: '/emails',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` }
+  }, payload);
+}
+
 function postJSON(options, body) {
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
@@ -373,6 +426,21 @@ try {
     console.error('Supabase save error:', err.message);
     // FIX: If the DB save fails, we need to know. We still return the AI data so the user isn't stuck, 
     // but we explicitly pass null lead_id so you know it didn't save.
+  }
+
+  // ===== OWNER ALERT (never blocks the quiz result) =====
+  try {
+    await notifyOwnerNewLead({
+      name, email, business_name: businessName,
+      role: resolvedRole, problem: resolvedProblem, goal: resolvedGoal, success: resolvedSuccess,
+      tried: resolvedTried, readiness: resolvedReadiness, obstacle: resolvedObstacle, investment: resolvedResources,
+      buying_intent: analysisData.buying_intent, opportunity_score: analysisData.opportunity_score,
+      solution_name: analysisData.solution_name, diagnosis: analysisData.page_title,
+      saved: !!savedLeadId,
+      adminUrl: `${req.headers.origin || 'https://ai-funnel-engine.vercel.app'}/admin`
+    });
+  } catch (ownerAlertError) {
+    console.error('Owner alert failed:', ownerAlertError.message);
   }
 
   return res.status(200).json({
