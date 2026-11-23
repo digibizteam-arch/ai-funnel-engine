@@ -901,7 +901,7 @@
       ['&#9993;&#65039; Messenger', adv.messengerUrl],
       ['&#128197; Book 15-Min Call', adv.bookingUrl]
     ].filter(([, u]) => u && u.trim())
-     .map(([label, u]) => `<a href="${u}" target="_blank" rel="noopener" class="tam-modal-link">${label}</a>`)
+     .map(([label, u]) => `<a href="${u}" target="_blank" rel="noopener" class="tam-modal-link" data-vw-contact="1">${label}</a>`)
      .join('');
 
     // Full DashNex profile opens in a NEW TAB so the prospect keeps the directory open
@@ -950,6 +950,14 @@
       </div>
     `;
     modal.classList.remove('tam-hidden');
+
+    // Activity widget: opening a profile counts as a visit; a click on a real contact channel logs "someone reached out"
+    if (window.vwTouch) window.vwTouch();
+    if (!adv.isDemo) {
+      modalBody.querySelectorAll('[data-vw-contact]').forEach((a) => {
+        a.addEventListener('click', () => { if (window.vwInquiry) window.vwInquiry(adv.fullName + ', FA'); });
+      });
+    }
   }
 
   function renderDirectoryResults() {
@@ -1063,5 +1071,157 @@
   renderQuizStep();
 })();
 </script>
+<!-- ===== LIVE ACTIVITY WIDGET: people online, total visitors, "someone reached out" ===== -->
+<style>
+  #vw,#vwT{position:fixed;left:14px;z-index:9999;font:13px/1.3 'Inter',system-ui,sans-serif;color:#fff;
+    background:rgba(15,40,28,.94);box-shadow:0 4px 14px rgba(0,0,0,.25);display:none}
+  #vw.vwon{display:flex;bottom:14px;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;line-height:1}
+  #vwT.vwon{display:block;bottom:58px;max-width:min(300px,calc(100vw - 28px));padding:10px 14px;border-radius:14px;
+    opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .35s,transform .35s}
+  #vwT.vwon.on{opacity:1;transform:none}
+  #vw .d{width:8px;height:8px;border-radius:50%;background:#3ddc97;animation:vwp 1.8s infinite}
+  #vw .s{opacity:.35}
+  #vwT small{display:block;opacity:.65;margin-top:3px;font-size:11px}
+  #vw em,#vwT em{font-style:normal;font-size:10px;background:#f2d27a;color:#4a3800;border-radius:4px;padding:1px 5px;display:none}
+  .vwdemo em{display:inline!important}
+  @keyframes vwp{0%,100%{box-shadow:0 0 0 0 rgba(61,220,151,.6)}50%{box-shadow:0 0 0 6px rgba(61,220,151,0)}}
+  @media(prefers-reduced-motion:reduce){#vw .d{animation:none}#vwT.vwon{transition:none}}
+</style>
+<div id="vwT" role="status" aria-live="polite"></div>
+<div id="vw" title="Live visitor count">
+  <span class="d"></span><span><b id="vwNow">–</b> online now</span>
+  <span class="s" id="vwSep">|</span><span id="vwTotWrap"><b id="vwTot">–</b> total visitors</span><em>sample</em>
+</div>
+<script>
+/*
+ SETUP: run vw-setup.sql once in the funnel-engine Supabase SQL editor, then paste that
+ project's URL and anon key into CFG below.
+
+ Until CFG is filled in, the widget stays completely hidden on the live page (no fake numbers).
+ To preview it with clearly labeled sample data, open the page with  ?vwdemo=1
+
+ To stop your own visits and clicks from being counted on a device, open the page once with  ?vw=off
+ (use ?vw=on to count that device again).
+*/
+(function () {
+  var CFG = { URL: "", KEY: "" };           // <- paste Supabase URL + anon key
+  var MIN_TOTAL_TO_SHOW = 0;                // hide the total until it reaches this number
+  var POLL_MS = 15000, HEARTBEAT_MS = 30000, ONLINE_WINDOW_S = 60;
+  var TOAST_SHOW_MS = 6000, TOAST_EVERY_MS = 25000, MAX_AGE_DAYS = 7, INQUIRY_COOLDOWN_MS = 10 * 60e3;
+
+  var qs = location.search, muted = false;
+  try {
+    if (/[?&]vw=off/.test(qs)) localStorage.setItem("vw_off", "1");
+    if (/[?&]vw=on/.test(qs)) localStorage.removeItem("vw_off");
+    muted = localStorage.getItem("vw_off") === "1";
+  } catch (e) {}
+
+  var isLive = !!(CFG.URL && CFG.KEY), wantDemo = /[?&]vwdemo=1/.test(qs);
+  window.vwTouch = function () {};
+  window.vwInquiry = function () {};
+  if (!isLive && !wantDemo) return;          // nothing configured: stay invisible
+
+  var box = document.getElementById("vw"), toast = document.getElementById("vwT");
+  var now = document.getElementById("vwNow"), tot = document.getElementById("vwTot");
+  var totWrap = document.getElementById("vwTotWrap"), sep = document.getElementById("vwSep");
+  box.classList.add("vwon"); toast.classList.add("vwon");
+
+  var fmt = function (n) { return Number(n).toLocaleString(); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var ago = function (t) { var m = Math.max(1, Math.round((Date.now() - t) / 60000)); if (m < 60) return m + " min ago"; var h = Math.round(m / 60); return h < 24 ? h + " hr ago" : Math.round(h / 24) + " d ago"; };
+  var setTotal = function (n) { var show = n >= MIN_TOTAL_TO_SHOW; totWrap.style.display = sep.style.display = show ? "" : "none"; tot.textContent = fmt(n); };
+
+  var items = [], idx = 0, hideTimer, sent = {};
+
+  function showToast(it, fresh) {
+    if (!it) return;
+    toast.className = "vwon" + (isLive ? "" : " vwdemo");
+    toast.innerHTML = "Someone reached out to <b>" + esc(it.name) + "</b>" + (isLive ? "" : " <em>sample</em>") +
+      "<small>" + (fresh ? "just now" : ago(it.t)) + "</small>";
+    requestAnimationFrame(function () { toast.classList.add("on"); });
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () { toast.classList.remove("on"); }, TOAST_SHOW_MS);
+  }
+  function cycle() {
+    var fresh = items.filter(function (i) { return Date.now() - i.t < MAX_AGE_DAYS * 864e5; });
+    if (!fresh.length || document.hidden) return;
+    showToast(fresh[idx++ % fresh.length]);
+  }
+  setInterval(cycle, TOAST_EVERY_MS);
+
+  // ---------- preview mode (?vwdemo=1): labeled sample data ----------
+  if (!isLive) {
+    box.classList.add("vwdemo");
+    var n = 7, t = 1284;
+    items = [
+      { name: "Louie John Legaspi, FA", t: Date.now() - 12 * 60e3 },
+      { name: "Angela Santos, FA", t: Date.now() - 47 * 60e3 },
+      { name: "Clarissa Mendoza, FA", t: Date.now() - 3 * 3600e3 }
+    ];
+    now.textContent = n; setTotal(t);
+    setInterval(function () { n = Math.max(2, n + Math.round(Math.random() * 2 - 1)); now.textContent = n; }, POLL_MS);
+    setTimeout(function () { showToast(items[0]); }, 1500);
+    window.vwTouch = function () {};
+    window.vwInquiry = function (name) { var it = { name: name, t: Date.now() }; items.unshift(it); showToast(it, true); };
+    return;
+  }
+
+  // ---------- live mode ----------
+  var sid; try { sid = localStorage.getItem("vw_sid"); if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("vw_sid", sid); } } catch (e) { sid = Math.random().toString(36).slice(2); }
+  var H = { apikey: CFG.KEY, Authorization: "Bearer " + CFG.KEY, "Content-Type": "application/json" };
+  var seen = {}, firstLoad = true;
+
+  function beat() {
+    if (document.hidden || muted) return;
+    fetch(CFG.URL + "/rest/v1/visitors?on_conflict=session_id", {
+      method: "POST", headers: Object.assign({ Prefer: "resolution=merge-duplicates,return=minimal" }, H),
+      body: JSON.stringify({ session_id: sid, last_seen: new Date().toISOString() })
+    }).catch(function () {});
+  }
+  function count(filter) {
+    return fetch(CFG.URL + "/rest/v1/visitors?select=session_id" + (filter || ""), {
+      method: "HEAD", headers: Object.assign({ Prefer: "count=exact" }, H)
+    }).then(function (r) { return parseInt((r.headers.get("content-range") || "*/0").split("/")[1], 10) || 0; });
+  }
+  function loadInquiries() {
+    return fetch(CFG.URL + "/rest/v1/inquiries?select=id,advisor_name,created_at&order=created_at.desc&limit=8", { headers: H })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        if (!Array.isArray(rows)) return;
+        var incoming = rows.map(function (r) { return { id: r.id, name: r.advisor_name, t: new Date(r.created_at).getTime() }; });
+        var fresh = incoming.filter(function (i) { return !seen[i.id]; });
+        incoming.forEach(function (i) { seen[i.id] = 1; });
+        items = incoming;
+        if (firstLoad) { firstLoad = false; var l = incoming[0]; if (l && Date.now() - l.t < MAX_AGE_DAYS * 864e5) setTimeout(function () { showToast(l); }, 1500); }
+        else if (fresh.length) showToast(fresh[0], true);
+      }).catch(function () {});
+  }
+  function refresh() {
+    var since = new Date(Date.now() - ONLINE_WINDOW_S * 1000).toISOString();
+    Promise.all([count("&last_seen=gte." + since), count("")]).then(function (v) {
+      now.textContent = fmt(Math.max(1, v[0])); setTotal(v[1]);
+    }).catch(function () {});
+    loadInquiries();
+  }
+
+  beat(); refresh();
+  setInterval(beat, HEARTBEAT_MS);
+  setInterval(refresh, POLL_MS);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { beat(); refresh(); } });
+
+  window.vwTouch = beat;
+  window.vwInquiry = function (advisorName) {
+    if (muted || !advisorName) return;
+    if (sent[advisorName] && Date.now() - sent[advisorName] < INQUIRY_COOLDOWN_MS) return;   // one per advisor per 10 min per visitor
+    sent[advisorName] = Date.now();
+    fetch(CFG.URL + "/rest/v1/inquiries", {
+      method: "POST", headers: Object.assign({ Prefer: "return=minimal" }, H),
+      body: JSON.stringify({ advisor_name: advisorName, session_id: sid })
+    }).then(function () { beat(); loadInquiries(); }).catch(function () {});
+  };
+})();
+</script>
+<!-- ===== END LIVE ACTIVITY WIDGET ===== -->
+
 </body>
 </html>
