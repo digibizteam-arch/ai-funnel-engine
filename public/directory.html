@@ -1168,7 +1168,8 @@
 
   // ---------- live mode ----------
   var sid; try { sid = localStorage.getItem("vw_sid"); if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("vw_sid", sid); } } catch (e) { sid = Math.random().toString(36).slice(2); }
-  var H = { apikey: CFG.KEY, Authorization: "Bearer " + CFG.KEY, "Content-Type": "application/json" };
+  var H = { apikey: CFG.KEY, "Content-Type": "application/json" };
+  if (CFG.KEY.indexOf("sb_") !== 0) H.Authorization = "Bearer " + CFG.KEY;   // new sb_publishable keys use the apikey header only; legacy anon keys also need Bearer
   var seen = {}, firstLoad = true;
 
   function beat() {
