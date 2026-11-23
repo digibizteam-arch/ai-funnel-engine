@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trusted Advisor Match PH | Find Your Financial Advisor</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20512%20512%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22tamf%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%230B8A46%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23075a2f%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%22512%22%20height=%22512%22%20rx=%22112%22%20fill=%22url(%23tamf)%22/%3E%3Cpath%20d=%22M256%2066%20L424%20126%20V250%20C424%20348%20352%20414%20256%20456%20C160%20414%2088%20348%2088%20250%20V126%20Z%22%20fill=%22%23fff%22/%3E%3Ccircle%20cx=%22256%22%20cy=%22196%22%20r=%2238%22%20fill=%22%230B6B38%22/%3E%3Cpath%20d=%22M178%20332%20C178%20280%20214%20252%20256%20252%20C298%20252%20334%20280%20334%20332%20Z%22%20fill=%22%230B6B38%22/%3E%3Ccircle%20cx=%22354%22%20cy=%22354%22%20r=%2266%22%20fill=%22%23fff%22/%3E%3Ccircle%20cx=%22354%22%20cy=%22354%22%20r=%2254%22%20fill=%22%2316c060%22/%3E%3Cpath%20d=%22M327%20356%20L348%20378%20L384%20328%22%20fill=%22none%22%20stroke=%22%23fff%22%20stroke-width=%2217%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -528,6 +529,9 @@
   .tam-join-card a:hover { background: #0B6B38; }
   @media (max-width: 640px) { .tam-trust-pill { display: none; } }
 
+  .tam-logo { width: 34px; height: 34px; flex-shrink: 0; display: block; }
+  .tam-brand span { white-space: nowrap; }
+  @media (max-width: 480px) { .tam-topbar { padding: 12px 14px; } .tam-brand { font-size: 13.5px; gap: 8px; } .tam-logo { width: 30px; height: 30px; } .tam-join-link { padding: 7px 11px; font-size: 12px; } }
   /* ── SAMPLE PROFILE LABELS + CLAIM CTA ── */
   .tam-badge-demo { background: #e2e8f0; color: #475569; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 9999px; }
   .tam-demo-note { margin: 0 0 16px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; font-size: 13px; color: #78350f; }
@@ -542,7 +546,7 @@
 <header class="tam-topbar">
   <div class="tam-topbar-inner">
     <a href="#" id="tam-home-link" class="tam-brand">
-      <span class="tam-brand-dot"></span>
+      <svg class="tam-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trusted Advisor Match PH logo"><defs><linearGradient id="tamg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B8A46"/><stop offset="1" stop-color="#075a2f"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#tamg)"/><path d="M256 66 L424 126 V250 C424 348 352 414 256 456 C160 414 88 348 88 250 V126 Z" fill="#fff"/><circle cx="256" cy="196" r="38" fill="#0B6B38"/><path d="M178 332 C178 280 214 252 256 252 C298 252 334 280 334 332 Z" fill="#0B6B38"/><circle cx="354" cy="354" r="66" fill="#fff"/><circle cx="354" cy="354" r="54" fill="#16c060"/><path d="M327 356 L348 378 L384 328" fill="none" stroke="#fff" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span>Trusted Advisor Match PH</span>
     </a>
     <div class="tam-topbar-right">
@@ -637,7 +641,7 @@
       roles: ['breadwinner', 'ofw', 'business-owner', 'high-net-worth', 'young-pro'],
       styles: ['chat', 'call', 'in-person'],
       consultationNote: 'Chat first via Messenger. Free Family Safety Net Check.',
-      isVerified: true,
+      isVerified: false,
       visibilityScore: 500
     },
     {
@@ -1104,7 +1108,7 @@
  (use ?vw=on to count that device again).
 */
 (function () {
-  var CFG = { URL: "https://lwrluivkdlaafojjkikc.supabase.co/rest/v1/", KEY: "sb_publishable_DlUWWLzrgGxPhMpUbMCJ2A_JihQwxmQ" };           // <- paste Supabase URL + anon key
+  var CFG = { URL: "", KEY: "" };           // <- paste Supabase URL + anon key
   var MIN_TOTAL_TO_SHOW = 0;                // hide the total until it reaches this number
   var POLL_MS = 15000, HEARTBEAT_MS = 30000, ONLINE_WINDOW_S = 60;
   var TOAST_SHOW_MS = 6000, TOAST_EVERY_MS = 25000, MAX_AGE_DAYS = 7, INQUIRY_COOLDOWN_MS = 10 * 60e3;
