@@ -492,30 +492,49 @@
   }
   @media (max-width: 500px) {
     .tam-modal-cta-grid { grid-template-columns: 1fr; }
-  } 
- /* ── MINT GREEN THEME (delete this block to go back to navy) ── */
-body { background-color: #f3f8f5; }
-.tam-brand { color: #0B6B38; }
-.tam-brand-dot { background: #16c060; }
-.tam-quiz-header { background: #ffffff; border-bottom: 1px solid #d9efe2; }
-.tam-quiz-header h1 { color: #0B6B38; }
-.tam-quiz-header p { color: #475569; }
-.tam-eyebrow { background: #d1fae5; color: #065f46; }
-.tam-progress-fill { background: #16a34a; }
-.tam-opt:hover { border-color: #16a34a; background: #f0fdf7; }
-.tam-opt.active { border-color: #16a34a; background: #f0fdf7; box-shadow: 0 0 0 2px rgba(22,163,74,0.16); }
-.tam-opt-arrow { color: #16a34a; }
-.tam-pill { background: #f0fdf7; color: #065f46; border-color: #bbf7d0; }
-.tam-retake-btn:hover { border-color: #16a34a; color: #0B6B38; }
-.tam-adv-card.is-recommended { border: 1.5px solid #86efac; }
-.tam-badge-rec { background: #fde68a; color: #78350f; }
-.tam-badge-ver { background: #d1fae5; color: #065f46; }
-.tam-spec-tag { background: #f0fdf7; color: #065f46; }
-.tam-cta-btn { background: #0B8A46; color: #ffffff; }
-.tam-spinner { border-top-color: #16a34a; }
-.tam-modal-link:hover { border-color: #16a34a; background: #f0fdf7; color: #0B6B38; }
-.tam-modal-calc-btn { background: #0B8A46; color: #ffffff; }
-.tam-modal-calc-btn:hover { background: #0B6B38; color: #ffffff; }
+  }
+  /* ── MINT GREEN THEME (delete this block to go back to navy) ── */
+  body { background-color: #f3f8f5; }
+  .tam-brand { color: #0B6B38; }
+  .tam-brand-dot { background: #16c060; }
+  .tam-quiz-header { background: #ffffff; border-bottom: 1px solid #d9efe2; }
+  .tam-quiz-header h1 { color: #0B6B38; }
+  .tam-quiz-header p { color: #475569; }
+  .tam-eyebrow { background: #d1fae5; color: #065f46; }
+  .tam-progress-fill { background: #16a34a; }
+  .tam-opt:hover { border-color: #16a34a; background: #f0fdf7; }
+  .tam-opt.active { border-color: #16a34a; background: #f0fdf7; box-shadow: 0 0 0 2px rgba(22,163,74,0.16); }
+  .tam-opt-arrow { color: #16a34a; }
+  .tam-pill { background: #f0fdf7; color: #065f46; border-color: #bbf7d0; }
+  .tam-retake-btn:hover { border-color: #16a34a; color: #0B6B38; }
+  .tam-adv-card.is-recommended { border: 1.5px solid #86efac; }
+  .tam-badge-rec { background: #fde68a; color: #78350f; }
+  .tam-badge-ver { background: #d1fae5; color: #065f46; }
+  .tam-spec-tag { background: #f0fdf7; color: #065f46; }
+  .tam-cta-btn { background: #0B8A46; color: #ffffff; }
+  .tam-spinner { border-top-color: #16a34a; }
+  .tam-modal-link:hover { border-color: #16a34a; background: #f0fdf7; color: #0B6B38; }
+  .tam-modal-calc-btn { background: #0B8A46; color: #ffffff; }
+  .tam-modal-calc-btn:hover { background: #0B6B38; color: #ffffff; }
+
+  /* ── ADVISOR SIGN-UP LINKS ── */
+  .tam-topbar-right { display: flex; align-items: center; gap: 10px; }
+  .tam-join-link { font-size: 12.5px; font-weight: 700; color: #ffffff; background: #0B8A46; padding: 7px 14px; border-radius: 9999px; text-decoration: none; white-space: nowrap; }
+  .tam-join-link:hover { background: #0B6B38; }
+  .tam-join-card { margin: 24px auto 0; text-align: center; background: #ffffff; border: 1.5px dashed #86efac; border-radius: 16px; padding: 24px 20px; }
+  .tam-join-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: #0B6B38; }
+  .tam-join-card p { margin: 0 0 14px; font-size: 13.5px; color: #475569; }
+  .tam-join-card a { display: inline-block; background: #0B8A46; color: #ffffff; font-weight: 700; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; }
+  .tam-join-card a:hover { background: #0B6B38; }
+  @media (max-width: 640px) { .tam-trust-pill { display: none; } }
+
+  /* ── SAMPLE PROFILE LABELS + CLAIM CTA ── */
+  .tam-badge-demo { background: #e2e8f0; color: #475569; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 9999px; }
+  .tam-demo-note { margin: 0 0 16px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; font-size: 13px; color: #78350f; }
+  .tam-demo-note a { color: #0B6B38; font-weight: 700; }
+  .tam-adv-card.is-demo { border: 1.5px dashed #cbd5e1; }
+  .tam-claim-btn { display: block; text-align: center; background: #0B8A46; color: #ffffff; font-weight: 700; font-size: 14px; padding: 13px 16px; border-radius: 10px; text-decoration: none; }
+  .tam-claim-btn:hover { background: #0B6B38; }
 </style>
 </head>
 <body>
@@ -526,7 +545,10 @@ body { background-color: #f3f8f5; }
       <span class="tam-brand-dot"></span>
       <span>Trusted Advisor Match PH</span>
     </a>
-    <span class="tam-trust-pill">Verified Filipino Financial Advisors</span>
+    <div class="tam-topbar-right">
+      <span class="tam-trust-pill">Verified Filipino Financial Advisors</span>
+      <a href="https://ai-funnel-engine.vercel.app/" target="_blank" rel="noopener" class="tam-join-link">List your profile</a>
+    </div>
   </div>
 </header>
 
@@ -569,7 +591,17 @@ body { background-color: #f3f8f5; }
     <button type="button" id="tam-retake-btn" class="tam-retake-btn">Change Answers</button>
   </div>
 
+  <div class="tam-demo-note">
+    <strong>Heads up:</strong> profiles marked <strong>Sample profile</strong> are placeholders, not real advisors.
+    Those spots are open &mdash; <a href="https://ai-funnel-engine.vercel.app/" target="_blank" rel="noopener">financial advisors can claim one here</a>.
+  </div>
   <div id="tam-advisor-grid" class="tam-grid"></div>
+
+  <div class="tam-join-card">
+    <h3>Are you a financial advisor?</h3>
+    <p>Get your own free advisor profile page and a spot in this directory.</p>
+    <a href="https://ai-funnel-engine.vercel.app/" target="_blank" rel="noopener">Create my advisor profile</a>
+  </div>
 </section>
 
 <!-- ADVISOR PROFILE POPUP MODAL (Used when DashNex liveProfileUrl is not set yet) -->
@@ -588,7 +620,7 @@ body { background-color: #f3f8f5; }
   // is live, paste their URL into `liveProfileUrl` (e.g. 'https://your-dashnex.com/angela-santos')
   // and clicking their button will automatically redirect there instead!
   const ADVISORS = [
-        {
+    {
       slug: 'louie-john-legaspi-9f82d1af',
       fullName: 'Louie John Legaspi',
       roleTitle: 'Healthcare Protection Specialist',
@@ -601,14 +633,14 @@ body { background-color: #f3f8f5; }
       specialtyLabel: 'Health Coverage & Critical Illness Protection',
       whoIHelp: 'OFWs, breadwinners, and budget-conscious families who want health and hospitalization protection.',
       solutionOffered: 'Tailored Health Fund solutions for medical and hospitalization needs, plus a free Family Safety Net Check.',
-      specialties: ['critical-illness', 'family-protection'],
-      roles: ['ofw', 'breadwinner'],
-      styles: ['chat'],
+      specialties: ['critical-illness', 'family-protection', 'wealth-retirement', 'business-estate'],
+      roles: ['breadwinner', 'ofw', 'business-owner', 'high-net-worth', 'young-pro'],
+      styles: ['chat', 'call', 'in-person'],
       consultationNote: 'Chat first via Messenger. Free Family Safety Net Check.',
       isVerified: false,
-      visibilityScore: 99
+      visibilityScore: 500
     },
-   {
+    {
       slug: 'angela-santos',
       fullName: 'Angela Santos',
       roleTitle: 'Licensed Financial & Health Protection Advisor',
@@ -626,6 +658,7 @@ body { background-color: #f3f8f5; }
       styles: ['chat', 'call', 'in-person'],
       consultationNote: 'Available via Messenger / Viber or 15-min Zoom',
       isVerified: true,
+      isDemo: true,
       visibilityScore: 98
     },
     {
@@ -646,6 +679,7 @@ body { background-color: #f3f8f5; }
       styles: ['call', 'in-person', 'chat'],
       consultationNote: 'Available for Zoom Strategy Review or Metro Manila Coffee',
       isVerified: true,
+      isDemo: true,
       visibilityScore: 95
     },
     {
@@ -666,6 +700,7 @@ body { background-color: #f3f8f5; }
       styles: ['chat', 'call'],
       consultationNote: 'Flexible timezone chat via WhatsApp / Viber / Zoom',
       isVerified: true,
+      isDemo: true,
       visibilityScore: 92
     },
     {
@@ -686,6 +721,7 @@ body { background-color: #f3f8f5; }
       styles: ['chat', 'call', 'in-person'],
       consultationNote: 'Quick Messenger Q&A or 15-min Clarity Call',
       isVerified: true,
+      isDemo: true,
       visibilityScore: 89
     },
     {
@@ -706,6 +742,7 @@ body { background-color: #f3f8f5; }
       styles: ['chat', 'call'],
       consultationNote: 'Chat-first consultation via Messenger or Instagram',
       isVerified: true,
+      isDemo: true,
       visibilityScore: 86
     },
     {
@@ -726,6 +763,7 @@ body { background-color: #f3f8f5; }
       styles: ['call', 'in-person'],
       consultationNote: 'Private 1-on-1 Zoom or Executive Office Meeting',
       isVerified: false,
+      isDemo: true,
       visibilityScore: 80
     }
   ];
@@ -856,6 +894,24 @@ body { background-color: #f3f8f5; }
     const calcHref = `/calculator.html?advisor=${encodeURIComponent(adv.slug)}&advisor_name=${encodeURIComponent(adv.fullName)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
     const firstName = adv.fullName.split(' ')[0];
 
+    // Only show contact buttons the advisor actually has (no dead "#" buttons)
+    const contactLinks = [
+      ['&#128172; Viber', adv.viberUrl],
+      ['&#128241; WhatsApp', adv.whatsappUrl],
+      ['&#9993;&#65039; Messenger', adv.messengerUrl],
+      ['&#128197; Book 15-Min Call', adv.bookingUrl]
+    ].filter(([, u]) => u && u.trim())
+     .map(([label, u]) => `<a href="${u}" target="_blank" rel="noopener" class="tam-modal-link">${label}</a>`)
+     .join('');
+
+    // Full DashNex profile opens in a NEW TAB so the prospect keeps the directory open
+    let profileLink = '';
+    if (hasLiveDashNexUrl(adv)) {
+      const sep = adv.liveProfileUrl.includes('?') ? '&' : '?';
+      const profileHref = `${adv.liveProfileUrl}${sep}advisor=${encodeURIComponent(adv.slug)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
+      profileLink = `<a href="${profileHref}" target="_blank" rel="noopener" class="tam-modal-link" style="grid-column:1 / -1;">&#128100; Open ${firstName}'s Full Profile (new tab) &#8599;</a>`;
+    }
+
     modalBody.innerHTML = `
       <div class="tam-badges-row">
         ${isTop5 ? '<span class="tam-badge-rec">Recommended</span>' : ''}
@@ -888,10 +944,8 @@ body { background-color: #f3f8f5; }
         <span class="tam-detail-label" style="margin-bottom:8px;">Connect Directly With ${firstName}</span>
         <div class="tam-modal-cta-grid">
           <a href="${calcHref}" class="tam-modal-link tam-modal-calc-btn">&#128202; Run 30-Sec Safety Net Check With ${firstName} &rarr;</a>
-          <a href="${adv.viberUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128172; Viber</a>
-          <a href="${adv.whatsappUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128241; WhatsApp</a>
-          <a href="${adv.messengerUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#9993;&#65039; Messenger</a>
-          <a href="${adv.bookingUrl || '#'}" target="_blank" rel="noopener" class="tam-modal-link">&#128197; Book 15-Min Call</a>
+          ${contactLinks}
+          ${profileLink}
         </div>
       </div>
     `;
@@ -928,14 +982,15 @@ body { background-color: #f3f8f5; }
 
     const grid = document.getElementById('tam-advisor-grid');
     grid.innerHTML = matched.map((adv, index) => {
-      const isTop5 = index < 5;
+      const isTop5 = index < 5 && !adv.isDemo;
 
       return `
-        <article class="tam-adv-card ${isTop5 ? 'is-recommended' : ''}">
+        <article class="tam-adv-card ${isTop5 ? 'is-recommended' : ''} ${adv.isDemo ? 'is-demo' : ''}">
           <div>
             <div class="tam-badges-row">
               ${isTop5 ? '<span class="tam-badge-rec">Recommended</span>' : ''}
-              ${adv.isVerified ? '<span class="tam-badge-ver">&#10003; Verified</span>' : ''}
+              ${adv.isDemo ? '<span class="tam-badge-demo">Sample profile</span>' : ''}
+              ${adv.isVerified && !adv.isDemo ? '<span class="tam-badge-ver">&#10003; Verified</span>' : ''}
             </div>
 
             <div class="tam-adv-head">
@@ -960,8 +1015,13 @@ body { background-color: #f3f8f5; }
           </div>
 
           <div class="tam-adv-footer">
-            <div class="tam-style-note">&#128172; ${adv.consultationNote}</div>
-            <button type="button" class="tam-cta-btn" data-slug="${adv.slug}" data-top5="${isTop5 ? '1' : '0'}">View Full Profile &amp; Connect &rarr;</button>
+            ${adv.isDemo ? `
+              <div class="tam-style-note">&#11088; This spot is open. Your profile could be here, in front of prospects who match your specialty.</div>
+              <a class="tam-claim-btn" href="https://ai-funnel-engine.vercel.app/" target="_blank" rel="noopener">Claim this spot &mdash; build your free profile &rarr;</a>
+            ` : `
+              <div class="tam-style-note">&#128172; ${adv.consultationNote}</div>
+              <button type="button" class="tam-cta-btn" data-slug="${adv.slug}" data-top5="${isTop5 ? '1' : '0'}">View Full Profile &amp; Connect &rarr;</button>
+            `}
           </div>
         </article>
       `;
@@ -974,12 +1034,7 @@ body { background-color: #f3f8f5; }
         const adv = ADVISORS.find((a) => a.slug === slug);
         if (!adv) return;
 
-        if (hasLiveDashNexUrl(adv)) {
-          const separator = adv.liveProfileUrl.includes('?') ? '&' : '?';
-          window.location.href = `${adv.liveProfileUrl}${separator}advisor=${encodeURIComponent(adv.slug)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
-        } else {
-          openAdvisorModal(adv, isTop5);
-        }
+        openAdvisorModal(adv, isTop5);
       });
     });
   }
