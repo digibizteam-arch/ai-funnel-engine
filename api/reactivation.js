@@ -128,16 +128,75 @@ function button(href, label) {
 
 
 
+// ---------------------------------------------------------------
+// QUIZ ANSWERS -> CLEAN ENGLISH PHRASES
+// Old leads saved their answers as "Label — sub-label", and the
+// older quiz had different questions. Pasting that raw text into a
+// sentence read badly, so answers from the current quiz are matched
+// to short phrases, and anything else gets a safe general sentence
+// instead of the raw text.
+// Subject lines stay in Tagalog; the email body is in English.
+// ---------------------------------------------------------------
+const PROBLEM_TOPICS = [
+  { re: /not enough prospects/i,                       topic: 'not having enough prospects' },
+  { re: /reach out but (do not|don'?t) move forward/i, topic: 'prospects who reach out but never move forward' },
+  { re: /inconsistent income/i,                        topic: 'inconsistent income from month to month' },
+  { re: /everything is manual/i,                       topic: 'doing everything manually, from posting to following up' },
+  { re: /look like everyone/i,                         topic: 'posts that look just like everyone else\'s' },
+  { re: /too busy to market/i,                         topic: 'being too busy to market yourself consistently' }
+];
+
+const GOAL_WISHES = [
+  { re: /felt understood/i,             wish: 'prospects who message you because they felt understood, before you even pitch' },
+  { re: /trusted advisor in my niche/i, wish: 'to be the trusted advisor in your niche' },
+  { re: /one professional link/i,       wish: 'one professional link you can share in every post and chat' },
+  { re: /story on video/i,              wish: 'to share your story on video without hours of work' },
+  { re: /consistent without burnout/i,  wish: 'to stay consistent without burnout' },
+  { re: /beyond my warm market/i,       wish: 'to reach new people beyond your warm market' }
+];
+
+function matchPhrase(value, list) {
+  const text = String(value == null ? '' : value);
+  return list.find(item => item.re.test(text)) || null;
+}
+
+// Ready-made pieces that can be dropped into an email safely.
+function describeLead(lead) {
+  const p = matchPhrase(lead.problem, PROBLEM_TOPICS);
+  const g = matchPhrase(lead.goal, GOAL_WISHES);
+
+  return {
+    // A full sentence that stands on its own.
+    challenge: p
+      ? `The biggest challenge you shared is <strong>${p.topic}</strong>.`
+      : 'You shared a few challenges with getting the right prospects online.',
+
+    goal: g
+      ? `What you want most is <strong>${g.wish}</strong>.`
+      : 'You were clear about what you want your online presence to do for you.',
+
+    // A full question that stands on its own.
+    stillWant: g
+      ? `Do you still want <strong>${g.wish}</strong>?`
+      : 'Do you still want to be found more easily online?'
+  };
+}
+
+
 function generateReactivationContent(lead, stage) {
 
-  const first =
-    esc(String(lead.name || 'there').trim().split(/\s+/)[0] || 'there');
+  const firstRaw =
+    String(lead.name || '').trim().split(/\s+/)[0] || '';
 
-  const goal =
-    esc(lead.goal || 'ang mga layunin mo');
+  // HTML-safe version for the email body.
+  const first = esc(firstRaw || 'there');
 
-  const problem =
-    esc(lead.problem || 'ang mga hamong binanggit mo');
+  // Plain version for the subject line (a subject is not HTML,
+  // so a name like O'Brien must not show as O&#39;Brien).
+  const subjectName = firstRaw || 'Hi';
+
+  const { challenge, goal, stillWant } =
+    describeLead(lead);
 
   const id = encodeURIComponent(lead.id);
 
@@ -157,18 +216,20 @@ function generateReactivationContent(lead, stage) {
   const advisorTemplates = [
 
     {
-      subject: `${first}, may bago na akong ginagawa para sa mga financial advisor`,
+      subject: `${subjectName}, may bago na akong ginagawa para sa mga financial advisor`,
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Noong sinagutan mo ang assessment ko, gusto mo ang <strong>${goal}</strong>, pero ang hamon mo ay <strong>${problem}</strong>.</p>
-        <p>Mula noon, mas pinagtuunan ko na ang pagtulong sa mga financial advisor na makilala nang maayos online. Ito ang ginagawa ko ngayon:</p>
+        <p>Thank you for taking my assessment earlier.</p>
+        <p>${challenge}</p>
+        <p>${goal}</p>
+        <p>Since then, I've focused on helping financial advisors get known properly online. Here is what I'm doing now:</p>
         <p>
-          1. Isang AI short film na kuwento ng mga pinag-aalala ng mga kliyente mo<br>
-          2. Personal advisor profile page na may lead capture<br>
-          3. Follow-up emails para sa bawat bagong lead<br>
-          4. AI sales chatbot na sinanay sa offer mo
+          1. An AI short film that tells the story of what your clients worry about<br>
+          2. A personal advisor profile page with lead capture<br>
+          3. Follow-up emails for every new lead<br>
+          4. An AI sales chatbot trained on your offer
         </p>
-        <p>May bago na rin akong 2-minutong assessment na akma sa specialty mo, at libre ito.</p>
+        <p>I also have a new 2-minute assessment tailored to your specialty, and it's free.</p>
         ${button(quizLink, 'Take The New Assessment')}
       `)
     },
@@ -177,9 +238,9 @@ function generateReactivationContent(lead, stage) {
       subject: 'Hindi kulang sa effort ang problema',
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Maraming advisor ang nagpo-post at nagme-message nang tuloy-tuloy, pero ang hamon pa rin nila ay <strong>${problem}</strong>.</p>
-        <p>Madalas, hindi kulang sa sipag. Kulang lang ang kuwentong nakakarelate ang prospect, at isang propesyonal na lugar kung saan ka nila makikilala.</p>
-        <p>Sasabihin sa iyo ng bagong assessment kung saan ka maaaring nahihirapan at kung paano makakatulong ang AI film at advisor profile page. Walang ipinapangakong resulta, dahil nakadepende iyon sa positioning at consistency mo.</p>
+        <p>Many advisors post and message consistently, yet it still doesn't turn into conversations.</p>
+        <p>Most of the time, it isn't a lack of hard work. What's missing is a story the prospect can relate to, and a professional place where they can get to know you.</p>
+        <p>The new assessment will show you where you may be struggling, and how an AI film and an advisor profile page can help. No results are promised, because that depends on your positioning and consistency.</p>
         ${button(quizLink, 'Take The New Assessment')}
       `)
     },
@@ -188,19 +249,19 @@ function generateReactivationContent(lead, stage) {
       subject: 'Nagbago na ba ang sitwasyon mo?',
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Gusto ko lang kumustahin: ang <strong>${problem}</strong>, gumanda na ba, ganoon pa rin, o mas humirap?</p>
-        <p>Kung gusto mong pag-usapan, mag-reply ka lang sa email na ito. Puwede ka ring kumuha ng bagong assessment para makita ang pinakabagong rekomendasyon para sa iyo.</p>
+        <p>I just wanted to check in: have the challenges you shared improved, stayed the same, or gotten harder?</p>
+        <p>If you'd like to talk about it, just reply to this email. You can also take the new assessment to see your latest recommendation.</p>
         ${button(quizLink, 'Take The New Assessment')}
       `)
     },
 
     {
-      subject: `Quick check-in, ${first}`,
+      subject: `Quick check-in, ${subjectName}`,
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Importante pa ba sa iyo ang <strong>${goal}</strong>?</p>
-        <p>Kung oo, puwede nating pag-usapan kung paano ka makikilala nang mas propesyonal ng mga prospect mo, nang walang pilitan.</p>
-        <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Makipag-chat sa akin</a></p>
+        <p>${stillWant}</p>
+        <p>If so, we can talk about how to get you known more professionally by your prospects, with no pressure.</p>
+        <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Chat with me</a></p>
         ${button(quizLink, 'Take The New Assessment')}
       `)
     }
@@ -215,9 +276,9 @@ function generateReactivationContent(lead, stage) {
       subject: `Update mula kay Angel`,
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Noong sinagutan mo ang assessment ko, gusto mo ang <strong>${goal}</strong>.</p>
-        <p>Gusto ko lang ipaalam na ang serbisyo ko ngayon ay nakatuon na sa mga financial advisor. Kung financial advisor ka, o may kakilala kang advisor na nahihirapang makakuha ng tamang prospects online, ito ang bagong libreng 2-minutong assessment namin.</p>
-        <p>Kung hindi, walang problema. Salamat sa oras mo.</p>
+        <p>Thank you for taking my assessment earlier.</p>
+        <p>I wanted to let you know that my service is now focused on financial advisors. If you're a financial advisor, or you know one who struggles to get the right prospects online, this is our new free 2-minute assessment.</p>
+        <p>If not, no problem. Thank you for your time.</p>
         ${button(quizLink, 'See The New Assessment')}
       `)
     },
@@ -226,8 +287,8 @@ function generateReactivationContent(lead, stage) {
       subject: 'Para sa mga financial advisor',
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Ang ginagawa ko ngayon ay isang AI short film at personal profile page para sa mga financial advisor, para mas maayos silang makilala ng mga prospect nila.</p>
-        <p>Kung may kakilala kang advisor na makikinabang dito, malaking tulong kung ibabahagi mo ang link na ito.</p>
+        <p>What I do now is an AI short film and a personal profile page for financial advisors, so their prospects can get to know them properly.</p>
+        <p>If you know an advisor who would benefit, it would mean a lot if you shared this link.</p>
         ${button(quizLink, 'See The New Assessment')}
       `)
     },
@@ -236,17 +297,17 @@ function generateReactivationContent(lead, stage) {
       subject: 'Kumusta ka na?',
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Kumusta na ang <strong>${problem}</strong>? Kung gusto mong magkuwento, mag-reply ka lang sa email na ito.</p>
-        <p>Kung financial advisor ka, nandito pa rin ang libreng assessment.</p>
+        <p>How have you been? If you'd like to share how things are going, just reply to this email.</p>
+        <p>If you're a financial advisor, the free assessment is still here.</p>
         ${button(quizLink, 'See The New Assessment')}
       `)
     },
 
     {
-      subject: `Quick check-in, ${first}`,
+      subject: `Quick check-in, ${subjectName}`,
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>Salamat sa pagsagot sa assessment ko noon. Kung financial advisor ka o may kakilala kang advisor, bukas pa rin ang libreng assessment.</p>
+        <p>Thank you for taking my assessment earlier. If you're a financial advisor, or you know one, the free assessment is still open.</p>
         ${button(quizLink, 'See The New Assessment')}
       `)
     }
@@ -259,6 +320,7 @@ function generateReactivationContent(lead, stage) {
   return templates[stage] || templates[0];
 
 }
+
 module.exports = async function handler(req, res) {
 
   try {
