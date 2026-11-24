@@ -539,6 +539,10 @@
   .tam-adv-card.is-demo { border: 1.5px dashed #cbd5e1; }
   .tam-claim-btn { display: block; text-align: center; background: #0B8A46; color: #ffffff; font-weight: 700; font-size: 14px; padding: 13px 16px; border-radius: 10px; text-decoration: none; }
   .tam-claim-btn:hover { background: #0B6B38; }
+
+  /* ── CALL BUTTON: greyed out when an advisor has no phone number yet ── */
+  .tam-modal-link.is-disabled { opacity: 0.55; cursor: not-allowed; background: #f1f5f9; border-style: dashed; }
+  .tam-modal-link.is-disabled:hover { border-color: #cbd5e1; background: #f1f5f9; color: #0f172a; }
 </style>
 </head>
 <body>
@@ -619,10 +623,14 @@
 <script>
 (function() {
   // ── ADVISOR ROSTER ────────────────────────────────────────────────────────
-  // Leave `liveProfileUrl: ''` to open the built-in popup modal (with Viber,
+  // Leave `liveProfileUrl: ''` to open the built-in popup modal (with Call, Viber,
   // WhatsApp, Messenger & Safety Net Calculator). Once an advisor's DashNex page
   // is live, paste their URL into `liveProfileUrl` (e.g. 'https://your-dashnex.com/angela-santos')
   // and clicking their button will automatically redirect there instead!
+  //
+  // PHONE NUMBERS: paste the number into `phoneUrl` as  'tel:+639171234567'
+  // (country code, no spaces). Every profile shows a Call button; it is greyed out
+  // as "Call (number coming soon)" until a phoneUrl is filled in.
   const ADVISORS = [
     {
       slug: 'louie-john-legaspi-9f82d1af',
@@ -630,6 +638,7 @@
       roleTitle: 'Healthcare Protection Specialist',
       photoUrl: 'https://file-hosting.dashnexpages.net/ascottdigitalbiz/.editor/1795326738-3218.jpeg',
       liveProfileUrl: 'https://ascottdigitalbiz.dashnexpages.net/louie-john-legaspi/',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639765188980',
       whatsappUrl: '',
       messengerUrl: 'https://www.facebook.com/share/1BwXPyAxA1/',
@@ -645,11 +654,33 @@
       visibilityScore: 500
     },
     {
+      slug: 'karen-368f38b2',
+      fullName: 'Karen',
+      roleTitle: 'Financial Advisor · Aquila Ace DSO',
+      photoUrl: '/advisors/default.jpg',
+      liveProfileUrl: 'https://ascottdigitalbiz.dashnexpages.net/karenyulo/',
+      phoneUrl: '',   // e.g. 'tel:+639171234567' once she sends her number
+      viberUrl: '',
+      whatsappUrl: '',
+      messengerUrl: '',
+      bookingUrl: '',
+      specialtyLabel: 'Life & Health Insurance',
+      whoIHelp: 'OFWs, breadwinners, business owners, high-net-worth clients, and families of all generations who want to secure their financial future.',
+      solutionOffered: 'Life and health protection tailored to your current needs, plus a free Family Safety Net Check.',
+      specialties: ['critical-illness', 'family-protection', 'business-estate'],
+      roles: ['ofw', 'breadwinner', 'young-pro', 'business-owner', 'high-net-worth'],
+      styles: ['chat', 'call'],
+      consultationNote: 'Chat first via Messenger or call directly. Free Family Safety Net Check.',
+      isVerified: true,
+      visibilityScore: 400
+    },
+    {
       slug: 'angela-santos',
       fullName: 'Angela Santos',
       roleTitle: 'Licensed Financial & Health Protection Advisor',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000001',
       whatsappUrl: 'https://wa.me/639170000001',
       messengerUrl: 'https://m.me/',
@@ -671,6 +702,7 @@
       roleTitle: 'Wealth, Business & Estate Planning Specialist',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000002',
       whatsappUrl: 'https://wa.me/639170000002',
       messengerUrl: 'https://m.me/',
@@ -692,6 +724,7 @@
       roleTitle: 'OFW & Global Filipino Family Advisor',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000003',
       whatsappUrl: 'https://wa.me/639170000003',
       messengerUrl: 'https://m.me/',
@@ -713,6 +746,7 @@
       roleTitle: 'Senior Protection & Policy Review Advisor',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000004',
       whatsappUrl: 'https://wa.me/639170000004',
       messengerUrl: 'https://m.me/',
@@ -734,6 +768,7 @@
       roleTitle: 'Young Professional & Starter Wealth Advisor',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000005',
       whatsappUrl: 'https://wa.me/639170000005',
       messengerUrl: 'https://m.me/',
@@ -755,6 +790,7 @@
       roleTitle: 'Corporate & High-Net-Worth Asset Advisor',
       photoUrl: '/advisors/default.jpg',
       liveProfileUrl: '',
+      phoneUrl: '',
       viberUrl: 'viber://chat?number=%2B639170000006',
       whatsappUrl: 'https://wa.me/639170000006',
       messengerUrl: 'https://m.me/',
@@ -898,7 +934,13 @@
     const calcHref = `/calculator.html?advisor=${encodeURIComponent(adv.slug)}&advisor_name=${encodeURIComponent(adv.fullName)}&goal=${encodeURIComponent(goal || '')}&role=${encodeURIComponent(role || '')}`;
     const firstName = adv.fullName.split(' ')[0];
 
-    // Only show contact buttons the advisor actually has (no dead "#" buttons)
+    // Call button: every profile gets one. Greyed out until a phoneUrl is added.
+    const phone = (adv.phoneUrl || '').trim();
+    const callLink = phone
+      ? `<a href="${phone}" class="tam-modal-link" data-vw-contact="1">&#128222; Call ${firstName}</a>`
+      : `<span class="tam-modal-link is-disabled" aria-disabled="true">&#128222; Call (number coming soon)</span>`;
+
+    // Only show the other contact buttons the advisor actually has (no dead "#" buttons)
     const contactLinks = [
       ['&#128172; Viber', adv.viberUrl],
       ['&#128241; WhatsApp', adv.whatsappUrl],
@@ -948,6 +990,7 @@
         <span class="tam-detail-label" style="margin-bottom:8px;">Connect Directly With ${firstName}</span>
         <div class="tam-modal-cta-grid">
           <a href="${calcHref}" class="tam-modal-link tam-modal-calc-btn">&#128202; Run 30-Sec Safety Net Check With ${firstName} &rarr;</a>
+          ${callLink}
           ${contactLinks}
           ${profileLink}
         </div>
