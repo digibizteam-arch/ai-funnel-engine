@@ -1,5 +1,6 @@
 const https = require('https');
 
+const BASE_URL = 'https://ai-funnel-engine.vercel.app';
 
 function postJSON(options, body) {
 
@@ -78,323 +79,184 @@ async function sendEmail(to, subject, html) {
 }
 
 
-
-function generateReactivationContent(lead, stage) {
-
-
-  let analysis = {};
-
-  try {
-
-    analysis = lead.full_analysis
-      ? JSON.parse(lead.full_analysis)
-      : {};
-
-  } catch(e) {
-
-    console.log(
-      "Full analysis parse failed"
-    );
-
-  }
-
-
-
-  const goal =
-    lead.goal ||
-    "your business goals";
-
-
-  const problem =
-    lead.problem ||
-    "the challenges you mentioned";
-
-
-
-  const diagnosis =
-    analysis.diagnosis ||
-    "Based on your previous assessment, there are opportunities to improve your current approach.";
-
-
-
-  const solution =
-    analysis.solution_name ||
-    "a better marketing system";
-
-
-
-  const chatLink =
-    `https://ai-funnel-engine.vercel.app/chat?id=${lead.id}`;
-
-
-
-  const quizLink =
-    `https://ai-funnel-engine.vercel.app/`;
-
-
-
-  const templates = {
-
-
-
-0: {
-
-subject:
-"Your Marketing Assessment Results Are Still Waiting For You",
-
-
-html:`
-
-<div style="font-family:Arial;max-width:700px;margin:auto;">
-
-
-<h2>Hi ${lead.name},</h2>
-
-
-<p>
-A while ago, you completed our Marketing Assessment, and I wanted to reconnect with you.
-</p>
-
-
-<p>
-You shared that your goal was:
-</p>
-
-
-<p>
-<strong>${goal}</strong>
-</p>
-
-
-<p>
-And one of the biggest challenges you mentioned was:
-</p>
-
-
-<p>
-<strong>${problem}</strong>
-</p>
-
-
-
-<p>
-After reviewing your answers again, this was the main thing that stood out:
-</p>
-
-
-<p>
-${diagnosis}
-</p>
-
-
-
-<p>
-Your recommended direction was:
-</p>
-
-
-<h3>
-${solution}
-</h3>
-
-
-
-<p>
-Your personalized assessment is still available if you want to revisit your strategy.
-</p>
-
-
-<a href="${chatLink}">
-Continue My Assessment
-</a>
-
-
-<br><br>
-
-
-<p>
-Want to retake the Marketing Assessment?
-</p>
-
-
-<a href="${quizLink}">
-Take Marketing Quiz Again
-</a>
-
-
-</div>
-
-`
-
-},
-
-
-
-1: {
-
-subject:
-"The Biggest Opportunity From Your Previous Assessment",
-
-
-html:`
-
-<h2>Hi ${lead.name},</h2>
-
-
-<p>
-I was reviewing some previous Marketing Assessment responses and noticed something important.
-</p>
-
-
-<p>
-You were looking for:
-</p>
-
-
-<p>
-<strong>${goal}</strong>
-</p>
-
-
-<p>
-But the obstacle you identified was:
-</p>
-
-
-<p>
-<strong>${problem}</strong>
-</p>
-
-
-<p>
-Many businesses don't fail because they lack effort.
-They struggle because their process is not predictable.
-</p>
-
-
-<p>
-Your assessment pointed toward:
-</p>
-
-
-<h3>${solution}</h3>
-
-
-<a href="${chatLink}">
-Continue My Assessment
-</a>
-
-
-`
-
-},
-
-
-
-2: {
-
-subject:
-"Has Anything Changed Since Your Assessment?",
-
-
-html:`
-
-<h2>Hi ${lead.name},</h2>
-
-
-<p>
-I wanted to check back with you.
-</p>
-
-
-<p>
-When you completed your Marketing Assessment, you mentioned:
-</p>
-
-
-<p>
-<strong>${problem}</strong>
-</p>
-
-
-<p>
-I'm curious — has this challenge improved, stayed the same, or become more difficult?
-</p>
-
-
-<p>
-Your original recommendation was:
-</p>
-
-
-<h3>${solution}</h3>
-
-
-<a href="${chatLink}">
-Review My Assessment
-</a>
-
-
-`
-
-},
-
-
-
-3: {
-
-subject:
-"Should We Revisit Your Marketing Strategy?",
-
-
-html:`
-
-<h2>Hi ${lead.name},</h2>
-
-
-<p>
-Before I close the loop, I wanted to give you one last opportunity to revisit your previous assessment.
-</p>
-
-
-<p>
-Your goal was:
-</p>
-
-
-<p>
-<strong>${goal}</strong>
-</p>
-
-
-<p>
-And the strategy recommended was:
-</p>
-
-
-<h3>${solution}</h3>
-
-
-<p>
-If this is still something you want to improve, your assessment is ready.
-</p>
-
-
-<a href="${chatLink}">
-Continue My Assessment
-</a>
-
-
-`
-
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 
-};
+// Leads who signed the proposal or are marked "won" are done.
+function isConverted(lead) {
+  return !!lead.proposal_signed_at || lead.admin_status === 'won';
+}
 
 
-return templates[stage] || templates[0];
+// These leads took the OLDER quiz, which was open to many kinds of
+// businesses. The new offer is only for financial advisors, so we
+// check the saved role. Anyone else gets a gentle, non-pushy update.
+function isFinancialAdvisor(lead) {
+  const role = String(lead.role || '');
+  return /financial|insurance|invest|retirement|mutual|uitf|life and health|agency leader|new advisor/i.test(role);
+}
 
+
+function emailShell(inner) {
+  return `
+  <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;font-size:15px;line-height:1.65;color:#1f2937;">
+    ${inner}
+    <p style="margin:28px 0 0;">
+      Salamat,<br>
+      <strong>Angel Scott</strong><br>
+      <span style="font-size:13px;color:#6b7280;">AI-Powered Marketing Systems Strategist</span>
+    </p>
+  </div>`;
+}
+
+
+function button(href, label) {
+  return `
+    <p style="margin:24px 0;">
+      <a href="${href}" style="background:#0F766E;color:#ffffff;padding:14px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:bold;">
+        ${label}
+      </a>
+    </p>`;
+}
+
+
+
+function generateReactivationContent(lead, stage) {
+
+  const first =
+    esc(String(lead.name || 'there').trim().split(/\s+/)[0] || 'there');
+
+  const goal =
+    esc(lead.goal || 'ang mga layunin mo');
+
+  const problem =
+    esc(lead.problem || 'ang mga hamong binanggit mo');
+
+  const id = encodeURIComponent(lead.id);
+
+  const chatLink =
+    `${BASE_URL}/chat?id=${id}`;
+
+  // The new assessment is the best next step for old leads:
+  // it is built for financial advisors, and leads straight into
+  // the profile page demo, the chat and the proposal.
+  const quizLink =
+    `${BASE_URL}/`;
+
+  const advisor = isFinancialAdvisor(lead);
+
+
+  // ---------- Financial advisors: the new offer ----------
+  const advisorTemplates = [
+
+    {
+      subject: `${first}, may bago na akong ginagawa para sa mga financial advisor`,
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Noong sinagutan mo ang assessment ko, gusto mo ang <strong>${goal}</strong>, pero ang hamon mo ay <strong>${problem}</strong>.</p>
+        <p>Mula noon, mas pinagtuunan ko na ang pagtulong sa mga financial advisor na makilala nang maayos online. Ito ang ginagawa ko ngayon:</p>
+        <p>
+          1. Isang AI short film na kuwento ng mga pinag-aalala ng mga kliyente mo<br>
+          2. Personal advisor profile page na may lead capture<br>
+          3. Follow-up emails para sa bawat bagong lead<br>
+          4. AI sales chatbot na sinanay sa offer mo
+        </p>
+        <p>May bago na rin akong 2-minutong assessment na akma sa specialty mo, at libre ito.</p>
+        ${button(quizLink, 'Take The New Assessment')}
+      `)
+    },
+
+    {
+      subject: 'Hindi kulang sa effort ang problema',
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Maraming advisor ang nagpo-post at nagme-message nang tuloy-tuloy, pero ang hamon pa rin nila ay <strong>${problem}</strong>.</p>
+        <p>Madalas, hindi kulang sa sipag. Kulang lang ang kuwentong nakakarelate ang prospect, at isang propesyonal na lugar kung saan ka nila makikilala.</p>
+        <p>Sasabihin sa iyo ng bagong assessment kung saan ka maaaring nahihirapan at kung paano makakatulong ang AI film at advisor profile page. Walang ipinapangakong resulta, dahil nakadepende iyon sa positioning at consistency mo.</p>
+        ${button(quizLink, 'Take The New Assessment')}
+      `)
+    },
+
+    {
+      subject: 'Nagbago na ba ang sitwasyon mo?',
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Gusto ko lang kumustahin: ang <strong>${problem}</strong>, gumanda na ba, ganoon pa rin, o mas humirap?</p>
+        <p>Kung gusto mong pag-usapan, mag-reply ka lang sa email na ito. Puwede ka ring kumuha ng bagong assessment para makita ang pinakabagong rekomendasyon para sa iyo.</p>
+        ${button(quizLink, 'Take The New Assessment')}
+      `)
+    },
+
+    {
+      subject: `Quick check-in, ${first}`,
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Importante pa ba sa iyo ang <strong>${goal}</strong>?</p>
+        <p>Kung oo, puwede nating pag-usapan kung paano ka makikilala nang mas propesyonal ng mga prospect mo, nang walang pilitan.</p>
+        <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Makipag-chat sa akin</a></p>
+        ${button(quizLink, 'Take The New Assessment')}
+      `)
+    }
+
+  ];
+
+
+  // ---------- Everyone else: honest, low-pressure update ----------
+  const generalTemplates = [
+
+    {
+      subject: `Update mula kay Angel`,
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Noong sinagutan mo ang assessment ko, gusto mo ang <strong>${goal}</strong>.</p>
+        <p>Gusto ko lang ipaalam na ang serbisyo ko ngayon ay nakatuon na sa mga financial advisor. Kung financial advisor ka, o may kakilala kang advisor na nahihirapang makakuha ng tamang prospects online, ito ang bagong libreng 2-minutong assessment namin.</p>
+        <p>Kung hindi, walang problema. Salamat sa oras mo.</p>
+        ${button(quizLink, 'See The New Assessment')}
+      `)
+    },
+
+    {
+      subject: 'Para sa mga financial advisor',
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Ang ginagawa ko ngayon ay isang AI short film at personal profile page para sa mga financial advisor, para mas maayos silang makilala ng mga prospect nila.</p>
+        <p>Kung may kakilala kang advisor na makikinabang dito, malaking tulong kung ibabahagi mo ang link na ito.</p>
+        ${button(quizLink, 'See The New Assessment')}
+      `)
+    },
+
+    {
+      subject: 'Kumusta ka na?',
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Kumusta na ang <strong>${problem}</strong>? Kung gusto mong magkuwento, mag-reply ka lang sa email na ito.</p>
+        <p>Kung financial advisor ka, nandito pa rin ang libreng assessment.</p>
+        ${button(quizLink, 'See The New Assessment')}
+      `)
+    },
+
+    {
+      subject: `Quick check-in, ${first}`,
+      html: emailShell(`
+        <p>Hi ${first},</p>
+        <p>Salamat sa pagsagot sa assessment ko noon. Kung financial advisor ka o may kakilala kang advisor, bukas pa rin ang libreng assessment.</p>
+        ${button(quizLink, 'See The New Assessment')}
+      `)
+    }
+
+  ];
+
+
+  const templates = advisor ? advisorTemplates : generalTemplates;
+
+  return templates[stage] || templates[0];
 
 }
 module.exports = async function handler(req, res) {
@@ -405,6 +267,11 @@ module.exports = async function handler(req, res) {
     const supabaseURL =
       new URL(process.env.SUPABASE_URL);
 
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'apikey': process.env.SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+    };
 
 
     // Get maximum 10 old leads ready for reactivation
@@ -444,6 +311,12 @@ module.exports = async function handler(req, res) {
     });
 
 
+    if (!Array.isArray(oldLeads)) {
+      throw new Error(
+        'Unexpected leads response: ' + JSON.stringify(oldLeads)
+      );
+    }
+
 
     console.log(
       'Reactivation leads found:',
@@ -451,8 +324,42 @@ module.exports = async function handler(req, res) {
     );
 
 
+    let sent = 0;
+    let stopped = 0;
+
 
     for (const lead of oldLeads) {
+
+
+      // STOP for leads who signed the proposal or are marked won
+      if (isConverted(lead)) {
+
+        await postJSON({
+
+          hostname: supabaseURL.hostname,
+
+          path: `/rest/v1/leads?id=eq.${lead.id}`,
+
+          method: 'PATCH',
+
+          headers: { ...authHeaders, 'Prefer': 'return=minimal' }
+
+        }, {
+
+          reactivation_active: false
+
+        });
+
+        stopped += 1;
+
+        console.log(
+          'Reactivation stopped (converted):',
+          lead.email
+        );
+
+        continue;
+
+      }
 
 
 
@@ -668,6 +575,8 @@ module.exports = async function handler(req, res) {
       }
 
 
+      sent += 1;
+
 
     }
 
@@ -677,7 +586,11 @@ module.exports = async function handler(req, res) {
 
       success:true,
 
-      processed:oldLeads.length
+      processed:oldLeads.length,
+
+      sent,
+
+      stopped
 
     });
 
