@@ -109,6 +109,68 @@ function button(href, label) {
     </p>`;
 }
 
+// ---------------------------------------------------------------
+// QUIZ ANSWERS -> CLEAN ENGLISH PHRASES
+// The quiz saves each answer as "Label — sub-label". Pasting that
+// raw text into a sentence read badly, so every known answer is
+// matched here to a short phrase written to fit inside a sentence.
+// An answer that is not recognised (for example from an older quiz)
+// gets a safe general sentence instead of the raw text.
+// Subject lines stay in Tagalog; the email body is in English.
+// ---------------------------------------------------------------
+const PROBLEM_TOPICS = [
+  { re: /not enough prospects/i,                       topic: 'not having enough prospects' },
+  { re: /reach out but (do not|don'?t) move forward/i, topic: 'prospects who reach out but never move forward' },
+  { re: /inconsistent income/i,                        topic: 'inconsistent income from month to month' },
+  { re: /everything is manual/i,                       topic: 'doing everything manually, from posting to following up' },
+  { re: /look like everyone/i,                         topic: 'posts that look just like everyone else\'s' },
+  { re: /too busy to market/i,                         topic: 'being too busy to market yourself consistently' }
+];
+
+const GOAL_WISHES = [
+  { re: /felt understood/i,             wish: 'prospects who message you because they felt understood, before you even pitch' },
+  { re: /trusted advisor in my niche/i, wish: 'to be the trusted advisor in your niche' },
+  { re: /one professional link/i,       wish: 'one professional link you can share in every post and chat' },
+  { re: /story on video/i,              wish: 'to share your story on video without hours of work' },
+  { re: /consistent without burnout/i,  wish: 'to stay consistent without burnout' },
+  { re: /beyond my warm market/i,       wish: 'to reach new people beyond your warm market' }
+];
+
+function matchPhrase(value, list) {
+  const text = String(value == null ? '' : value);
+  return list.find(item => item.re.test(text)) || null;
+}
+
+// Ready-made pieces that can be dropped into an email safely.
+function describeLead(lead) {
+  const p = matchPhrase(lead.problem, PROBLEM_TOPICS);
+  const g = matchPhrase(lead.goal, GOAL_WISHES);
+
+  return {
+    // "...started the conversation <about X>"
+    aboutProblem: p
+      ? `about <strong>${p.topic}</strong>`
+      : 'about the challenges you shared',
+
+    challenge: p
+      ? `The biggest challenge you shared is <strong>${p.topic}</strong>.`
+      : 'You shared a few challenges with getting the right prospects online.',
+
+    goal: g
+      ? `What you want most is <strong>${g.wish}</strong>.`
+      : 'You were clear about what you want your online presence to do for you.'
+  };
+}
+
+const PACKAGE_NAME = 'AI Marketing System for Financial Advisors';
+
+// The AI diagnosis is written in English, so it now fits the email.
+// It is shown as a quote so it reads as the lead's own result.
+function diagnosisBlock(diagnosis) {
+  if (!diagnosis) return '';
+  return `<p style="margin:16px 0;padding:4px 0 4px 14px;border-left:3px solid #0F766E;color:#374151;">${diagnosis}</p>`;
+}
+
 function generateFollowupContent(lead, track, index) {
 
   let analysis = {};
@@ -123,11 +185,13 @@ function generateFollowupContent(lead, track, index) {
     console.log('Full analysis parse failed');
   }
 
-  const first    = esc(String(lead.name || 'there').trim().split(/\s+/)[0] || 'there');
-  const goal     = esc(lead.goal || 'getting more of the right prospects online');
-  const problem  = esc(lead.problem || 'turning your posts into real conversations');
-  const diagnosis = esc(analysis.diagnosis || '');
-  const solution = esc(analysis.solution_name || 'an AI Film and Advisor Profile Prospect-Attraction System');
+  const firstRaw = String(lead.name || '').trim().split(/\s+/)[0] || '';
+  const first    = esc(firstRaw || 'there');
+  const subjectName = firstRaw || 'Hi';
+
+  const diagnosis = diagnosisBlock(esc(analysis.diagnosis || ''));
+
+  const { aboutProblem, challenge, goal } = describeLead(lead);
 
   const id = encodeURIComponent(lead.id);
 
@@ -145,15 +209,14 @@ function generateFollowupContent(lead, track, index) {
     // ---------- Finished the quiz, no demo page yet ----------
     quiz: [
       {
-        subject: `${lead.name ? String(lead.name).trim().split(/\s+/)[0] : 'Hi'}, your prospect-attraction diagnosis is still waiting`,
+        subject: `${subjectName}, nandito pa ang diagnosis mo`,
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Noong sinagutan mo ang assessment, ito ang gusto mong mangyari:</p>
-          <p><strong>${goal}</strong></p>
-          <p>At ito ang isa sa pinakamalaking hamon mo:</p>
-          <p><strong>${problem}</strong></p>
-          ${diagnosis ? `<p>Ito ang napansin ko sa mga sagot mo:</p><p>${diagnosis}</p>` : ''}
-          <p>Nandito pa rin ang buong diagnosis mo, at puwede mo akong tanungin tungkol dito anytime.</p>
+          <p>Thank you for taking my assessment. Here is what stood out in your answers:</p>
+          <p>${challenge}</p>
+          <p>${goal}</p>
+          ${diagnosis}
+          <p>Your full diagnosis is still waiting for you, and you can ask me about it anytime in the chat.</p>
           ${button(chatLink, 'Continue My Conversation')}
         `)
       },
@@ -161,10 +224,10 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Bakit hindi nagiging usapan ang mga post mo?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Maraming advisors ang nagpo-post nang tuloy-tuloy sa Facebook at nagme-message sa Messenger, pero hindi pa rin nagiging usapan ang mga ito.</p>
-          <p>Madalas, hindi kulang sa effort. Kulang lang ang kuwentong nakakarelate ang prospect, at isang professional na lugar kung saan nila makikilala ka at makakapag-message sila.</p>
-          <p>Doon pumapasok ang <strong>${solution}</strong>: isang AI short film na tumatalakay sa totoong pinag-aalala ng mga kliyente mo, at isang personal advisor profile page na puwede mong i-link sa kahit anong post.</p>
-          <p>Wala akong ipinapangako na bilang ng leads o kliyente, dahil nakadepende iyon sa positioning at consistency mo. Pero mas propesyonal at mas madaling makilala ka.</p>
+          <p>Many advisors post consistently on Facebook and message people on Messenger, yet it still doesn't turn into conversations.</p>
+          <p>Most of the time, it isn't a lack of effort. What's missing is a story the prospect can relate to, and a professional place where they can get to know you and message you.</p>
+          <p>That's where the <strong>${PACKAGE_NAME}</strong> comes in: an AI short film that speaks to what your clients truly worry about, and a personal advisor profile page you can link in any post.</p>
+          <p>I can't promise a number of leads or clients, because that depends on your positioning and consistency. But you will be easier to recognize, and more professional to deal with.</p>
           ${button(chatLink, 'Ask Me How It Works')}
         `)
       },
@@ -172,9 +235,9 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Isang professional na tahanan para sa kuwento mo',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Isipin mo: may isang link na puwede mong ilagay sa bawat post, story, o chat. Pagbukas ng prospect, nakikita nila agad ang profile mo, kung ano ang pinakamagaling mong gawin, at kung paano ka kakausapin.</p>
-          <p>Iyon ang advisor profile page. Kasama nito ang lead capture, para may mapagsulatan ang interesadong prospect.</p>
-          <p>Kung gusto mong makita kung paano ito babagay sa specialty mo, tanungin mo lang ako sa chat.</p>
+          <p>Imagine one link you can place in every post, story, or chat. When a prospect opens it, they immediately see your profile, what you do best, and how to reach you.</p>
+          <p>That's the advisor profile page. It includes lead capture, so an interested prospect has a way to reach out.</p>
+          <p>If you'd like to see how it would fit your specialty, just ask me in the chat.</p>
           ${button(chatLink, 'Continue My Conversation')}
         `)
       }
@@ -183,13 +246,14 @@ function generateFollowupContent(lead, track, index) {
     // ---------- Has a demo page, has not opened the chat ----------
     demo: [
       {
-        subject: `${lead.name ? String(lead.name).trim().split(/\s+/)[0] : 'Hi'}, nakita mo na ba ang advisor profile page mo?`,
+        subject: `${subjectName}, nakita mo na ba ang advisor profile page mo?`,
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Sa assessment mo, sinabi mong gusto mo ang <strong>${goal}</strong>, pero ang hamon mo ay <strong>${problem}</strong>.</p>
-          <p>Kaya ginawan kita ng sample advisor profile page para makita mo kung paano ka lalabas sa mga prospect mo.</p>
-          <p style="margin:16px 0;"><a href="${demoLink}" style="color:#0F766E;font-weight:bold;">Buksan ang demo profile page mo</a></p>
-          <p>Demo pa lang ito. Kung gusto mong maging sarili mo na ang page na ito, pumunta ka lang sa chat at doon natin pag-usapan ang susunod na hakbang.</p>
+          <p>${challenge}</p>
+          <p>${goal}</p>
+          <p>That's why I made you a sample advisor profile page, so you can see how you would appear to your prospects.</p>
+          <p style="margin:16px 0;"><a href="${demoLink}" style="color:#0F766E;font-weight:bold;">Open your demo profile page</a></p>
+          <p>It's only a demo. If you'd like this page to become your own, head to the chat and we'll talk about the next step.</p>
           ${button(chatLink, 'I Want This As My Own Page')}
         `)
       },
@@ -197,15 +261,14 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Ano ang kasama kapag naging sarili mo na ito?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          ${diagnosis ? `<p>Ito ang lumabas sa assessment mo:</p><p>${diagnosis}</p>` : ''}
-          <p>Para masagot iyon, ito ang kasama kapag naging sarili mo na ang demo page mo:</p>
+          <p>If you like your demo profile page, here is what's included when it becomes your own:</p>
           <p>
-            1. Isang AI short film na nakabase sa specialty mo at sa pinag-aalala ng mga kliyente mo<br>
-            2. Personal advisor profile page na may lead capture at call-to-action buttons<br>
-            3. Follow-up at nurture email sequence para sa bawat bagong lead<br>
-            4. AI sales chatbot na sinanay sa offer mo
+            1. An AI short film based on your specialty and what your clients worry about<br>
+            2. A personal advisor profile page with lead capture and call-to-action buttons<br>
+            3. A follow-up and nurture email sequence for every new lead<br>
+            4. An AI sales chatbot trained on your offer
           </p>
-          <p>Hindi ako nangangako ng followers, booked calls, o kliyente. Ang sinisiguro lang namin ay maayos at propesyonal ang pagpapakilala sa iyo online.</p>
+          <p>I don't promise followers, booked calls, or clients. What we make sure of is that you're introduced online in a clear, professional way.</p>
           ${button(chatLink, 'Ask About The Next Step')}
         `)
       },
@@ -213,9 +276,9 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Isang mabilis na tanong tungkol sa profile page mo',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Ang hamon mo ay <strong>${problem}</strong>. Gusto ko lang itanong: tama ba ang specialty at paraan ng pagpapakilala na nakita mo sa demo page mo?</p>
-          <p>Kung may gusto kang baguhin o may tanong ka, mag-reply ka lang sa email na ito o dumiretso sa chat. Doon ko rin ipapaliwanag kung paano ito magiging sarili mo.</p>
-          <p style="margin:16px 0;"><a href="${demoLink}" style="color:#0F766E;font-weight:bold;">Tingnan ulit ang demo page</a></p>
+          <p>A quick question: do the specialty and the way you're introduced on your demo page feel right to you?</p>
+          <p>If you'd like to change anything, or you have a question, just reply to this email or go straight to the chat. That's also where I'll explain how this can become your own.</p>
+          <p style="margin:16px 0;"><a href="${demoLink}" style="color:#0F766E;font-weight:bold;">Take another look at the demo page</a></p>
           ${button(chatLink, 'Continue In Chat')}
         `)
       }
@@ -227,9 +290,9 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Itutuloy ba natin ang usapan natin?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Nasimulan na natin ang usapan tungkol sa <strong>${problem}</strong>, at nandoon pa rin ang lahat ng napag-usapan natin.</p>
-          ${diagnosis ? `<p>Paalala sa lumabas sa assessment mo:</p><p>${diagnosis}</p>` : ''}
-          <p>Kung may natitira kang tanong, puwede mo itong ituloy kung saan tayo huminto.</p>
+          <p>We started a conversation ${aboutProblem}, and everything we talked about is still there.</p>
+          ${diagnosis ? `<p>As a reminder, here is what your assessment showed:</p>${diagnosis}` : ''}
+          <p>If you still have questions, you can pick up right where we left off.</p>
           ${button(chatLink, 'Continue My Chat')}
         `)
       },
@@ -237,8 +300,8 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Ano ang pinakakinakabahan mo?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Natural na may mga tanong o alinlangan bago magdesisyon, lalo na kung ang gusto mo ay <strong>${goal}</strong>. Baka ito ay tungkol sa oras, sa proseso, o kung babagay ba ito sa specialty mo.</p>
-          <p>Kung ano man iyon, sabihin mo lang sa chat o mag-reply ka sa email na ito. Sasagutin kita nang tapat, kahit hindi mo pa ito kukunin.</p>
+          <p>It's natural to have questions or hesitations before deciding. Maybe it's about time, the process, or whether this fits your specialty.</p>
+          <p>Whatever it is, tell me in the chat or reply to this email. I'll answer honestly, even if you never end up taking it.</p>
           ${button(chatLink, 'Ask My Question')}
         `)
       },
@@ -246,8 +309,8 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Gusto mo ba ng mabilis na proposal?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Para masagot ang <strong>${problem}</strong>, puwede kitang gawan ng mabilis na proposal sa chat para makita mo kung ano mismo ang kasama sa AI Marketing System for Financial Advisors. Mga 30 segundo lang ito.</p>
-          <p>Walang obligasyon ang pagtingin. Ikaw pa rin ang magdedesisyon.</p>
+          <p>If you'd like to see exactly what's included in the ${PACKAGE_NAME}, I can put together a quick proposal for you in the chat. It takes about 30 seconds.</p>
+          <p>Looking costs nothing, and the decision stays with you.</p>
           ${button(chatLink, 'Get My Quick Proposal')}
         `)
       }
@@ -259,7 +322,7 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Nandito pa rin ang proposal mo',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Nandito pa rin ang proposal mo para sa <strong>AI Marketing System for Financial Advisors</strong>, na ginawa para sagutin ang <strong>${problem}</strong>. Puwede mo itong balikan anumang oras at basahin nang dahan-dahan.</p>
+          <p>Your proposal for the <strong>${PACKAGE_NAME}</strong> is still here. You can come back to it anytime and read it at your own pace.</p>
           ${button(proposalLink, 'Review My Proposal')}
         `)
       },
@@ -267,9 +330,9 @@ function generateFollowupContent(lead, track, index) {
         subject: 'May tanong ka ba tungkol sa proposal mo?',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Kung may hindi malinaw sa proposal, o may gusto kang linawin bago magdesisyon, mag-reply ka lang sa email na ito o dumaan sa chat.</p>
-          <p>Kasama sa proposal: AI short film, advisor profile page na may lead capture, follow-up email sequence, at AI sales chatbot.</p>
-          <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Magtanong sa chat</a></p>
+          <p>If anything in the proposal isn't clear, or there's something you'd like to clarify before deciding, just reply to this email or stop by the chat.</p>
+          <p>The proposal includes: an AI short film, an advisor profile page with lead capture, a follow-up email sequence, and an AI sales chatbot.</p>
+          <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Ask in the chat</a></p>
           ${button(proposalLink, 'Review My Proposal')}
         `)
       },
@@ -277,10 +340,11 @@ function generateFollowupContent(lead, track, index) {
         subject: 'Bumalik tayo sa assessment mo',
         html: emailShell(`
           <p>Hi ${first},</p>
-          <p>Ang hinahanap mo ay <strong>${goal}</strong>, at ang pinakamalaking hamon mo ay <strong>${problem}</strong>.</p>
-          <p>Ang proposal mo ay ginawa para sagutin mismo iyon, para mas maayos at mas propesyonal kang makilala ng mga prospect mo.</p>
-          <p>Kung handa ka na, puwede mong pirmahan ang proposal. Kung may gusto ka pang linawin muna, pumunta ka lang sa chat at pag-usapan natin.</p>
-          <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Magtanong sa chat</a></p>
+          <p>${goal}</p>
+          <p>${challenge}</p>
+          <p>Your proposal was built to speak to exactly that, so your prospects can get to know you in a clearer, more professional way.</p>
+          <p>If you're ready, you can sign the proposal. If you'd like to clarify something first, head to the chat and we'll talk it through.</p>
+          <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Ask in the chat</a></p>
           ${button(proposalLink, 'Review My Proposal')}
         `)
       }
