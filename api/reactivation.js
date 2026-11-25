@@ -224,7 +224,7 @@ function generateReactivationContent(lead, stage) {
         <p>${goal}</p>
         <p>Since then, I've focused on helping financial advisors get known properly online. Here is what I'm doing now:</p>
         <p>
-          1. An AI short film that tells the story of what your clients worry about<br>
+          1. Free membership in our Financial Advisor Directory, with your profile featured in our AI short film campaigns and ads<br>
           2. A personal advisor profile page with lead capture<br>
           3. Follow-up emails for every new lead<br>
           4. An AI sales chatbot trained on your offer
@@ -240,7 +240,7 @@ function generateReactivationContent(lead, stage) {
         <p>Hi ${first},</p>
         <p>Many advisors post and message consistently, yet it still doesn't turn into conversations.</p>
         <p>Most of the time, it isn't a lack of hard work. What's missing is a story the prospect can relate to, and a professional place where they can get to know you.</p>
-        <p>The new assessment will show you where you may be struggling, and how an AI film and an advisor profile page can help. No results are promised, because that depends on your positioning and consistency.</p>
+        <p>The new assessment will show you where you may be struggling, and how a directory listing and an advisor profile page can help. No results are promised, because that depends on your positioning and consistency.</p>
         ${button(quizLink, 'Take The New Assessment')}
       `)
     },
@@ -287,7 +287,7 @@ function generateReactivationContent(lead, stage) {
       subject: 'Para sa mga financial advisor',
       html: emailShell(`
         <p>Hi ${first},</p>
-        <p>What I do now is an AI short film and a personal profile page for financial advisors, so their prospects can get to know them properly.</p>
+        <p>What I do now is a directory listing, promoted through AI short film campaigns, and a personal profile page for financial advisors, so their prospects can get to know them properly.</p>
         <p>If you know an advisor who would benefit, it would mean a lot if you shared this link.</p>
         ${button(quizLink, 'See The New Assessment')}
       `)
