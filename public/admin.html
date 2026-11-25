@@ -290,6 +290,7 @@ a{color:inherit;text-decoration:none}
       <button class="action-btn" style="background:var(--bg3);color:var(--text-mid);border:1px solid var(--border2)" onclick="moveStatus('new-lead')">↩ Reset to New</button>
       <button class="action-btn btn-proposal" onclick="generateProposal()">📄 Generate Proposal</button>
       <button class="action-btn" id="copy-code-btn" style="background:#1a3a2a;color:#4ade80;border:1px solid #166534;display:none" onclick="copyFunnelCode()">📋 Copy Funnel Code</button>
+      <button class="action-btn" id="copy-photo-btn" style="background:#1a3a2a;color:#4ade80;border:1px solid #166534;display:none" onclick="copyPhotoLink()">🖼 Copy Photo Link</button>
       <button class="action-btn" style="background:#1a2a3a;color:#60a5fa;border:1px solid #1e40af;grid-column:span 2" onclick="regenerateDemo()">🔄 Regenerate Demo Funnel</button>
       <button class="action-btn" style="background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;grid-column:span 2" onclick="deleteLead()">🗑 Delete This Lead</button>
     </div>
@@ -562,6 +563,8 @@ function openLead(id) {
   const copyBtn = document.getElementById('copy-code-btn');
   const hasdemo = !!(l.demo_html || l.demo_generated_at);
   copyBtn.style.display = hasdemo ? 'block' : 'none';
+  const photoBtn = document.getElementById('copy-photo-btn');
+  if (photoBtn) photoBtn.style.display = hasdemo ? 'block' : 'none';
 
   // Show demo status indicator
   const viewDemoBtn = document.querySelector('.btn-view-demo');
@@ -646,18 +649,50 @@ async function copyFunnelCode() {
       btn.textContent = '📋 Copy Funnel Code';
       return;
     }
-    // An uploaded advisor photo is stored inside the page as very long inline image text.
-    // Swap it for a normal https link to the sample photo so it can be replaced easily
-    // in a page builder such as DashNex. The live demo page keeps the advisor's own photo.
-    const samplePhoto = window.location.origin + '/advisors/default.jpg';
-    const codeToCopy = html.replace(/(<img src=")data:image\/jpeg;base64,[A-Za-z0-9+\/]+={0,2}(")/, '$1' + samplePhoto + '$2');
+    // An uploaded advisor photo is stored inside the page as very long inline image text,
+    // which is awkward to paste into a page builder such as DashNex. Swap it for a short
+    // link (api/photo) that serves THIS advisor's uploaded photo, so the copied page shows
+    // their own photo. If they did not upload one, nothing is swapped and the page keeps
+    // the sample photo link it already has.
+    const photoLink = photoLinkFor(currentId);
+    let codeToCopy = html.replace(/(<img src=")data:image\/jpeg;base64,[A-Za-z0-9+\/]+={0,2}(")/, (m, open, close) => open + photoLink + close);
+    const photoLinked = codeToCopy !== html;
+
+    // The copy is for an advisor who has signed up, so it is the final page, not a demo:
+    // the top-right "Demo profile" badge becomes "Verified", and the "demonstration profile"
+    // footer line is removed. The demo the advisor sees on /demo keeps its demo labels.
+    codeToCopy = codeToCopy
+      .replace(/(<!--\s*DEMO-ONLY: delete this badge[^>]*-->\s*<span[^>]*>)\s*Demo profile\s*(<\/span>)/i, '$1&#10003; Verified$2')
+      .replace(/[ \t]*<!--\s*DEMO-ONLY: delete this line[^>]*-->\s*<p[^>]*>[^<]*demonstration profile[^<]*<\/p>[ \t]*\n?/i, '')
+      .replace(/[ \t]*<!--\s*DEMO-ONLY:[^>]*-->[ \t]*\n?/gi, '');
+
     await navigator.clipboard.writeText(codeToCopy);
     btn.textContent = '✅ Copied!';
-    toast('Funnel code copied — ready to deploy');
+    toast(photoLinked ? 'Funnel code copied — verified profile, advisor photo linked' : 'Funnel code copied — verified profile, sample photo (none uploaded)');
     setTimeout(() => { btn.textContent = '📋 Copy Funnel Code'; }, 3000);
   } catch(e) {
     toast('Error copying code');
     btn.textContent = '📋 Copy Funnel Code';
+    console.error(e);
+  }
+}
+
+// ── PHOTO LINK ──
+// Short link to the photo the advisor uploaded at demo generation. Use it as the photo in
+// DashNex and as photoUrl in directory.html, so both show the same photo.
+function photoLinkFor(id) {
+  return window.location.origin + '/api/photo?id=' + encodeURIComponent(id);
+}
+async function copyPhotoLink() {
+  if (!currentId) return;
+  const btn = document.getElementById('copy-photo-btn');
+  try {
+    await navigator.clipboard.writeText(photoLinkFor(currentId));
+    btn.textContent = '✅ Link copied!';
+    toast('Photo link copied — paste it as the photo in DashNex or directory.html');
+    setTimeout(() => { btn.textContent = '🖼 Copy Photo Link'; }, 3000);
+  } catch (e) {
+    toast('Error copying photo link');
     console.error(e);
   }
 }
