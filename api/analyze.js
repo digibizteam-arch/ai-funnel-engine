@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
   const resolvedResources = body.investment || body.resources || 'Not provided';
   const businessName = body.business_name || '';
 
-  const prompt = `You are a content-attraction strategist who works with Filipino financial advisors (life insurance, health and critical illness, education, retirement and investment advisors). A potential client just completed a discovery questionnaire. Your job is to write a highly personalized, empathetic diagnosis of why their online posts are not attracting the right prospects, and to show how a short AI film plus one personal advisor profile link can help. Use their exact words and situation throughout.
+  const prompt = `You are a content-attraction strategist who works with Filipino financial advisors (life insurance, health and critical illness, education, retirement and investment advisors). A potential client just completed a discovery questionnaire. Your job is to write a highly personalized, empathetic diagnosis of why their online posts are not attracting the right prospects, and to show how a free directory listing, a personal advisor profile page, and AI short film campaigns run by our Facebook page can help. Use their exact words and situation throughout.
 
 CLIENT ANSWERS:
 Name: ${name}
@@ -143,7 +143,7 @@ COMMON REAL STRUGGLES IN THE PHILIPPINE MARKET (use the ones that fit their answ
 - Between clients, family and sometimes another job, they cannot post consistently
 
 WHAT THIS SERVICE CAN DO (describe it as support, never as a guaranteed result):
-- A short AI film with a relatable, psychology-based story about a real family worry, made around their specialty, to give a post a stronger hook and help the right viewer feel understood
+- A listing in our Financial Advisor Directory, free for founding advisors. Our Facebook page creates and posts relatable AI short films with psychology-based stories about real Filipino family worries and runs the ads. Each film links to the directory, where prospects answer 4 quick questions and are matched with a recommended advisor. The advisor does not have to make, post or pay for these films or ads. Do not say the advisor gets a personal film.
 - A personal advisor profile page: one trustworthy link for every post, showing who they are, what they specialize in, who they help, and clear calls to action for interested prospects to reach out
 - A follow-up email sequence that keeps in touch with people who showed interest
 - An AI sales chatbot trained on their offer, so common questions get answered while they are busy
@@ -174,12 +174,12 @@ JSON FORMAT:
   ],
   "diagnosis": "3-4 sentences on WHY their posts are not turning into conversations. Specific to their challenge and what they have tried. Name 1-2 of the struggles above that fit them. Use the word you. Reference the gap between where they are and where they want to be.",
   "agitation_footnote": "1-2 sentences on what this is costing them right now, such as good posts that get scrolled past and interested people who never reach out.",
-  "next_step": "2-3 sentences on the single most important action: a story-based hook that makes the right prospect stop and relate, with one personal link they can send everywhere. Specific to their situation. Address their obstacle naturally.",
+  "next_step": "2-3 sentences on the single most important action: being found through relatable story-based films that make the right prospect stop and relate, leading them to the directory and to the advisor's own personal profile page. Specific to their situation. Address their obstacle naturally.",
   "next_step_footnote": "One short sentence reinforcing why this step matters most.",
-  "solution_name": "Short name for their ideal solution e.g. An AI Film and Advisor Profile Prospect-Attraction System",
-  "solution_desc": "3 sentences on how the AI film and advisor profile page address their challenge and can be reused on any post. The last sentence plainly says the system gives their message a stronger hook and a clear place to send people, while results depend on their positioning and consistency.",
+  "solution_name": "Short name for their ideal solution e.g. A Directory Listing and Advisor Profile Prospect-Attraction System",
+  "solution_desc": "3 sentences on how the directory listing, the AI film campaigns run by our Facebook page, and the advisor profile page address their challenge, and how the profile link can be reused on any post. The last sentence plainly says the system gives their message a stronger hook and a clear place to send people, while results depend on their positioning and consistency.",
   "cta_headline": "Personalized CTA headline tied to their goal or outcome",
-  "cta_body": "2 sentences. First: what we will build for them (AI short film, personal advisor profile page, follow-up emails and AI sales chatbot). Second: speak to their obstacle to remove hesitation, without promising results.",
+  "cta_body": "2 sentences. First: what we will set up for them (free directory listing, personal advisor profile page, follow-up emails and AI sales chatbot, with our AI short film campaigns bringing prospects to the directory). Second: speak to their obstacle to remove hesitation, without promising results.",
   "buying_intent": "Use EXACTLY one of: hot, warm, cold. Rules — hot: score 8-10 AND has budget AND expresses urgency or strong desire to start now; warm: score 5-7 OR has budget but uncertain timing; cold: score 1-4 OR no budget OR just exploring with no urgency",
   "opportunity_score": 7
 }`;
