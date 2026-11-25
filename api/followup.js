@@ -226,7 +226,7 @@ function generateFollowupContent(lead, track, index) {
           <p>Hi ${first},</p>
           <p>Many advisors post consistently on Facebook and message people on Messenger, yet it still doesn't turn into conversations.</p>
           <p>Most of the time, it isn't a lack of effort. What's missing is a story the prospect can relate to, and a professional place where they can get to know you and message you.</p>
-          <p>That's where the <strong>${PACKAGE_NAME}</strong> comes in: an AI short film that speaks to what your clients truly worry about, and a personal advisor profile page you can link in any post.</p>
+          <p>That's where the <strong>${PACKAGE_NAME}</strong> comes in: free membership in our Financial Advisor Directory, where prospects from our AI short film ads can find you, and a personal advisor profile page you can link in any post.</p>
           <p>I can't promise a number of leads or clients, because that depends on your positioning and consistency. But you will be easier to recognize, and more professional to deal with.</p>
           ${button(chatLink, 'Ask Me How It Works')}
         `)
@@ -263,7 +263,7 @@ function generateFollowupContent(lead, track, index) {
           <p>Hi ${first},</p>
           <p>If you like your demo profile page, here is what's included when it becomes your own:</p>
           <p>
-            1. An AI short film based on your specialty and what your clients worry about<br>
+            1. Free membership in our Financial Advisor Directory, with your profile featured in our AI short film campaigns and ads<br>
             2. A personal advisor profile page with lead capture and call-to-action buttons<br>
             3. A follow-up and nurture email sequence for every new lead<br>
             4. An AI sales chatbot trained on your offer
@@ -331,7 +331,7 @@ function generateFollowupContent(lead, track, index) {
         html: emailShell(`
           <p>Hi ${first},</p>
           <p>If anything in the proposal isn't clear, or there's something you'd like to clarify before deciding, just reply to this email or stop by the chat.</p>
-          <p>The proposal includes: an AI short film, an advisor profile page with lead capture, a follow-up email sequence, and an AI sales chatbot.</p>
+          <p>The proposal includes: free directory membership with your profile featured in our AI short film campaigns, an advisor profile page with lead capture, a follow-up email sequence, and an AI sales chatbot.</p>
           <p style="margin:16px 0;"><a href="${chatLink}" style="color:#0F766E;font-weight:bold;">Ask in the chat</a></p>
           ${button(proposalLink, 'Review My Proposal')}
         `)
