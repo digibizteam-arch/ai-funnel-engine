@@ -542,6 +542,7 @@
 
   /* ── CALL BUTTON: greyed out when an advisor has no phone number yet ── */
   .tam-modal-link.is-disabled { opacity: 0.55; cursor: not-allowed; background: #f1f5f9; border-style: dashed; }
+  .tam-copy-note { margin: 10px 0 0; padding: 9px 12px; background: #f0fdf7; border: 1px solid #bbf7d0; border-radius: 10px; font-size: 12.5px; color: #065f46; }
   .tam-modal-link.is-disabled:hover { border-color: #cbd5e1; background: #f1f5f9; color: #0f172a; }
 </style>
 </head>
@@ -983,15 +984,33 @@
       ? `<a href="${phone}" class="tam-modal-link" data-vw-contact="1">&#128222; Call ${firstName}</a>`
       : `<span class="tam-modal-link is-disabled" aria-disabled="true">&#128222; Call (number coming soon)</span>`;
 
+    // ── READY-MADE OPENING MESSAGE ─────────────────────────────────────────
+    // Built from the prospect's quiz answers. Edit the wording here (one place) and it
+    // updates for every advisor and every channel.
+    const { goal_label, role_label } = state.answers;
+    const msgLines = [`Hi ${firstName}! I found your profile on Trusted Advisor Match PH.`];
+    if (goal_label) msgLines.push(`My top priority: ${goal_label}`);
+    if (role_label) msgLines.push(`About me: ${role_label}`);
+    msgLines.push(`I'd like to ask a few questions when you're free. Thank you!`);
+    const prefill = msgLines.join('\n');
+    const addParams = (url, params) => url + (url.includes('?') ? '&' : '?') + params;
+
     // Only show the other contact buttons the advisor actually has (no dead "#" buttons)
     const contactLinks = [
-      ['&#128172; Viber', adv.viberUrl],
-      ['&#128241; WhatsApp', adv.whatsappUrl],
-      ['&#9993;&#65039; Messenger', adv.messengerUrl],
-      ['&#128231; Email', adv.emailUrl],
-      ['&#128197; Book 15-Min Call', adv.bookingUrl]
+      // Viber: "draft" pre-fills the message box in the Viber mobile app
+      ['&#128172; Viber', adv.viberUrl && addParams(adv.viberUrl, 'draft=' + encodeURIComponent(prefill)), false],
+      // WhatsApp: "text" pre-fills the message (wa.me links)
+      ['&#128241; WhatsApp', adv.whatsappUrl && addParams(adv.whatsappUrl, 'text=' + encodeURIComponent(prefill)), false],
+      // Messenger can't be pre-filled by link, so the message is copied for the prospect to paste
+      ['&#9993;&#65039; Messenger', adv.messengerUrl, true],
+      // Email: pre-fills subject and body
+      ['&#128231; Email', adv.emailUrl && addParams(adv.emailUrl, 'subject=' + encodeURIComponent('Inquiry from Trusted Advisor Match PH') + '&body=' + encodeURIComponent(prefill)), false],
+      ['&#128197; Book 15-Min Call', adv.bookingUrl, false]
     ].filter(([, u]) => u && u.trim())
-     .map(([label, u]) => `<a href="${u}" target="_blank" rel="noopener" class="tam-modal-link" data-vw-contact="1">${label}</a>`)
+     .map(([label, u, copy]) => {
+       const isMail = /^mailto:/i.test(u);
+       return `<a href="${u}" ${isMail ? '' : 'target="_blank" rel="noopener"'} class="tam-modal-link" data-vw-contact="1" ${copy ? 'data-copy="1"' : ''}>${label}</a>`;
+     })
      .join('');
 
     // Full DashNex profile opens in a NEW TAB so the prospect keeps the directory open
@@ -1038,9 +1057,28 @@
           ${contactLinks}
           ${profileLink}
         </div>
+        <p id="tam-copy-note" class="tam-copy-note tam-hidden">&#10003; Message copied. Just paste it into the chat and press send.</p>
       </div>
     `;
     modal.classList.remove('tam-hidden');
+
+    // Messenger: copy the ready-made message so the prospect can paste it in the chat
+    modalBody.querySelectorAll('[data-copy]').forEach((a) => {
+      a.addEventListener('click', () => {
+        const note = document.getElementById('tam-copy-note');
+        const done = () => { if (note) note.classList.remove('tam-hidden'); };
+        try {
+          navigator.clipboard.writeText(prefill).then(done, done);
+        } catch (e) {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = prefill; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+          } catch (e2) {}
+          done();
+        }
+      });
+    });
 
     // Activity widget: opening a profile counts as a visit; a click on a real contact channel logs "someone reached out"
     if (window.vwTouch) window.vwTouch();
