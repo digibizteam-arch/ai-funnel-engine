@@ -696,6 +696,28 @@
       visibilityScore: 300
     },
     {
+      slug: 'tecs-193e57a7',
+      fullName: 'Tecs',
+      roleTitle: 'Financial Advisor',
+      photoUrl: '/advisors/default.jpg',   // replace with Tecs's DashNex photo URL once received
+      liveProfileUrl: '',                  // paste Tecs's DashNex page URL once it is built
+      phoneUrl: '',                        // e.g. 'tel:+639171234567' once Tecs sends a number
+      viberUrl: '',
+      whatsappUrl: '',
+      messengerUrl: '',
+      emailUrl: 'mailto:coachtecschua@gmail.com',
+      bookingUrl: '',
+      specialtyLabel: 'Business Continuity',
+      whoIHelp: 'Business owners who want to protect everything they have built and keep it secure through tough times.',
+      solutionOffered: 'Risk-gap review and continuity strategies to protect your business interests, plus a free Family Safety Net Check.',
+      specialties: ['business-estate'],
+      roles: ['business-owner'],
+      styles: ['chat'],
+      consultationNote: 'Reach out by email first. Free Family Safety Net Check.',
+      isVerified: true,
+      visibilityScore: 200
+    },
+    {
       slug: 'angela-santos',
       fullName: 'Angela Santos',
       roleTitle: 'Licensed Financial & Health Protection Advisor',
@@ -966,6 +988,7 @@
       ['&#128172; Viber', adv.viberUrl],
       ['&#128241; WhatsApp', adv.whatsappUrl],
       ['&#9993;&#65039; Messenger', adv.messengerUrl],
+      ['&#128231; Email', adv.emailUrl],
       ['&#128197; Book 15-Min Call', adv.bookingUrl]
     ].filter(([, u]) => u && u.trim())
      .map(([label, u]) => `<a href="${u}" target="_blank" rel="noopener" class="tam-modal-link" data-vw-contact="1">${label}</a>`)
